@@ -180,7 +180,7 @@ Verantwortlichkeiten:
 * Auf Ergebnisse der Wegfindung reagieren
 * Große Armeen unterstützen
 
-Die Bewegung muss effizient sein, da Frontier Command auf mittelgroße bis große Schlachten mit bis zu ungefähr 300 Einheiten pro Spieler im späten Spiel ausgerichtet ist.
+Die Bewegung muss effizient sein, da Frontier Command auf mittelgroße bis große Schlachten mit bis zu ungefähr 150 Einheiten pro Spieler im späten Spiel ausgerichtet ist.
 
 ---
 

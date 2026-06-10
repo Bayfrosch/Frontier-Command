@@ -180,7 +180,7 @@ Responsibilities:
 * Responding to pathfinding results
 * Supporting large armies
 
-Movement must be efficient because Frontier Command targets medium-large battles with up to approximately 300 units per player in late game.
+Movement must be efficient because Frontier Command targets medium-large battles with up to approximately 150 units per player in late game.
 
 ---
 
