@@ -69,58 +69,9 @@ Outposts function as regional command centers.
 
 Each Outpost may be specialized.
 
-Players can choose a specialization after construction which reduces and improves factors to give economy decisions more depth.
+Players can choose a specialization after capturing which reduces and improves factors to give economy decisions more depth.
 
-### Industrial Outpost
-
-Focuses on Materials.
-
-Benefits:
-
-* Improved harvesting efficiency
-* Faster resource processing
-* Additional storage capacity
-
-Best for:
-
-* Military-heavy strategies
-* Large armies
-* Vehicle production
-
----
-
-### Energy Outpost
-
-Focuses on power generation.
-
-Benefits:
-
-* Increased energy production
-* Improved research efficiency
-* Supports advanced infrastructure
-
-Best for:
-
-* Technology-focused strategies
-* Advanced units
-* Research-heavy playstyles
-
----
-
-### Military Outpost
-
-Focuses on territorial control.
-
-Benefits:
-
-* Improved defenses
-* Faster and cheaper reinforcement production
-
-Best for:
-
-* Frontline regions
-* Defensive borders
-* Strategic choke points
+see more in map-territory.md
 
 ---
 
@@ -162,7 +113,7 @@ A player cannot efficiently complete every branch during a match.
 
 Choosing a research path represents a strategic commitment.
 
-Every faction has two main research Paths effectifely splitting it into two seperate factions
+Every faction has two main research Paths effectifely splitting it into two seperate factions after researching a shared core research tree
 
 Example:
 

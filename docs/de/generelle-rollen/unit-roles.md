@@ -26,6 +26,70 @@ Die Armeezusammenstellung soll wichtiger sein als die Anzahl der Einheiten.
 
 ---
 
+# Einheitenkategorien
+
+Einheitenkategorien beschreiben die grundlegende Form einer Einheit, während Einheitenrollen ihren Zweck auf dem Schlachtfeld definieren. Abhängig von Fraktionsdesign und Technologie kann eine einzelne Kategorie mehrere Rollen erfüllen.
+
+## Infanterie
+
+Typische Rollen:
+
+* Aufklärung
+* Unterstützungsoperationen
+
+Infanterieeinheiten sind in der Regel günstig und zahlreich.
+
+## Leichte Fahrzeuge
+
+Typische Rollen:
+
+* Flankenangriffe
+* Schnelle Reaktion
+
+Leichte Fahrzeuge sind schnell, aber verwundbar.
+
+## Schwere Fahrzeuge
+
+Typische Rollen:
+
+* Kampf an der Front
+* Angriffsoperationen
+* Defensive Kriegsführung
+
+Schwere Fahrzeuge bilden das Rückgrat der meisten Armeen.
+
+## Artillerie
+
+Typische Rollen:
+
+* Belagerungskrieg
+* Gebietssperrung
+* Defensives Bombardement
+
+Artillerie benötigt Schutz vor schnelleren Einheiten.
+
+## Lufteinheiten
+
+Typische Rollen:
+
+* Aufklärung
+* Präzisionsangriffe
+* Schneller Einsatz
+
+Lufteinheiten bieten strategische Flexibilität.
+
+## Großeinheiten
+
+Typische Rollen:
+
+* Führung auf dem Schlachtfeld
+* Strategische Durchbrüche
+* Verstärkung der Kampfkraft verbündeter Einheiten
+
+Großeinheiten sammeln im Verlauf einer Partie Erfahrung und steigen Stufen auf. Sie stellen bedeutende strategische Investitionen dar und sollen konventionelle Armeen unterstützen, statt sie zu ersetzen.
+
+---
+
 # Baueinheit
 
 ## Zweck

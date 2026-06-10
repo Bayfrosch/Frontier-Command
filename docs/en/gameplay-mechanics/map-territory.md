@@ -100,7 +100,7 @@ This allows players to adapt territory to their needs instead of relying on pred
 
 ---
 
-## Economic Outpost
+## Industrial Outpost
 
 Focuses on material production and industrial development.
 
@@ -108,7 +108,6 @@ Benefits may include:
 
 * Increased material income
 * Improved harvesting efficiency
-* Reduced transportation losses
 
 Best suited for:
 

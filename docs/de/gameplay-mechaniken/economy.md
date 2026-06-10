@@ -69,58 +69,9 @@ Außenposten dienen als regionale Kommandozentralen.
 
 Jeder Außenposten kann spezialisiert werden.
 
-Nach dem Bau können die Spieler eine Spezialisierung wählen, die bestimmte Faktoren verbessert und andere einschränkt, um wirtschaftlichen Entscheidungen mehr Tiefe zu verleihen.
+Nach der Eroberung können die Spieler eine Spezialisierung wählen, die bestimmte Faktoren verbessert und andere einschränkt, um wirtschaftlichen Entscheidungen mehr Tiefe zu verleihen.
 
-### Industrie-Außenposten
-
-Konzentriert sich auf Materialien.
-
-Vorteile:
-
-* Verbesserte Sammeleffizienz
-* Schnellere Ressourcenverarbeitung
-* Zusätzliche Lagerkapazität
-
-Am besten geeignet für:
-
-* Militärisch ausgerichtete Strategien
-* Große Armeen
-* Fahrzeugproduktion
-
----
-
-### Energie-Außenposten
-
-Konzentriert sich auf die Energieerzeugung.
-
-Vorteile:
-
-* Erhöhte Energieproduktion
-* Verbesserte Forschungseffizienz
-* Unterstützt fortschrittliche Infrastruktur
-
-Am besten geeignet für:
-
-* Technologieorientierte Strategien
-* Fortschrittliche Einheiten
-* Forschungsintensive Spielweisen
-
----
-
-### Militär-Außenposten
-
-Konzentriert sich auf Gebietskontrolle.
-
-Vorteile:
-
-* Verbesserte Verteidigung
-* Schnellere und günstigere Produktion von Verstärkungen
-
-Am besten geeignet für:
-
-* Frontregionen
-* Verteidigte Grenzen
-* Strategische Engpässe
+Weitere Informationen befinden sich in [Karte und Territorium](map-territory.md).
 
 ---
 
@@ -162,7 +113,7 @@ Ein Spieler kann während einer Partie nicht jeden Zweig effizient abschließen.
 
 Die Wahl eines Forschungswegs stellt eine strategische Festlegung dar.
 
-Jede Fraktion besitzt zwei zentrale Forschungswege, durch die sie sich effektiv in zwei eigenständige Unterfraktionen aufteilt.
+Jede Fraktion besitzt zwei zentrale Forschungswege, durch die sie sich nach der Erforschung eines gemeinsamen Kernforschungsbaums effektiv in zwei eigenständige Unterfraktionen aufteilt.
 
 Beispiel:
 

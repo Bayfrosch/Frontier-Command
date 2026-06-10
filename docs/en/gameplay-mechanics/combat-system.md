@@ -110,9 +110,9 @@ The battlefield should contain enough units to create impressive engagements whi
 
 The target scale is approximately:
 
-* Early Game: 20-50 units
-* Mid Game: 75-150 units
-* Late Game: 150-300 units
+* Early Game: 10-20 units
+* Mid Game: 20-50 units
+* Late Game: 50-150 units
 
 This places Frontier Command between traditional RTS games and massive-scale strategy games.
 
@@ -135,78 +135,9 @@ Players should constantly adapt their composition based on:
 
 ---
 
-# Unit Categories
+# Unit Roles
 
-## Infantry
-
-Roles:
-
-* Scouting
-* Capturing objectives
-* Support operations
-
-Cheap and numerous.
-
----
-
-## Light Vehicles
-
-Roles:
-
-* Flanking
-* Rapid response
-
-Fast but fragile.
-
----
-
-## Heavy Vehicles
-
-Roles:
-
-* Frontline combat
-* Assault operations
-* Defensive warfare
-
-Form the backbone of most armies.
-
----
-
-## Artillery
-
-Roles:
-
-* Siege warfare
-* Area denial
-* Defensive bombardment
-
-Require protection from faster units.
-
----
-
-## Air Units
-
-Roles:
-
-* Reconnaissance
-* Precision strikes
-* Rapid deployment
-
-Provide strategic flexibility.
-
----
-
-## Capital Units
-
-Roles:
-
-* Battlefield leadership
-* Strategic breakthroughs
-* Force multiplication
-
-Gain experience and level up throughout a match.
-
-Represent major strategic investments.
+Unit categories, battlefield roles, and counter relationships are defined in the unit-roles.md document.
 
 ---
 

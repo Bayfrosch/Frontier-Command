@@ -110,9 +110,9 @@ Das Schlachtfeld soll genügend Einheiten für eindrucksvolle Gefechte bieten un
 
 Die angestrebte Größenordnung beträgt ungefähr:
 
-* Frühes Spiel: 20-50 Einheiten
-* Mittleres Spiel: 75-150 Einheiten
-* Spätes Spiel: 150-300 Einheiten
+* Frühes Spiel: 10-20 Einheiten
+* Mittleres Spiel: 20-50 Einheiten
+* Spätes Spiel: 50-150 Einheiten
 
 Damit liegt Frontier Command zwischen traditionellen RTS-Spielen und Strategiespielen mit gewaltigem Maßstab.
 
@@ -135,78 +135,9 @@ Die Spieler sollen ihre Zusammenstellung fortlaufend an folgende Faktoren anpass
 
 ---
 
-# Einheitenkategorien
+# Einheitenrollen
 
-## Infanterie
-
-Rollen:
-
-* Aufklärung
-* Einnahme von Zielen
-* Unterstützungsoperationen
-
-Günstig und zahlreich.
-
----
-
-## Leichte Fahrzeuge
-
-Rollen:
-
-* Flankenangriffe
-* Schnelle Reaktion
-
-Schnell, aber verwundbar.
-
----
-
-## Schwere Fahrzeuge
-
-Rollen:
-
-* Kampf an der Front
-* Angriffsoperationen
-* Defensive Kriegsführung
-
-Bilden das Rückgrat der meisten Armeen.
-
----
-
-## Artillerie
-
-Rollen:
-
-* Belagerungskrieg
-* Gebietssperrung
-* Defensives Bombardement
-
-Benötigt Schutz vor schnelleren Einheiten.
-
----
-
-## Lufteinheiten
-
-Rollen:
-
-* Aufklärung
-* Präzisionsangriffe
-* Schneller Einsatz
-
-Bieten strategische Flexibilität.
-
----
-
-## Großeinheiten
-
-Rollen:
-
-* Führung auf dem Schlachtfeld
-* Strategische Durchbrüche
-* Verstärkung der Kampfkraft verbündeter Einheiten
-
-Sammeln im Verlauf einer Partie Erfahrung und steigen Stufen auf.
-
-Stellen bedeutende strategische Investitionen dar.
+Einheitenkategorien, Rollen auf dem Schlachtfeld und Konterbeziehungen sind im Dokument [Allgemeine Einheitenrollen](../generelle-rollen/unit-roles.md) definiert.
 
 ---
 

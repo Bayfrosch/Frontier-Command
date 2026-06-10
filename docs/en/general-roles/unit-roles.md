@@ -26,6 +26,70 @@ Army composition should be more important than unit quantity.
 
 ---
 
+# Unit Categories
+
+Unit categories describe the broad form of a unit, while unit roles describe its battlefield purpose. A single category may fulfill multiple roles depending on faction design and technology.
+
+## Infantry
+
+Common roles:
+
+* Scouting
+* Support operations
+
+Infantry units are generally cheap and numerous.
+
+## Light Vehicles
+
+Common roles:
+
+* Flanking
+* Rapid response
+
+Light vehicles are fast but fragile.
+
+## Heavy Vehicles
+
+Common roles:
+
+* Frontline combat
+* Assault operations
+* Defensive warfare
+
+Heavy vehicles form the backbone of most armies.
+
+## Artillery
+
+Common roles:
+
+* Siege warfare
+* Area denial
+* Defensive bombardment
+
+Artillery requires protection from faster units.
+
+## Air Units
+
+Common roles:
+
+* Reconnaissance
+* Precision strikes
+* Rapid deployment
+
+Air units provide strategic flexibility.
+
+## Capital Units
+
+Common roles:
+
+* Battlefield leadership
+* Strategic breakthroughs
+* Force multiplication
+
+Capital Units gain experience and level up throughout a match. They represent major strategic investments and should support conventional armies rather than replace them.
+
+---
+
 # Worker Unit
 
 ## Purpose

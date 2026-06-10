@@ -100,7 +100,7 @@ Dadurch können die Spieler das Territorium an ihre Bedürfnisse anpassen, ansta
 
 ---
 
-## Wirtschafts-Außenposten
+## Industrie-Außenposten
 
 Konzentriert sich auf Materialproduktion und industrielle Entwicklung.
 
@@ -108,7 +108,6 @@ Mögliche Vorteile:
 
 * Erhöhtes Materialeinkommen
 * Verbesserte Sammeleffizienz
-* Geringere Transportverluste
 
 Am besten geeignet für:
 
