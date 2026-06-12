@@ -173,7 +173,6 @@ Diese Trennung ist wichtig, da dasselbe Befehlssystem spÃ¤ter Folgendes unterstÃ
 
 * KI-Spieler
 * Mehrspieler
-* Wiederholungen
 * Tutorials
 * Automatisierte Tests
 

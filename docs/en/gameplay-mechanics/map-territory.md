@@ -161,7 +161,7 @@ Frontier Command supports procedural map generation.
 
 Instead of relying solely on handcrafted maps, players select a map template and generate a battlefield using a random seed.
 
-This provides replayability while maintaining strategic fairness.
+This provides variety between matches while maintaining strategic fairness.
 
 ---
 

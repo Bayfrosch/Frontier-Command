@@ -173,7 +173,6 @@ This separation is important because the same command system can later support:
 
 * AI players
 * Multiplayer
-* Replays
 * Tutorials
 * Automated testing
 

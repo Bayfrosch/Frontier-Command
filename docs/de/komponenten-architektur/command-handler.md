@@ -192,6 +192,5 @@ Der Server validiert Befehle und verteilt angenommene Befehle.
 Dies unterstützt:
 
 * Geringere Bandbreitennutzung
-* Einfachere Erzeugung von Wiederholungen
 * Besseren Schutz vor Betrug
 * Konsistente Spiellogik

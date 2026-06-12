@@ -42,7 +42,7 @@ Der Simulation Core ist verantwortlich für:
 
 Der Simulation Core führt das Spiel in festen Simulationsschritten fort.
 
-Eine feste Taktrate erleichtert das Testen, Wiedergeben und Synchronisieren des Spiels sowie die spätere Mehrspielerunterstützung.
+Eine feste Taktrate erleichtert das Testen und Synchronisieren des Spiels sowie die spätere Mehrspielerunterstützung.
 
 Beispielhafter Ablauf eines Takts:
 
@@ -252,7 +252,6 @@ Der Client kann diese Ereignisse für Folgendes verwenden:
 * Soundeffekte
 * Warnmeldungen der Benutzeroberfläche
 * Benachrichtigungen
-* Wiederholungen
 
 Ereignisse sollen beschreiben, was geschehen ist, ohne von Darstellungsdetails abhängig zu sein.
 

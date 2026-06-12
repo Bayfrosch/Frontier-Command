@@ -192,6 +192,5 @@ The server validates commands and distributes accepted commands.
 This supports:
 
 * Lower bandwidth
-* Cleaner replay generation
 * Better cheat prevention
 * Consistent game logic

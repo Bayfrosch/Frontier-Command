@@ -161,7 +161,7 @@ Frontier Command unterstützt prozedurale Kartengenerierung.
 
 Anstatt sich ausschließlich auf handgefertigte Karten zu verlassen, wählen die Spieler eine Kartenvorlage und erzeugen mithilfe eines zufälligen Seeds ein Schlachtfeld.
 
-Dies sorgt für Wiederspielwert und wahrt gleichzeitig die strategische Fairness.
+Dies sorgt für Abwechslung zwischen den Partien und wahrt gleichzeitig die strategische Fairness.
 
 ---
 

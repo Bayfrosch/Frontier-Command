@@ -42,7 +42,7 @@ The Simulation Core is responsible for:
 
 The Simulation Core advances the game in fixed simulation steps.
 
-A fixed tick rate makes the game easier to test, replay, synchronize, and eventually support in multiplayer.
+A fixed tick rate makes the game easier to test, synchronize, and eventually support in multiplayer.
 
 Example tick flow:
 
@@ -252,7 +252,6 @@ The Client can use these events for:
 * Sound effects
 * UI alerts
 * Notifications
-* Replays
 
 Events should describe what happened without depending on presentation details.
 
