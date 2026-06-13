@@ -14,6 +14,14 @@ config/name="Frontier Command"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+InterfacesAutoload="*res://addons/gdscript-interfaces/global.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gdscript-interfaces/plugin.cfg")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
