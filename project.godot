@@ -16,11 +16,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-InterfacesAutoload="*res://addons/gdscript-interfaces/global.gd"
+InterfacesAutoload="*uid://e0wee4u4fgsb"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdscript-interfaces/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdscript-interfaces/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [physics]
 

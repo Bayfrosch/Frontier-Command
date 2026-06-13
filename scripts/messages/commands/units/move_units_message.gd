@@ -20,7 +20,6 @@ var destination: Vector2
 # Formation in which units end in
 var formation: StringName = &"rectangle"
 
-
 func _init(
 		p_command_id: String = "",
 		p_issued_at_tick: int = -1,
@@ -76,3 +75,5 @@ func validate() -> PackedStringArray:
 	if formation not in [&"none", &"rectangle"]:
 		errors.append("formation is invalid.")
 	return errors
+
+#

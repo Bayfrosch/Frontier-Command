@@ -288,7 +288,6 @@ to the Command Handler separately.
 ```gdscript
 {
 	"client_version": "0.1.0", # String
-	"protocol_version": 1,     # int
 	"player_name": "Player",   # String
 
 	# Optional:
