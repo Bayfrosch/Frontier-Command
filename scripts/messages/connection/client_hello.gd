@@ -44,5 +44,3 @@ func validate() -> PackedStringArray:
 	if client_version.is_empty():
 		errors.append("client_version is required.")
 	return errors
-
-#

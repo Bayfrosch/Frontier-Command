@@ -10,15 +10,14 @@ Befehle, verändert den Spielzustand und gibt Ergebnisse aus. Clients und KI
 verändern den maßgeblichen Zustand niemals direkt.
 
 Frontier Command verwendet den
-[`gdscript-interfaces`](https://github.com/moritz-junge/gdscript-interfaces)
-Godot-4-Port, um zur Laufzeit geprüfte Interfaces zu definieren. Konkrete
+[`GDScript-Interfaces-addon`](https://github.com/Rito13/GDScript-Interfaces-addon),
+um im Editor und zur Laufzeit geprüfte Interfaces zu definieren. Konkrete
 Nachrichten sind typisierte `RefCounted`-Klassen. Sie werden nur beim
 Überschreiten der Netzwerkgrenze in `Dictionary`-Werte umgewandelt.
 
-Die Bibliothek prüft, ob Eigenschaften, Methoden und Signale vorhanden sind.
-Sie kann weder Eigenschaftstypen noch Methodenparameter- oder Rückgabetypen
-prüfen. Statische GDScript-Annotationen und eine explizite Nachrichtenprüfung
-bleiben daher erforderlich.
+Die Bibliothek prüft erforderliche Eigenschaften, Methoden, Signale und deren
+deklarierte Typen. Eine explizite Nachrichtenprüfung bleibt für erlaubte Werte
+und Gameplay-Regeln erforderlich.
 
 ## GDScript-Konventionen
 
@@ -42,37 +41,23 @@ bleiben daher erforderlich.
 
 ## Interface-Bibliothek
 
-Installiere den Godot-4-Port unter `res://addons/gdscript-interfaces/`, aktiviere
-das Plugin und lasse dessen `Interfaces`-Autoload aktiviert.
-
-Implementierende Klassen verwenden Script-Preloads, da globale
-`class_name`-Referenzen in GDScript nicht direkt in Konstanten verwendet werden
-können:
+Installiere das Addon unter `res://addons/gdscript-interfaces/`, aktiviere das
+Plugin und lasse dessen `InterfacesAutoload` aktiviert. Interface-Klassen
+erweitern `BasicInterface`. Implementierende Klassen geben die Interface-Namen
+in der großgeschriebenen Konstante `IMPLEMENTS` an:
 
 ```gdscript
-const implements: Array[GDScript] = [
-	preload("res://scripts/messages/interfaces/message_interface.gd"),
+const IMPLEMENTS: Array[StringName] = [
+	&"MessageInterface",
 ]
 ```
 
 Prüfe ein Objekt, bevor es angenommen wird:
 
 ```gdscript
-if not Interfaces.implements(message, MessageInterface):
+if not Interfaces.implements(message, &"MessageInterface"):
 	push_error("Object does not implement MessageInterface.")
 	return
-```
-
-Lasse `allow_string_classes` deaktiviert. Preloads sind explizit und vermeiden
-den Umweg der Bibliothek über die Auswertung von Strings.
-
-Empfohlene Plugin-Konfiguration:
-
-```gdscript
-@export var runtime_validation: bool = false
-@export var allow_string_classes: bool = false
-@export var strict_validation: bool = true
-@export var validate_dirs: Array[String] = ["res://scripts/messages/"]
 ```
 
 ## Nachrichten-Interfaces
@@ -84,7 +69,7 @@ Jede Nachricht implementiert:
 ```gdscript
 # Interface
 class_name MessageInterface
-extends RefCounted
+extends BasicInterface
 
 var message_type: StringName
 
@@ -109,7 +94,7 @@ Jeder Gameplay-Befehl implementiert sowohl `MessageInterface` als auch
 ```gdscript
 # Interface
 class_name CommandInterface
-extends RefCounted
+extends BasicInterface
 
 var command_id: String
 var issued_at_tick: int
@@ -123,7 +108,7 @@ implementieren zusätzlich:
 ```gdscript
 # Interface
 class_name QueueableCommandInterface
-extends RefCounted
+extends BasicInterface
 
 var queue_mode: int
 ```
@@ -137,12 +122,10 @@ für `MOVE_UNITS`:
 class_name MoveUnitsMessage
 extends RefCounted
 
-const implements: Array[GDScript] = [
-	preload("res://scripts/messages/interfaces/message_interface.gd"),
-	preload("res://scripts/messages/interfaces/command_interface.gd"),
-	preload(
-		"res://scripts/messages/interfaces/queueable_command_interface.gd"
-	),
+const IMPLEMENTS: Array[StringName] = [
+	&"MessageInterface",
+	&"CommandInterface",
+	&"QueueableCommandInterface",
 ]
 
 var message_type: StringName = GameMessages.MOVE_UNITS
@@ -293,7 +276,6 @@ Spieler-ID separat an den Command Handler.
 ```gdscript
 {
 	"client_version": "0.1.0", # String
-	"protocol_version": 1,     # int
 	"player_name": "Player",   # String
 
 	# Optional:
@@ -336,9 +318,6 @@ Spieler-ID separat an den Command Handler.
 {
 	"reason": &"client_quit", # StringName:
 	# client_quit, timeout, kicked, server_shutdown, protocol_error
-
-	# Optional:
-	"details": "", # String
 }
 ```
 
@@ -348,15 +327,13 @@ Spieler-ID separat an den Command Handler.
 
 ```gdscript
 {
-	"match_name": "Frontier Match",       # String
-	"mode": GameMessages.MatchMode.ONE_VS_ONE,
-	"max_players": 2,                     # int
-	"map_template_id": "standard_1v1",    # String
-	"map_seed": "seed",                   # String
-	"map_width_tiles": 192,               # int
-	"map_height_tiles": 192,              # int
-	"allow_observers": true,              # bool
-	"allow_pause": true,                  # bool
+	"match_name": "Frontier Match",    # String
+	"max_players": 2,                  # int
+	"map_seed": "seed",                # String
+	"map_template": "standard_1v1",    # String
+	"map_width_tiles": 192,            # int
+	"map_height_tiles": 192,           # int
+	"allow_pause": true,               # bool
 }
 ```
 
@@ -409,7 +386,7 @@ Nur für den Host verfügbarer Befehl.
 
 ```gdscript
 {
-	"match_id": "match-id",         # String
+	"lobby_id": "lobby-id",         # String
 	"host_player_id": "player-id",  # String
 	"settings": {},                 # Match Settings Dictionary
 	"players": [                    # Array[Dictionary]
@@ -418,12 +395,9 @@ Nur für den Host verfügbarer Befehl.
 			"display_name": "Player",
 			"is_ai": false,
 			"is_ready": true,
-			"is_connected": true,
-
-			# Optional:
-			"team_id": "team-1",
-			"faction_id": "frontier_coalition",
-			"ai_difficulty": &"normal",
+			"team_id": 1,
+			"faction": "frontier_coalition",
+			"color": Color.RED,
 		},
 	],
 }
@@ -1154,10 +1128,11 @@ static func create_move_units(payload: Dictionary) -> MoveUnitsMessage:
 		return null
 
 	var message := MoveUnitsMessage.new()
-	if not Interfaces.implements(
-			message,
-			[MessageInterface, CommandInterface, QueueableCommandInterface]
-	):
+	if not Interfaces.implements(message, &"MessageInterface"):
+		return null
+	if not Interfaces.implements(message, &"CommandInterface"):
+		return null
+	if not Interfaces.implements(message, &"QueueableCommandInterface"):
 		return null
 
 	message.from_payload(payload)

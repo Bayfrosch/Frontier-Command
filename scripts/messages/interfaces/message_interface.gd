@@ -11,5 +11,3 @@ func from_payload(_payload: Dictionary) -> void:
 
 func validate() -> PackedStringArray:
 	return PackedStringArray()
-
-#
