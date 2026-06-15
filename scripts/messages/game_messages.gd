@@ -19,6 +19,13 @@ const PAUSE_MATCH: StringName = &"pause_match"
 const MATCH_ENDED: StringName = &"match_ended"
 
 const MOVE_UNITS: StringName = &"move_units"
+const STOP_UNITS: StringName = &"stop_units"
+const HOLD_POSITION_UNITS: StringName = &"hold_position_units"
+const PATROL_UNITS: StringName = &"patrol_units"
+const SET_UNIT_STANCE: StringName = &"set_unit_stance"
+const USE_ABILITY: StringName = &"use_ability"
+const GATHER_RESOURCES: StringName = &"gather_resources"
+const ATTACK_MOVE_UNITS: StringName = &"attack_move_units"
 const ATTACK_TARGET: StringName = &"attack_target"
 const STATE_SNAPSHOT: StringName = &"state_snapshot"
 
@@ -26,3 +33,5 @@ enum MatchMode { ONE_VS_ONE, FREE_FOR_ALL, TEAM }
 enum QueueMode { REPLACE, APPEND }
 enum UnitStance { AGGRESSIVE, DEFENSIVE, HOLD_FIRE }
 enum MatchPhase { LOBBY, RUNNING, PAUSED, ENDED }
+
+#

@@ -68,3 +68,5 @@ func test_disconnect_round_trip_without_details() -> void:
 func test_disconnect_rejects_unknown_reason() -> void:
 	var message := DisconnectMessage.new(&"unknown")
 	assert_false(message.validate().is_empty())
+
+#

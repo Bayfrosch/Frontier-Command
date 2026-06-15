@@ -70,3 +70,5 @@ func validate() -> PackedStringArray:
 	if map_height_tiles <= 0:
 		errors.append("map_height_tiles must be greater than 0")
 	return errors
+
+#

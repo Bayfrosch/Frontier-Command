@@ -31,3 +31,5 @@ func test_move_units_round_trip() -> void:
 func test_move_units_default_message_is_invalid() -> void:
 	var message := MoveUnitsMessage.new()
 	assert_eq(message.validate().size(), 3)
+
+#
