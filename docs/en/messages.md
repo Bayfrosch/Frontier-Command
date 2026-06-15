@@ -736,18 +736,6 @@ Use `"target": null` to clear the rally point.
 }
 ```
 
-### CHOOSE_DOCTRINE
-
-Doctrine selection is permanent for the match.
-
-```gdscript
-{
-	"command_id": "command-id",
-	"issued_at_tick": 120,
-	"doctrine_id": "mechanized_command",
-}
-```
-
 ### CHOOSE_CAPITAL_UPGRADE
 
 ```gdscript

@@ -739,18 +739,6 @@ Verwende `"target": null`, um den Sammelpunkt zu löschen.
 }
 ```
 
-### CHOOSE_DOCTRINE
-
-Die Wahl der Doktrin gilt dauerhaft für die Partie.
-
-```gdscript
-{
-	"command_id": "command-id",
-	"issued_at_tick": 120,
-	"doctrine_id": "mechanized_command",
-}
-```
-
 ### CHOOSE_CAPITAL_UPGRADE
 
 ```gdscript

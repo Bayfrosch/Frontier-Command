@@ -27,11 +27,25 @@ const USE_ABILITY: StringName = &"use_ability"
 const GATHER_RESOURCES: StringName = &"gather_resources"
 const ATTACK_MOVE_UNITS: StringName = &"attack_move_units"
 const ATTACK_TARGET: StringName = &"attack_target"
+const BUILD_STRUCTURE: StringName = &"build_structure"
+const CANCEL_CONSTRUCTION: StringName = &"cancel_construction"
+const REPAIR_TARGET: StringName = &"repair_target"
+const CAPTURE_TARGET: StringName = &"capture_target"
+const UPGRADE_STRUCTURE: StringName = &"upgrade_structure"
+const CANCEL_STRUCTURE_UPGRADE: StringName = &"cancel_structure_upgrade"
+const TRAIN_UNITS: StringName = &"train_units"
+const CANCEL_PRODUCTION: StringName = &"cancel_production"
+const REORDER_PRODUCTION: StringName = &"reorder_production"
+const SET_RALLY_POINT: StringName = &"set_rally_point"
+const START_RESEARCH: StringName = &"start_research"
+const CANCEL_RESEARCH: StringName = &"cancel_research"
+const SPECIALIZE_OUTPOST: StringName = &"specialize_outpost"
 const STATE_SNAPSHOT: StringName = &"state_snapshot"
 
 enum MatchMode { ONE_VS_ONE, FREE_FOR_ALL, TEAM }
 enum QueueMode { REPLACE, APPEND }
 enum UnitStance { AGGRESSIVE, DEFENSIVE, HOLD_FIRE }
+enum OutpostSpecialization { INDUSTRIAL, MILITARY, RESEARCH }
 enum MatchPhase { LOBBY, RUNNING, PAUSED, ENDED }
 
 #
