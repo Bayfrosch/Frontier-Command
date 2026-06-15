@@ -144,6 +144,12 @@ func test_research_command_round_trips() -> void:
 			"outpost-1",
 			GameMessages.OutpostSpecialization.RESEARCH,
 		),
+		ChooseCapitalUpgradeMessage.new(
+			"command-16",
+			135,
+			"capital-1",
+			"capital-upgrade-1",
+		),
 	]
 
 	for message in messages:
@@ -169,6 +175,7 @@ func test_remaining_default_commands_are_invalid() -> void:
 	assert_false(StartResearchMessage.new().validate().is_empty())
 	assert_false(CancelResearchMessage.new().validate().is_empty())
 	assert_false(SpecializeOutpostMessage.new().validate().is_empty())
+	assert_false(ChooseCapitalUpgradeMessage.new().validate().is_empty())
 
 
 func test_invalid_remaining_command_values_are_rejected() -> void:
@@ -211,8 +218,8 @@ func test_invalid_remaining_command_values_are_rejected() -> void:
 	)
 	assert_false(
 		SpecializeOutpostMessage.new(
-			"command-20",
-			139,
+			"command-21",
+			140,
 			"outpost-1",
 			999,
 		).validate().is_empty()

@@ -39,13 +39,22 @@ const REORDER_PRODUCTION: StringName = &"reorder_production"
 const SET_RALLY_POINT: StringName = &"set_rally_point"
 const START_RESEARCH: StringName = &"start_research"
 const CANCEL_RESEARCH: StringName = &"cancel_research"
+const CHOOSE_CAPITAL_UPGRADE: StringName = &"choose_capital_upgrade"
 const SPECIALIZE_OUTPOST: StringName = &"specialize_outpost"
+const COMMAND_RESULT: StringName = &"command_result"
 const STATE_SNAPSHOT: StringName = &"state_snapshot"
+const STATE_DELTA: StringName = &"state_delta"
+const RESYNC_REQUEST: StringName = &"resync_request"
+const RESYNC_RESPONSE: StringName = &"resync_response"
+const SIMULATION_EVENTS: StringName = &"simulation_events"
+const GENERIC_ERROR: StringName = &"generic_error"
 
 enum MatchMode { ONE_VS_ONE, FREE_FOR_ALL, TEAM }
 enum QueueMode { REPLACE, APPEND }
 enum UnitStance { AGGRESSIVE, DEFENSIVE, HOLD_FIRE }
 enum OutpostSpecialization { INDUSTRIAL, MILITARY, RESEARCH }
 enum MatchPhase { LOBBY, RUNNING, PAUSED, ENDED }
+enum VisibilityState { HIDDEN, FOGGED, VISIBLE }
+enum MovementCategory { GROUND, AIR, NAVAL }
 
 #
