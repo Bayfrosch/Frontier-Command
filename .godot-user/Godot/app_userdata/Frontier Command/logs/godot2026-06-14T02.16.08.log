@@ -1,0 +1,618 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+---  GUT  ---
+[INFO]:  using [D:/Godot/Frontier-Command/.godot-user/Godot/app_userdata/Frontier Command] for temporary output.
+Godot version:  4.6.3
+GUT version:  9.6.0
+SCRIPT ERROR: Parse Error: Identifier "CreateMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:37)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:37)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "CreateMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:40)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "restored" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:40)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "JoinMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:47)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:47)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "JoinMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:50)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "restored" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:50)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "LeaveMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:58)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:58)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "SetPlayerReadyMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:65)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:65)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "SetPlayerReadyMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:72)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "restored" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:72)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "SetPlayerReadyMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:81)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:81)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "UpdateMatchSettingsMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:86)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:86)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "UpdateMatchSettingsMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:89)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "restored" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:89)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "StartMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:123)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:123)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchStartedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:130)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:130)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchStartedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:139)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "restored" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:139)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchStartedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:150)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:150)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "PauseMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:155)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:155)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchEndedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:162)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "message" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:162)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchEndedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:171)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "restored" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:171)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "CreateMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:183)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "JoinMatchMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:184)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "SetPlayerReadyMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:185)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "UpdateMatchSettingsMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:186)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchStartedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:188)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "MatchEndedMessage" not declared in the current scope.
+   at: GDScript::reload (res://__tests__/messages/test_lobby_messages.gd:189)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+ERROR: Failed to load script "res://__tests__/messages/test_lobby_messages.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+   GDScript backtrace (most recent call first):
+       [0] load_script_using_custom_warnings (res://addons/gut/warnings_manager.gd:173)
+       [1] _parse_script (res://addons/gut/test_collector.gd:76)
+       [2] add_script (res://addons/gut/test_collector.gd:127)
+       [3] add_script (res://addons/gut/gut.gd:1053)
+       [4] add_directory (res://addons/gut/gut.gd:1076)
+       [5] _apply_options (res://addons/gut/gut_config.gd:136)
+       [6] apply_options (res://addons/gut/gut_config.gd:207)
+       [7] run_tests (res://addons/gut/gui/GutRunner.gd:192)
+       [8] _run_tests (res://addons/gut/cli/gut_cli.gd:238)
+       [9] main (res://addons/gut/cli/gut_cli.gd:284)
+       [10] _init (res://addons/gut/gut_cmdln.gd:38)
+[WARNING]:  Ignoring script res://__tests__/messages/test_lobby_messages.gd because it does not extend GutTest
+
+
+res://__tests__/messages/test_connection_messages.gd
+* test_client_hello_round_trip
+* test_server_hello_round_trip
+* test_ping_round_trip
+* test_pong_round_trip
+* test_disconnect_round_trip_without_details
+* test_disconnect_rejects_unknown_reason
+6/6 passed.
+
+
+res://__tests__/messages/test_move_units_message.gd
+* test_move_units_round_trip
+* test_move_units_default_message_is_invalid
+2/2 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Warnings              1
+
+Scripts               2
+Tests                 8
+Passing Tests         8
+Asserts              36
+Time              0.422s
+
+
+---- All tests passed! ----
+
