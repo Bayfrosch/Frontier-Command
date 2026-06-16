@@ -14,13 +14,13 @@ config/name="Frontier Command"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
-[autoload]
+[dotnet]
 
-InterfacesAutoload="*uid://e0wee4u4fgsb"
+project/assembly_name="Frontier Command"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdscript-interfaces/plugin.cfg", "res://addons/gut/plugin.cfg")
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 [physics]
 
