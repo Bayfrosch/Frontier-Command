@@ -22,13 +22,34 @@ public sealed class SimulationContext
 
         // construction
         Register<BuildStructureMessage>(HandleBuildStructure);
+        Register<CancelConstructionMessage>(HandleCancelConstruction);
+        Register<RepairTargetMessage>(HandleRepairTarget);
+        Register<CaptureTargetMessage>(HandleCaptureTarget);
+        Register<UpgradeStructureMessage>(HandleUpgradeStructure);
+        Register<CancelStructureUpgradeMessage>(HandleCancelStructureUpgrade);
 
         // production
+        Register<TrainUnitsMessage>(HandleTrainUnits);
+        Register<CancelProductionMessage>(HandleCancelProduction);
+        Register<ReorderProductionMessage>(HandleReorderProduction);
+        Register<SetRallyPointMessage>(HandleSetRallyPoint);
 
         // research
+        Register<StartResearchMessage>(HandleStartResearch);
+        Register<CancelResearchMessage>(HandleCancelResearch);
+        Register<ChooseCapitalUpgradeMessage>(HandleChooseCapitalUpgrade);
+        Register<SpecializeOutpostMessage>(HandleSpecializeOutpost);
 
         // units 
         Register<MoveUnitsMessage>(HandleMoveUnit);
+        Register<AttackMoveUnitsMessage>(HandleAttackMoveUnits);
+        Register<AttackTargetMessage>(HandleAttackTarget);
+        Register<StopUnitsMessage>(HandleStopUnits);
+        Register<HoldPositionMessage>(HandleHoldPosition);
+        Register<PatrolUnitsMessage>(HandlePatrolUnits);
+        Register<SetUnitStanceMessage>(HandleSetUnitStance);
+        Register<UseAbilityMessage>(HandleUseAbility);
+        Register<GatherResourcesMessage>(HandleGatherResources);
     }
     private void Register<TMessage>(Func<TMessage, bool> handler)
         where TMessage : MessageBase
@@ -115,6 +136,139 @@ public sealed class SimulationContext
         player.AddEntity(building);
         return true;
     }
+    private bool HandleCancelConstruction(CancelConstructionMessage msg)
+    {
+        if (!_matchState.Players.TryGetValue(msg.player_id, out var player))
+            return false;
+
+        if (!player.Entities.TryGetValue(msg.construction_site_id, out var entity))
+            return false;
+
+        if (entity is not BuildingState building)
+            return false;
+        
+        if (building.BuildProgression >= 100)
+            return false;
+
+        return player.RemoveEntity(msg.construction_site_id);
+    }
+    private bool HandleRepairTarget(RepairTargetMessage msg)
+    {
+        if (!_matchState.Players.TryGetValue(msg.player_id, out var player))
+            return false;
+        
+        foreach (var repairUnitId in msg.repair_unit_ids)
+        {
+            if (!player.Entities.TryGetValue(repairUnitId, out var repairUnit))
+                return false;
+
+            if (repairUnit is not UnitState)
+                return false;
+        }
+
+        if (!player.Entities.TryGetValue(msg.target_entity_id, out var entity))
+            return false;
+
+        if (entity.Health == entity.MaxHealth)
+            return false;
+
+        return entity.GettingRepaired = true;
+    }
+    // TODO:
+    private bool HandleCaptureTarget(CaptureTargetMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleUpgradeStructure(UpgradeStructureMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleCancelStructureUpgrade(CancelStructureUpgradeMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleTrainUnits(TrainUnitsMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleCancelProduction(CancelProductionMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleReorderProduction(ReorderProductionMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleSetRallyPoint(SetRallyPointMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleStartResearch(StartResearchMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleCancelResearch(CancelResearchMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleChooseCapitalUpgrade(ChooseCapitalUpgradeMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleSpecializeOutpost(SpecializeOutpostMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleAttackMoveUnits(AttackMoveUnitsMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleAttackTarget(AttackTargetMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleStopUnits(StopUnitsMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleHoldPosition(HoldPositionMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandlePatrolUnits(PatrolUnitsMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleSetUnitStance(SetUnitStanceMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleUseAbility(UseAbilityMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleGatherResources(GatherResourcesMessage msg)
+    {
+        return false;
+    }
 
     private static string newEntityId(string prefix)
     {
@@ -179,6 +333,10 @@ public sealed class PlayerState
     {
         _entities[entity.EntityId] = entity;
     }
+    internal bool RemoveEntity(string id)
+    {
+        return _entities.Remove(id);
+    }
     /*
     _research is the private editable version of the Dictionary
     Research is the public version which cannot be edited but only read
@@ -207,6 +365,7 @@ public abstract class EntityState
     public Vector2 CurrentPosition { get; protected set; }
     public int Health { get; private set; }
     public int MaxHealth { get; private set; }
+    public bool GettingRepaired = false;
 }
 
 public sealed class UnitState : EntityState
