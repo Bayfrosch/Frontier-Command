@@ -2,5 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="gdUnit4.api" Version="5.0.0" />
+  </ItemGroup>
 </Project>

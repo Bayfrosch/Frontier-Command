@@ -60,6 +60,7 @@ public abstract partial class MessageBase : RefCounted, MessageInterface
 public abstract partial class UnitDestinationCommandBase : MessageBase, CommandInterface, QueueableCommandInterface
 {
     public string command_id = "";
+    public string player_id = "";
     public int issued_at_tick = -1;
     public int queue_mode = (int)GameMessages.QueueMode.REPLACE;
     public string[] unit_ids = System.Array.Empty<string>();
