@@ -1,55 +1,84 @@
+using System.Collections.Generic;
+using Godot;
+
+class ContextProvider
+{
+    /*
+    The state of the match gets saved in this Singleton to prevent issues
+    */
+    private MatchState matchState = new MatchState();
+    /*
+    This funtion is for accessing information from the context provider
+    */
+    public MatchState get()
+    {
+        return matchState;
+    }
+
+    /*
+    This function is for accessing what is stored in context provider
+    can be accessed with contextProvider.push(...) to store information
+    msg Dictionary should consist of pre Defined messages (in scripts/messages)
+     */
+    public bool push(MessageBase msg)
+    {
+        return false;
+    }
+}
+
 public sealed class MatchState
 {
-    public int Tick { get; set; }
-    public Dictionary<string, PlayerState> Players { get; set; } = new Dictionary<string, PlayerState>();
+    int Tick;
+    VictoryState victoryState;
+    Dictionary<string, PlayerState> Players = new Dictionary<string, PlayerState>();
 }
 
 public sealed class VictoryState
 {
-    public string WinningPlayerId { get; set; } = "";
-    public string VictoryReason { get; set; } = "";
+    string WinningPlayerId = "";
+    string VictoryReason = "";
 }
 
 public sealed class PlayerState
 {
-    public string PlayerId { get; set; } = "";
-    public Dictionary<string, EntityState> Entities { get; set; } = new Dictionary<string, EntityState>();
-    public Dictionary<string, bool> Research { get; set; } = new Dictionary<string, bool>();
-    public int Materials { get; set; }
-    public int EnergyProduced { get; set; }
-    public int EnergyConsumed { get; set; }
+    string PlayerId = "";
+    Dictionary<string, EntityState> Entities = new Dictionary<string, EntityState>();
+    Dictionary<string, bool> Research = new Dictionary<string, bool>();
+    int Materials;
+    int EnergyProduced;
+    int EnergyConsumed;
 }
 
 public abstract class EntityState
 {
-    public string EntityId { get; set; } = "";
-    public string? OwnerPlayerId { get; set; }
-    public Vector2 Position { get; set; }
-    public int Health { get; set; }
-    public int MaxHealth { get; set; }   
+    string EntityId = "";
+    string? OwnerPlayerId;
+    Vector2 Position;
+    int Health;
+    int MaxHealth;
 }
 
 public sealed class UnitState : EntityState
 {
-    public string UnitType { get; set; } = "";
-    public int AttackDamage { get; set; }
-    public float AttackRange { get; set; }
-    public float MovementSpeed { get; set; }
+    string UnitType = "";
+    int AttackDamage;
+    float AttackRange;
+    float MovementSpeed;
 }
 
 public sealed class BuildingState : EntityState
 {
-    public string BuildingType { get; set; } = "";
-    public int ProductionQueue { get; set; }
-    public int ProductionProgress { get; set; }
+    string BuildingType = "";
+    int ProductionQueue;
+    int ProductionProgress;
 }
 
 public sealed class OutpostState : EntityState
 {
-    public string OutpostSpecialization { get; set; } = "";
+    string OutpostSpecialization = "";
 }
 
 public sealed class ResourceFieldState : EntityState
 {
-    
+
 }
