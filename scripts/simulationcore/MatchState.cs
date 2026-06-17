@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Castle.Components.DictionaryAdapter.Xml;
 using Godot;
 
 public sealed class SimulationContext
@@ -93,6 +95,63 @@ public sealed class SimulationContext
     Command Handler for directing each message type to the correct handler fuction
     */
     private readonly Dictionary<System.Type, Func<MessageBase, bool>> _handlers = new();
+    private bool TryGetPlayer(string playerId, out PlayerState? player)
+    {
+        player = null;
+
+        if (string.IsNullOrEmpty(playerId))
+            return false;
+
+        return _matchState.Players.TryGetValue(playerId, out player);
+    }
+    private bool TryGetPlayerEntity<T>(
+        string playerId,
+        string entityId,
+        out T? entity
+    ) where T : EntityState
+    {
+        entity = null;
+
+        if (string.IsNullOrEmpty(playerId))
+            return false;
+
+        if (!TryGetPlayer(playerId, out var player))
+            return false;
+
+        if (player is null)
+            return false;
+
+        if (!player.Entities.TryGetValue(entityId, out var rawEntity))
+            return false;
+
+        if (rawEntity is not T typedEntity)
+            return false;
+
+        entity = typedEntity;
+        return true;
+    }
+
+    private bool TryGetOwnedUnits(
+        string playerId,
+        string[] unitIds,
+        out List<UnitState>? units
+    )
+    {
+        units = new List<UnitState>();
+
+        foreach (var unitId in unitIds)
+        {
+            if(!TryGetPlayerEntity<UnitState>(playerId, unitId, out var unit))
+            {
+                units.Clear();
+                return false;
+            }
+            if (unit is null) 
+                return false;
+            units.Add(unit);   
+        }
+        return true;
+    }
     /*
     Message handlers for reacting to every pre defined message in Messages.cs
     Message types get linked in the constructor to their coresponding handler
@@ -100,34 +159,17 @@ public sealed class SimulationContext
     */
     private bool HandleMoveUnit(MoveUnitsMessage msg)
     {
-        if (!_matchState.Players.TryGetValue(msg.player_id, out PlayerState? currentPlayer))
+        if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
             return false;
-        
-        if (currentPlayer is null)
-            return false;
-        
-        foreach (string s in msg.unit_ids)
-        {
-            if (!currentPlayer.Entities.TryGetValue(s, out EntityState? entity))
-                return false;
-            
-            if (entity is null)
-                return false;
-            
-            if (entity is not UnitState unit)
-                return false;
-            
+
+        foreach (var unit in units)
             unit.SetMoveOrder(msg.destination);
-        }
 
         return true;
     }
     private bool HandleBuildStructure(BuildStructureMessage msg)
     {
-        if (!_matchState.Players.TryGetValue(msg.player_id, out PlayerState? player))
-            return false;
-        
-        if (player is null) 
+        if (!TryGetPlayer(msg.player_id, out var player) || player is null)
             return false;
 
         var id = newEntityId(msg.building_type.ToString());
@@ -138,13 +180,10 @@ public sealed class SimulationContext
     }
     private bool HandleCancelConstruction(CancelConstructionMessage msg)
     {
-        if (!_matchState.Players.TryGetValue(msg.player_id, out var player))
+        if (!TryGetPlayer(msg.player_id, out var player) || player is null)
             return false;
 
-        if (!player.Entities.TryGetValue(msg.construction_site_id, out var entity))
-            return false;
-
-        if (entity is not BuildingState building)
+        if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.construction_site_id, out var building) || building is null)
             return false;
         
         if (building.BuildProgression >= 100)
@@ -154,19 +193,10 @@ public sealed class SimulationContext
     }
     private bool HandleRepairTarget(RepairTargetMessage msg)
     {
-        if (!_matchState.Players.TryGetValue(msg.player_id, out var player))
+        if (!TryGetOwnedUnits(msg.player_id, msg.repair_unit_ids, out _))
             return false;
-        
-        foreach (var repairUnitId in msg.repair_unit_ids)
-        {
-            if (!player.Entities.TryGetValue(repairUnitId, out var repairUnit))
-                return false;
 
-            if (repairUnit is not UnitState)
-                return false;
-        }
-
-        if (!player.Entities.TryGetValue(msg.target_entity_id, out var entity))
+        if (!TryGetPlayerEntity<EntityState>(msg.player_id, msg.target_entity_id, out var entity) || entity is null)
             return false;
 
         if (entity.Health == entity.MaxHealth)
@@ -189,10 +219,15 @@ public sealed class SimulationContext
     {
         return false;
     }
-    // TODO:
     private bool HandleTrainUnits(TrainUnitsMessage msg)
     {
-        return false;
+        if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building) || building is null)
+            return false;
+
+        for (var i = 0; i < msg.quantity; i++)
+            building.QueueProduction(msg.unit_definition_id);
+
+        return true;
     }
     // TODO:
     private bool HandleCancelProduction(CancelProductionMessage msg)
@@ -418,8 +453,12 @@ public sealed class BuildingState : EntityState
     }
     public int BuildProgression { get; private set; } = 0;
     public BuildingType Type;
-    public int ProductionQueue { get; private set; }
+    public string[] ProductionQueue { get; private set; } = [];
     public int ProductionProgress { get; private set; }
+    internal void QueueProduction(string unitDefinitionId)
+    {
+        ProductionQueue = ProductionQueue.Append(unitDefinitionId).ToArray();
+    }
 }
 
 public sealed class OutpostState : EntityState
