@@ -32,7 +32,8 @@ current code.
 - Lists of IDs are C# `string[]`, serialized as Godot string arrays.
 - Structured lists are `Godot.Collections.Array<Godot.Collections.Dictionary>`.
 - Byte data is `byte[]`.
-- Enums are serialized as `int` values.
+- Enums are serialized as `int` values, except
+  `BuildStructureMessage.building_type`, which serializes the enum name string.
 - `from_payload()` uses permissive helper conversions and default values.
 - `validate()` checks only the implemented structural rules listed below.
 - No message factory, raw Variant schema validator, or gameplay-rule validator
@@ -101,6 +102,7 @@ OutpostSpecialization: INDUSTRIAL, MILITARY, RESEARCH
 MatchPhase: LOBBY, RUNNING, PAUSED, ENDED
 VisibilityState: HIDDEN, FOGGED, VISIBLE
 MovementCategory: GROUND, AIR, NAVAL
+BuildingType: BASIC_GENERATOR
 ```
 
 ## Message Envelope
@@ -520,14 +522,14 @@ one harvester id, and `resource_field_entity_id`.
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "construction_unit_id": "worker-1",
-    "building_definition_id": "basic_generator",
+    "building_type": "BASIC_GENERATOR",
     "position": new Vector2(100.0f, 250.0f),
     "rotation_radians": 0.0f,
 }
 ```
 
 Validation requires `player_id`, a non-negative tick, valid queue mode,
-`construction_unit_id`, and `building_definition_id`.
+`construction_unit_id`, and `building_type`.
 
 ### CANCEL_CONSTRUCTION
 
@@ -917,3 +919,10 @@ currently implement:
 
 Those rules may belong in server, command handler, simulation, or future factory
 code, but they are not implemented by the message classes documented here.
+
+## Simulation Handler Coverage
+
+`MatchState` currently registers handlers for every implemented gameplay
+command message. `MOVE_UNITS`, `BUILD_STRUCTURE`, `CANCEL_CONSTRUCTION`, and
+`REPAIR_TARGET` have initial simulation behavior. The remaining registered
+command handlers are placeholders and currently return `false`.

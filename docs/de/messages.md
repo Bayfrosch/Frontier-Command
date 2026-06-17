@@ -32,7 +32,9 @@ aktuellen Code aber nicht.
 - ID-Listen sind C#-`string[]`, serialisiert als Godot-String-Arrays.
 - Strukturierte Listen sind `Godot.Collections.Array<Godot.Collections.Dictionary>`.
 - Byte-Daten sind `byte[]`.
-- Enums werden als `int`-Werte serialisiert.
+- Enums werden als `int`-Werte serialisiert, ausser
+  `BuildStructureMessage.building_type`, das den Enum-Namen als String
+  serialisiert.
 - `from_payload()` nutzt tolerante Helper-Konvertierungen und Default-Werte.
 - `validate()` prueft nur die unten aufgefuehrten implementierten Strukturregeln.
 - Keine Message Factory, kein roher Variant-Schema-Validator und kein
@@ -101,6 +103,7 @@ OutpostSpecialization: INDUSTRIAL, MILITARY, RESEARCH
 MatchPhase: LOBBY, RUNNING, PAUSED, ENDED
 VisibilityState: HIDDEN, FOGGED, VISIBLE
 MovementCategory: GROUND, AIR, NAVAL
+BuildingType: BASIC_GENERATOR
 ```
 
 ## Nachrichten-Envelope
@@ -528,14 +531,14 @@ gueltigen Queue Mode, mindestens eine Harvester-ID und
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "construction_unit_id": "worker-1",
-    "building_definition_id": "basic_generator",
+    "building_type": "BASIC_GENERATOR",
     "position": new Vector2(100.0f, 250.0f),
     "rotation_radians": 0.0f,
 }
 ```
 
 Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
-gueltigen Queue Mode, `construction_unit_id` und `building_definition_id`.
+gueltigen Queue Mode, `construction_unit_id` und `building_type`.
 
 ### CANCEL_CONSTRUCTION
 
@@ -930,3 +933,11 @@ implementiert aktuell nicht:
 Diese Regeln koennen in Server-, Command-Handler-, Simulations- oder kuenftigem
 Factory-Code liegen, sind aber nicht durch die hier dokumentierten
 Nachrichtenklassen implementiert.
+
+## Simulations-Handler-Abdeckung
+
+`MatchState` registriert aktuell Handler fuer jede implementierte
+Gameplay-Befehlsnachricht. `MOVE_UNITS`, `BUILD_STRUCTURE`,
+`CANCEL_CONSTRUCTION` und `REPAIR_TARGET` haben erstes Simulationsverhalten. Die
+uebrigen registrierten Befehls-Handler sind Platzhalter und geben aktuell
+`false` zurueck.
