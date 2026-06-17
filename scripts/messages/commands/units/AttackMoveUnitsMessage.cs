@@ -8,9 +8,9 @@ public partial class AttackMoveUnitsMessage : UnitDestinationCommandBase
         "MessageInterface", "CommandInterface", "QueueableCommandInterface"
     };
     public StringName message_type = GameMessages.ATTACK_MOVE_UNITS;
-    public AttackMoveUnitsMessage(string p_command_id = "", int p_issued_at_tick = -1, string[] p_unit_ids = default, Vector2 p_destination = default, int p_queue_mode = (int)GameMessages.QueueMode.REPLACE, StringName p_formation = default)
+    public AttackMoveUnitsMessage(string p_player_id = "", int p_issued_at_tick = -1, string[] p_unit_ids = default, Vector2 p_destination = default, int p_queue_mode = (int)GameMessages.QueueMode.REPLACE, StringName p_formation = default)
     {
-        command_id = p_command_id;
+        player_id = p_player_id;
         issued_at_tick = p_issued_at_tick;
         unit_ids = p_unit_ids ?? System.Array.Empty<string>();
         destination = p_destination;

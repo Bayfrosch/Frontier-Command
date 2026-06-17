@@ -135,12 +135,12 @@ All implemented gameplay commands serialize:
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
 }
 ```
 
-Validation generally requires a non-empty `command_id` and a non-negative
+Validation generally requires a non-empty `player_id` and a non-negative
 `issued_at_tick`. Queueable commands also serialize:
 
 ```csharp
@@ -151,9 +151,8 @@ Validation generally requires a non-empty `command_id` and a non-negative
 
 Queueable validation accepts only `REPLACE` or `APPEND`.
 
-`MoveUnitsMessage` has a `player_id` field on its C# base class constructor, but
-`player_id` is not serialized by `to_payload()` and is not loaded by
-`from_payload()`.
+Player-driven lobby and match request messages also carry `player_id` where the
+implementation needs to identify the acting player.
 
 ## Connection Messages
 
@@ -250,12 +249,13 @@ strings and positive integer sizes/player count.
 
 ```csharp
 {
+    "player_id": "player-id",
     "settings": {},
 }
 ```
 
-Validation delegates to `MatchSettingsMessage.validate()` after loading the
-`settings` dictionary.
+Validation requires `player_id` and delegates to
+`MatchSettingsMessage.validate()` after loading the `settings` dictionary.
 
 ### UPDATE_MATCH_SETTINGS
 
@@ -267,23 +267,27 @@ validation.
 
 ```csharp
 {
+    "player_id": "player-id",
     "match_id": "match-id",
     "as_observer": false,
 }
 ```
 
-Validation requires `match_id`.
+Validation requires `player_id` and `match_id`.
 
 ### LEAVE_MATCH
 
 ```csharp
-{}
+{
+    "player_id": "player-id",
+}
 ```
 
 ### SET_PLAYER_READY
 
 ```csharp
 {
+    "player_id": "player-id",
     "is_ready": true,
     "faction_id": "frontier_coalition",
 
@@ -292,7 +296,7 @@ Validation requires `match_id`.
 }
 ```
 
-Validation requires `faction_id`.
+Validation requires `player_id` and `faction_id`.
 
 ### LOBBY_STATE
 
@@ -323,7 +327,9 @@ non-negative int, not an optional string.
 ### START_MATCH
 
 ```csharp
-{}
+{
+    "player_id": "player-id",
+}
 ```
 
 ### MATCH_STARTED
@@ -346,7 +352,9 @@ and `map_seed`.
 ### PAUSE_MATCH
 
 ```csharp
-{}
+{
+    "player_id": "player-id",
+}
 ```
 
 There are no implemented `resume_match` or `surrender` messages.
@@ -375,7 +383,7 @@ are `victory_conditions`, `surrender`, `all_opponents_disconnected`, and
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "unit_ids": new string[] { "unit-1", "unit-2" },
@@ -384,7 +392,7 @@ are `victory_conditions`, `surrender`, `all_opponents_disconnected`, and
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode, at least
+Validation requires `player_id`, a non-negative tick, valid queue mode, at least
 one unit id, and `formation` equal to `none` or `rectangle`.
 
 ### ATTACK_MOVE_UNITS
@@ -396,7 +404,7 @@ Same payload and validation as `MOVE_UNITS`, with
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "unit_ids": new string[] { "unit-1", "unit-2" },
@@ -404,28 +412,28 @@ Same payload and validation as `MOVE_UNITS`, with
 }
 ```
 
-The implemented key is `target_id`, not `target_entity_id`.
-`AttackTargetMessage` currently does not override `validate()`, so it inherits
-the default no-op validation from `MessageBase`.
+The implemented key is `target_id`, not `target_entity_id`. Validation requires
+`player_id`, a non-negative tick, valid queue mode, at least one unit id, and
+`target_id`.
 
 ### STOP_UNITS
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "unit_ids": new string[] { "unit-1", "unit-2" },
 }
 ```
 
-There is no implemented `clear_queue` field. `StopUnitsMessage` currently does
-not override `validate()`.
+There is no implemented `clear_queue` field. Validation requires `player_id`, a
+non-negative tick, and at least one unit id.
 
 ### HOLD_POSITION_UNITS
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "unit_ids": new string[] { "unit-1" },
     "enabled": true,
@@ -433,13 +441,13 @@ not override `validate()`.
 ```
 
 The implemented message ID is `hold_position_units`. Validation requires a
-command id, non-negative tick, and at least one unit id.
+non-negative tick and at least one unit id.
 
 ### PATROL_UNITS
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "unit_ids": new string[] { "unit-1" },
@@ -447,28 +455,28 @@ command id, non-negative tick, and at least one unit id.
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode, and at
+Validation requires `player_id`, a non-negative tick, valid queue mode, and at
 least one unit id.
 
 ### SET_UNIT_STANCE
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "unit_ids": new string[] { "unit-1" },
     "stance": (int)GameMessages.UnitStance.DEFENSIVE,
 }
 ```
 
-Validation requires a command id, non-negative tick, at least one unit id, and a
+Validation requires `player_id`, a non-negative tick, at least one unit id, and a
 valid `UnitStance`.
 
 ### USE_ABILITY
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "caster_entity_ids": new string[] { "unit-1" },
@@ -480,7 +488,7 @@ valid `UnitStance`.
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode, at least
+Validation requires `player_id`, a non-negative tick, valid queue mode, at least
 one caster id, and `ability_id`. It rejects using both target forms and requires
 `target_position` to be a `Vector2` when present.
 
@@ -488,7 +496,7 @@ one caster id, and `ability_id`. It rejects using both target forms and requires
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "harvester_entity_ids": new string[] { "harvester-1" },
@@ -499,7 +507,7 @@ one caster id, and `ability_id`. It rejects using both target forms and requires
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode, at least
+Validation requires `player_id`, a non-negative tick, valid queue mode, at least
 one harvester id, and `resource_field_entity_id`.
 
 ## Construction And Support Commands
@@ -508,7 +516,7 @@ one harvester id, and `resource_field_entity_id`.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "construction_unit_id": "worker-1",
@@ -518,14 +526,14 @@ one harvester id, and `resource_field_entity_id`.
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode,
+Validation requires `player_id`, a non-negative tick, valid queue mode,
 `construction_unit_id`, and `building_definition_id`.
 
 ### CANCEL_CONSTRUCTION
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "construction_site_id": "construction-site-1",
 }
@@ -537,7 +545,7 @@ Validation requires all three fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "repair_unit_ids": new string[] { "worker-1" },
@@ -545,14 +553,14 @@ Validation requires all three fields above, with a non-negative tick.
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode, at least
+Validation requires `player_id`, a non-negative tick, valid queue mode, at least
 one repair unit id, and `target_entity_id`.
 
 ### CAPTURE_TARGET
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "envoy_unit_ids": new string[] { "envoy-1" },
@@ -560,14 +568,14 @@ one repair unit id, and `target_entity_id`.
 }
 ```
 
-Validation requires a command id, non-negative tick, valid queue mode, at least
+Validation requires `player_id`, a non-negative tick, valid queue mode, at least
 one envoy id, and `target_entity_id`.
 
 ### UPGRADE_STRUCTURE
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "structure_entity_id": "building-1",
     "upgrade_definition_id": "advanced_production",
@@ -580,7 +588,7 @@ Validation requires all fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "structure_entity_id": "building-1",
     "upgrade_queue_item_id": "queue-item-1",
@@ -595,7 +603,7 @@ Validation requires all fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_id": "factory-1",
     "unit_definition_id": "main_battle_unit",
@@ -603,14 +611,14 @@ Validation requires all fields above, with a non-negative tick.
 }
 ```
 
-Validation requires a command id, non-negative tick, `producer_entity_id`,
+Validation requires `player_id`, a non-negative tick, `producer_entity_id`,
 `unit_definition_id`, and `quantity > 0`.
 
 ### CANCEL_PRODUCTION
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_id": "factory-1",
     "queue_item_id": "queue-item-1",
@@ -623,7 +631,7 @@ Validation requires all fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_id": "factory-1",
     "queue_item_id": "queue-item-1",
@@ -638,7 +646,7 @@ Validation requires all fields above, with non-negative `issued_at_tick` and
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_ids": new string[] { "factory-1" },
     "target": {
@@ -650,7 +658,7 @@ Validation requires all fields above, with non-negative `issued_at_tick` and
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_ids": new string[] { "factory-1" },
     "target": {
@@ -661,7 +669,7 @@ Validation requires all fields above, with non-negative `issued_at_tick` and
 ```
 
 `target` may be `null`/Nil to clear the rally point. Validation requires a
-command id, non-negative tick, and at least one producer id. When target is not
+non-negative tick and at least one producer id. When target is not
 Nil, it must be a dictionary with `kind = position` and a Vector2 `position`, or
 `kind = entity` and non-empty `entity_id`.
 
@@ -674,7 +682,7 @@ These files are currently under `scripts/messages/commands/research`, including
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "research_structure_id": "research-center-1",
     "research_id": "research-id",
@@ -687,7 +695,7 @@ Validation requires all fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "research_structure_id": "research-center-1",
     "research_queue_item_id": "queue-item-1",
@@ -700,7 +708,7 @@ Validation requires all fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "capital_unit_entity_id": "capital-unit-1",
     "upgrade_definition_id": "capital-upgrade-id",
@@ -713,14 +721,14 @@ Validation requires all fields above, with a non-negative tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "outpost_entity_id": "outpost-1",
     "specialization": (int)GameMessages.OutpostSpecialization.INDUSTRIAL,
 }
 ```
 
-Validation requires a command id, non-negative tick, `outpost_entity_id`, and a
+Validation requires `player_id`, a non-negative tick, `outpost_entity_id`, and a
 valid `OutpostSpecialization`.
 
 ## Command Result
@@ -729,7 +737,6 @@ valid `OutpostSpecialization`.
 
 ```csharp
 {
-    "command_id": "command-id",
     "status": "accepted",
     "accepted_at_tick": 121,
 }
@@ -739,7 +746,6 @@ valid `OutpostSpecialization`.
 
 ```csharp
 {
-    "command_id": "command-id",
     "status": "rejected",
     "rejection": {
         "code": "not_owner",
@@ -749,7 +755,7 @@ valid `OutpostSpecialization`.
 }
 ```
 
-Validation requires `command_id`, `status` equal to `accepted` or `rejected`,
+Validation requires `status` equal to `accepted` or `rejected`,
 `accepted_at_tick >= 0` for accepted results, and a non-empty rejection
 dictionary with a valid `code` for rejected results.
 
@@ -900,7 +906,7 @@ internal_server_error
 The current message layer validates local message shape only. It does not
 currently implement:
 
-- Duplicate `message_id` or `command_id` handling.
+- Duplicate `message_id` handling.
 - Authentication or sender derivation.
 - Ownership checks.
 - Match phase checks beyond simple enum validation in snapshots.

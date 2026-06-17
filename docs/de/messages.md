@@ -135,12 +135,12 @@ Alle implementierten Gameplay-Befehle serialisieren:
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
 }
 ```
 
-Die Validierung verlangt im Allgemeinen eine nicht leere `command_id` und ein
+Die Validierung verlangt im Allgemeinen ein nicht leeres `player_id` und ein
 nicht negatives `issued_at_tick`. Queueable-Befehle serialisieren ausserdem:
 
 ```csharp
@@ -151,9 +151,9 @@ nicht negatives `issued_at_tick`. Queueable-Befehle serialisieren ausserdem:
 
 Die Queueable-Validierung akzeptiert nur `REPLACE` oder `APPEND`.
 
-`MoveUnitsMessage` hat ein `player_id`-Feld im C#-Basisklassen-Konstruktor,
-aber `player_id` wird von `to_payload()` nicht serialisiert und von
-`from_payload()` nicht geladen.
+Player-getriebene Lobby- und Match-Request-Nachrichten tragen ebenfalls
+`player_id`, wenn die Implementierung den handelnden Spieler identifizieren
+muss.
 
 ## Verbindungsnachrichten
 
@@ -250,12 +250,14 @@ leere Strings und positive Integer fuer Groessen und Spieleranzahl.
 
 ```csharp
 {
+    "player_id": "player-id",
     "settings": {},
 }
 ```
 
-Die Validierung delegiert an `MatchSettingsMessage.validate()`, nachdem das
-`settings`-Dictionary geladen wurde.
+Die Validierung verlangt `player_id` und delegiert an
+`MatchSettingsMessage.validate()`, nachdem das `settings`-Dictionary geladen
+wurde.
 
 ### UPDATE_MATCH_SETTINGS
 
@@ -267,23 +269,27 @@ Validierung.
 
 ```csharp
 {
+    "player_id": "player-id",
     "match_id": "match-id",
     "as_observer": false,
 }
 ```
 
-Die Validierung verlangt `match_id`.
+Die Validierung verlangt `player_id` und `match_id`.
 
 ### LEAVE_MATCH
 
 ```csharp
-{}
+{
+    "player_id": "player-id",
+}
 ```
 
 ### SET_PLAYER_READY
 
 ```csharp
 {
+    "player_id": "player-id",
     "is_ready": true,
     "faction_id": "frontier_coalition",
 
@@ -292,7 +298,7 @@ Die Validierung verlangt `match_id`.
 }
 ```
 
-Die Validierung verlangt `faction_id`.
+Die Validierung verlangt `player_id` und `faction_id`.
 
 ### LOBBY_STATE
 
@@ -324,7 +330,9 @@ optionaler String.
 ### START_MATCH
 
 ```csharp
-{}
+{
+    "player_id": "player-id",
+}
 ```
 
 ### MATCH_STARTED
@@ -347,7 +355,9 @@ positives `tick_rate` und `map_seed`.
 ### PAUSE_MATCH
 
 ```csharp
-{}
+{
+    "player_id": "player-id",
+}
 ```
 
 Es gibt keine implementierten `resume_match`- oder `surrender`-Nachrichten.
@@ -377,7 +387,7 @@ werden von der implementierten Validierung nicht verlangt.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "unit_ids": new string[] { "unit-1", "unit-2" },
@@ -386,7 +396,7 @@ werden von der implementierten Validierung nicht verlangt.
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode, mindestens eine Unit-ID und `formation` gleich `none` oder
 `rectangle`.
 
@@ -399,7 +409,7 @@ Gleiche Payload und Validierung wie `MOVE_UNITS`, mit
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "unit_ids": new string[] { "unit-1", "unit-2" },
@@ -407,28 +417,28 @@ Gleiche Payload und Validierung wie `MOVE_UNITS`, mit
 }
 ```
 
-Der implementierte Key ist `target_id`, nicht `target_entity_id`.
-`AttackTargetMessage` ueberschreibt `validate()` aktuell nicht und erbt daher
-die Default-No-op-Validierung von `MessageBase`.
+Der implementierte Key ist `target_id`, nicht `target_entity_id`. Die
+Validierung verlangt `player_id`, einen nicht negativen Tick, einen gueltigen
+Queue Mode, mindestens eine Unit-ID und `target_id`.
 
 ### STOP_UNITS
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "unit_ids": new string[] { "unit-1", "unit-2" },
 }
 ```
 
-Es gibt kein implementiertes `clear_queue`-Feld. `StopUnitsMessage`
-ueberschreibt `validate()` aktuell nicht.
+Es gibt kein implementiertes `clear_queue`-Feld. Die Validierung verlangt
+`player_id`, einen nicht negativen Tick und mindestens eine Unit-ID.
 
 ### HOLD_POSITION_UNITS
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "unit_ids": new string[] { "unit-1" },
     "enabled": true,
@@ -436,14 +446,14 @@ ueberschreibt `validate()` aktuell nicht.
 ```
 
 Die implementierte Nachrichten-ID ist `hold_position_units`. Die Validierung
-verlangt eine Command-ID, einen nicht negativen Tick und mindestens eine
+verlangt `player_id`, einen nicht negativen Tick und mindestens eine
 Unit-ID.
 
 ### PATROL_UNITS
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "unit_ids": new string[] { "unit-1" },
@@ -451,28 +461,28 @@ Unit-ID.
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode und mindestens eine Unit-ID.
 
 ### SET_UNIT_STANCE
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "unit_ids": new string[] { "unit-1" },
     "stance": (int)GameMessages.UnitStance.DEFENSIVE,
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, mindestens
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, mindestens
 eine Unit-ID und eine gueltige `UnitStance`.
 
 ### USE_ABILITY
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "caster_entity_ids": new string[] { "unit-1" },
@@ -484,7 +494,7 @@ eine Unit-ID und eine gueltige `UnitStance`.
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode, mindestens eine Caster-ID und `ability_id`. Sie lehnt es
 ab, beide Ziel-Formen gleichzeitig zu verwenden, und verlangt, dass
 `target_position` bei Vorhandensein ein `Vector2` ist.
@@ -493,7 +503,7 @@ ab, beide Ziel-Formen gleichzeitig zu verwenden, und verlangt, dass
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "harvester_entity_ids": new string[] { "harvester-1" },
@@ -504,7 +514,7 @@ ab, beide Ziel-Formen gleichzeitig zu verwenden, und verlangt, dass
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode, mindestens eine Harvester-ID und
 `resource_field_entity_id`.
 
@@ -514,7 +524,7 @@ gueltigen Queue Mode, mindestens eine Harvester-ID und
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "construction_unit_id": "worker-1",
@@ -524,14 +534,14 @@ gueltigen Queue Mode, mindestens eine Harvester-ID und
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode, `construction_unit_id` und `building_definition_id`.
 
 ### CANCEL_CONSTRUCTION
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "construction_site_id": "construction-site-1",
 }
@@ -544,7 +554,7 @@ Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "repair_unit_ids": new string[] { "worker-1" },
@@ -552,14 +562,14 @@ Tick.
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode, mindestens eine Repair-Unit-ID und `target_entity_id`.
 
 ### CAPTURE_TARGET
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "queue_mode": (int)GameMessages.QueueMode.REPLACE,
     "envoy_unit_ids": new string[] { "envoy-1" },
@@ -567,14 +577,14 @@ gueltigen Queue Mode, mindestens eine Repair-Unit-ID und `target_entity_id`.
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick, einen
+Die Validierung verlangt `player_id`, einen nicht negativen Tick, einen
 gueltigen Queue Mode, mindestens eine Envoy-ID und `target_entity_id`.
 
 ### UPGRADE_STRUCTURE
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "structure_entity_id": "building-1",
     "upgrade_definition_id": "advanced_production",
@@ -587,7 +597,7 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "structure_entity_id": "building-1",
     "upgrade_queue_item_id": "queue-item-1",
@@ -602,7 +612,7 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_id": "factory-1",
     "unit_definition_id": "main_battle_unit",
@@ -610,14 +620,14 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick,
+Die Validierung verlangt `player_id`, einen nicht negativen Tick,
 `producer_entity_id`, `unit_definition_id` und `quantity > 0`.
 
 ### CANCEL_PRODUCTION
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_id": "factory-1",
     "queue_item_id": "queue-item-1",
@@ -630,7 +640,7 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_id": "factory-1",
     "queue_item_id": "queue-item-1",
@@ -645,7 +655,7 @@ Die Validierung verlangt alle obigen Felder sowie nicht negative Werte fuer
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_ids": new string[] { "factory-1" },
     "target": {
@@ -657,7 +667,7 @@ Die Validierung verlangt alle obigen Felder sowie nicht negative Werte fuer
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_ids": new string[] { "factory-1" },
     "target": {
@@ -668,7 +678,7 @@ Die Validierung verlangt alle obigen Felder sowie nicht negative Werte fuer
 ```
 
 `target` darf `null`/Nil sein, um den Rally Point zu loeschen. Die Validierung
-verlangt eine Command-ID, einen nicht negativen Tick und mindestens eine
+verlangt `player_id`, einen nicht negativen Tick und mindestens eine
 Producer-ID. Wenn target nicht Nil ist, muss es ein Dictionary mit
 `kind = position` und einer Vector2-`position` oder `kind = entity` und nicht
 leerer `entity_id` sein.
@@ -682,7 +692,7 @@ einschliesslich `ChooseCapitalUpgradeMessage`.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "research_structure_id": "research-center-1",
     "research_id": "research-id",
@@ -695,7 +705,7 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "research_structure_id": "research-center-1",
     "research_queue_item_id": "queue-item-1",
@@ -708,7 +718,7 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "capital_unit_entity_id": "capital-unit-1",
     "upgrade_definition_id": "capital-upgrade-id",
@@ -721,14 +731,14 @@ Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
 ```csharp
 {
-    "command_id": "command-id",
+    "player_id": "player-id",
     "issued_at_tick": 120,
     "outpost_entity_id": "outpost-1",
     "specialization": (int)GameMessages.OutpostSpecialization.INDUSTRIAL,
 }
 ```
 
-Die Validierung verlangt eine Command-ID, einen nicht negativen Tick,
+Die Validierung verlangt `player_id`, einen nicht negativen Tick,
 `outpost_entity_id` und eine gueltige `OutpostSpecialization`.
 
 ## Befehlsergebnis
@@ -737,7 +747,6 @@ Die Validierung verlangt eine Command-ID, einen nicht negativen Tick,
 
 ```csharp
 {
-    "command_id": "command-id",
     "status": "accepted",
     "accepted_at_tick": 121,
 }
@@ -747,7 +756,6 @@ Die Validierung verlangt eine Command-ID, einen nicht negativen Tick,
 
 ```csharp
 {
-    "command_id": "command-id",
     "status": "rejected",
     "rejection": {
         "code": "not_owner",
@@ -757,7 +765,7 @@ Die Validierung verlangt eine Command-ID, einen nicht negativen Tick,
 }
 ```
 
-Die Validierung verlangt `command_id`, `status` gleich `accepted` oder
+Die Validierung verlangt `status` gleich `accepted` oder
 `rejected`, `accepted_at_tick >= 0` fuer akzeptierte Ergebnisse und ein nicht
 leeres Rejection-Dictionary mit gueltigem `code` fuer abgelehnte Ergebnisse.
 
@@ -910,7 +918,7 @@ internal_server_error
 Die aktuelle Nachrichtenschicht validiert nur die lokale Nachrichtenform. Sie
 implementiert aktuell nicht:
 
-- Behandlung doppelter `message_id`- oder `command_id`-Werte.
+- Behandlung doppelter `message_id`-Werte.
 - Authentifizierung oder Sender-Ableitung.
 - Ownership-Pruefungen.
 - Match-Phase-Pruefungen ausser einfacher Enum-Validierung in Snapshots.

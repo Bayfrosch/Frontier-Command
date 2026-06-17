@@ -59,17 +59,16 @@ public abstract partial class MessageBase : RefCounted, MessageInterface
 
 public abstract partial class UnitDestinationCommandBase : MessageBase, CommandInterface, QueueableCommandInterface
 {
-    public string command_id = "";
     public string player_id = "";
     public int issued_at_tick = -1;
     public int queue_mode = (int)GameMessages.QueueMode.REPLACE;
     public string[] unit_ids = System.Array.Empty<string>();
     public Vector2 destination = Vector2.Zero;
     public StringName formation = "rectangle";
-    protected GDictionary UnitDestinationPayload() => D(("command_id", command_id), ("issued_at_tick", issued_at_tick), ("queue_mode", queue_mode), ("unit_ids", unit_ids), ("destination", destination), ("formation", formation));
+    protected GDictionary UnitDestinationPayload() => D(("player_id", player_id), ("issued_at_tick", issued_at_tick), ("queue_mode", queue_mode), ("unit_ids", unit_ids), ("destination", destination), ("formation", formation));
     protected void UnitDestinationFromPayload(GDictionary payload)
     {
-        command_id = S(payload, "command_id");
+        player_id = S(payload, "player_id");
         issued_at_tick = I(payload, "issued_at_tick", -1);
         queue_mode = I(payload, "queue_mode", (int)GameMessages.QueueMode.REPLACE);
         unit_ids = PSA(payload, "unit_ids");
@@ -79,7 +78,7 @@ public abstract partial class UnitDestinationCommandBase : MessageBase, CommandI
     public override string[] validate()
     {
         var errors = new List<string>();
-        if (Empty(command_id)) Add(errors, "command_id is required.");
+        if (Empty(player_id)) Add(errors, "player_id is required.");
         if (issued_at_tick < 0) Add(errors, "issued_at_tick cannot be negative.");
         if (!QueueModeValid(queue_mode)) Add(errors, "queue_mode is invalid.");
         if (Empty(unit_ids)) Add(errors, "unit_ids must contain at least one unit.");

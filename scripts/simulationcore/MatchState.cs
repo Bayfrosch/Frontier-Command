@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Godot;
 
@@ -19,6 +20,14 @@ public sealed class SimulationContext
     {
         MatchId = matchId;
 
+        // construction
+        Register<BuildStructureMessage>(HandleBuildStructure);
+
+        // production
+
+        // research
+
+        // units 
         Register<MoveUnitsMessage>(HandleMoveUnit);
     }
     private void Register<TMessage>(Func<TMessage, bool> handler)
@@ -65,6 +74,8 @@ public sealed class SimulationContext
     private readonly Dictionary<System.Type, Func<MessageBase, bool>> _handlers = new();
     /*
     Message handlers for reacting to every pre defined message in Messages.cs
+    Message types get linked in the constructor to their coresponding handler
+    All handlers return true or false regarding wether the message was succesfully parsed
     */
     private bool HandleMoveUnit(MoveUnitsMessage msg)
     {
@@ -89,6 +100,25 @@ public sealed class SimulationContext
         }
 
         return true;
+    }
+    private bool HandleBuildStructure(BuildStructureMessage msg)
+    {
+        if (!_matchState.Players.TryGetValue(msg.player_id, out PlayerState? player))
+            return false;
+        
+        if (player is null) 
+            return false;
+
+        var id = newEntityId(msg.building_type.ToString());
+        BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type);
+
+        player.AddEntity(building);
+        return true;
+    }
+
+    private static string newEntityId(string prefix)
+    {
+        return $"{prefix}-{Guid.NewGuid():N}";
     }
 
     /*
@@ -215,13 +245,20 @@ public sealed class UnitState : EntityState
     }
 }
 
+public enum BuildingType
+{
+    BASIC_GENERATOR,
+}
+
 public sealed class BuildingState : EntityState
 {
-    public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos)
+    public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType buildingType)
         : base(entityId, ownerPlayerId, currentPos)
     {
+        Type = buildingType;
     }
-    public string BuildingType { get; private set; } = "";
+    public int BuildProgression { get; private set; } = 0;
+    public BuildingType Type;
     public int ProductionQueue { get; private set; }
     public int ProductionProgress { get; private set; }
 }

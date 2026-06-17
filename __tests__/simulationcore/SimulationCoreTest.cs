@@ -19,9 +19,8 @@ public class SimulationCoreTest
     {
         var context = new SimulationContext("match-1");
         var msg = new MoveUnitsMessage(
-            p_command_id: "",
             p_player_id: "player-1",
-            p_issued_at_tick: 0,
+            p_issued_at_tick: -1,
             p_unit_ids: new[] { "unit-1" },
             p_destination: new Vector2(1, 2)
         );
@@ -34,7 +33,7 @@ public class SimulationCoreTest
     {
         var context = new SimulationContext("match-1");
         var msg = new StopUnitsMessage(
-            p_command_id: "cmd-1",
+            p_player_id: "player-1",
             p_issued_at_tick: 0,
             p_unit_ids: new[] { "unit-1" }
         );
@@ -48,7 +47,6 @@ public class SimulationCoreTest
         var context = new SimulationContext("match-1");
 
         var msg = new MoveUnitsMessage(
-            p_command_id: "cmd-1",
             p_player_id: "1",
             p_issued_at_tick: 0,
             p_unit_ids: new[] {"unit_1"},
@@ -75,7 +73,7 @@ public class SimulationCoreTest
     {
         var context = new SimulationContext("match-1");
         var player = new PlayerState("player-1");
-        var building = new BuildingState("building-1", "player-1", Vector2.Zero);
+        var building = new BuildingState("building-1", "player-1", Vector2.Zero, BuildingType.BASIC_GENERATOR);
         player.AddEntity(building);
         context.AddPlayer(player);
 
@@ -114,7 +112,6 @@ public class SimulationCoreTest
 
         var destination = new Vector2(30, 40);
         var msg = new MoveUnitsMessage(
-            p_command_id: "cmd-1",
             p_player_id: "player-1",
             p_issued_at_tick: 0,
             p_unit_ids: new[] { "unit-a", "unit-b" },
@@ -131,7 +128,6 @@ public class SimulationCoreTest
     private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
     {
         return new MoveUnitsMessage(
-            p_command_id: "cmd-1",
             p_player_id: playerId,
             p_issued_at_tick: 0,
             p_unit_ids: new[] { unitId },
