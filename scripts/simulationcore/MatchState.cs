@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Castle.Components.DictionaryAdapter.Xml;
 using Godot;
 
 public sealed class SimulationContext
@@ -229,11 +226,21 @@ public sealed class SimulationContext
 
         return true;
     }
-    // TODO:
     private bool HandleCancelProduction(CancelProductionMessage msg)
     {
-        return false;
+        if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building))
+            return false;
+
+        if (building is null)
+            return false;
+
+        if (!building.ProductionQueue.Contains(msg.queue_item_id))
+            return false;
+
+        building.ProductionQueue.Where(x => !x.Equals(msg.queue_item_id));
+        return true;
     }
+    
     // TODO:
     private bool HandleReorderProduction(ReorderProductionMessage msg)
     {
