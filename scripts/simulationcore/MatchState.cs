@@ -321,7 +321,16 @@ public sealed class SimulationContext
     // TODO:
     private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
     {
-        return false;
+        if (!TryGetPlayer(msg.player_id, out var player))
+            return false;
+
+        if (player is null)
+            return false;
+
+        var unitId = newEntityId(msg.unit_definition_id);
+        UnitState newUnit = new UnitState(unitId, msg.player_id, msg.position);
+        player.AddEntity(newUnit);
+        return true;
     }
 
     private static string newEntityId(string prefix)
