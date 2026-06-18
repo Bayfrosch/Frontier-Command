@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class ResyncResponseMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.RESYNC_RESPONSE;
     public GDictionary snapshot = new();
     public ResyncResponseMessage(GDictionary p_snapshot = null)

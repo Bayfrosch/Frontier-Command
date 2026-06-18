@@ -6,9 +6,6 @@ using GArrayDictionary = Godot.Collections.Array<Godot.Collections.Dictionary>;
 [GlobalClass]
 public partial class StateDeltaMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.STATE_DELTA;
     public int from_tick = -1;
     public int to_tick = -1;

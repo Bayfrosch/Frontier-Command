@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class SetPlayerReadyMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.SET_PLAYER_READY;
     public string player_id = "";
     public bool is_ready = false;

@@ -4,9 +4,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class AttackMoveUnitsMessage : UnitDestinationCommandBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface", "CommandInterface", "QueueableCommandInterface"
-    };
     public StringName message_type = GameMessages.ATTACK_MOVE_UNITS;
     public AttackMoveUnitsMessage(string p_player_id = "", int p_issued_at_tick = -1, string[] p_unit_ids = default, Vector2 p_destination = default, int p_queue_mode = (int)GameMessages.QueueMode.REPLACE, StringName p_formation = default)
     {

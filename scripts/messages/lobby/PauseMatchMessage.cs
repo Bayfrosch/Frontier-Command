@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class PauseMatchMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.PAUSE_MATCH;
     public string player_id = "";
     public PauseMatchMessage(string p_player_id = "")

@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class PongMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.PONG;
     public int client_time_unix_ms = -1;
     public int server_time_unix_ms = -1;

@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class CreateMatchMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.CREATE_MATCH;
     public string player_id = "";
     public GDictionary settings = new();

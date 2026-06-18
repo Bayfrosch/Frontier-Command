@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class LeaveMatchMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.LEAVE_MATCH;
     public string player_id = "";
     public LeaveMatchMessage(string p_player_id = "")

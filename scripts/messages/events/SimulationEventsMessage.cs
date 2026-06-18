@@ -6,9 +6,6 @@ using GArrayDictionary = Godot.Collections.Array<Godot.Collections.Dictionary>;
 [GlobalClass]
 public partial class SimulationEventsMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.SIMULATION_EVENTS;
     public int tick = -1;
     public GArrayDictionary events = new();

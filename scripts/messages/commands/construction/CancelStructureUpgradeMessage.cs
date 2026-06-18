@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class CancelStructureUpgradeMessage : MessageBase, CommandInterface
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface", "CommandInterface"
-    };
     public StringName message_type = GameMessages.CANCEL_STRUCTURE_UPGRADE;
     public string player_id = "";
     public int issued_at_tick = -1;

@@ -6,9 +6,6 @@ using GArrayDictionary = Godot.Collections.Array<Godot.Collections.Dictionary>;
 [GlobalClass]
 public partial class StateSnapshotMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.STATE_SNAPSHOT;
     public string match_id = "";
     public int tick = -1;

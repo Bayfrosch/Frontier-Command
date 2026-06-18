@@ -19,6 +19,9 @@ public sealed class SimulationContext
     {
         MatchId = matchId;
 
+        // debugging
+        Register<DebugSpawnUnitsMessage>(HandleDebugSpawnUnit);
+
         // construction
         Register<BuildStructureMessage>(HandleBuildStructure);
         Register<CancelConstructionMessage>(HandleCancelConstruction);
@@ -30,7 +33,6 @@ public sealed class SimulationContext
         // production
         Register<TrainUnitsMessage>(HandleTrainUnits);
         Register<CancelProductionMessage>(HandleCancelProduction);
-        Register<ReorderProductionMessage>(HandleReorderProduction);
         Register<SetRallyPointMessage>(HandleSetRallyPoint);
 
         // research
@@ -125,6 +127,10 @@ public sealed class SimulationContext
             return false;
 
         entity = typedEntity;
+
+        if (typedEntity is null)
+            return false;
+
         return true;
     }
 
@@ -237,19 +243,20 @@ public sealed class SimulationContext
         if (!building.ProductionQueue.Contains(msg.queue_item_id))
             return false;
 
-        building.ProductionQueue.Where(x => !x.Equals(msg.queue_item_id));
+        building.CancelProduction(msg.queue_item_id);
         return true;
     }
     
-    // TODO:
-    private bool HandleReorderProduction(ReorderProductionMessage msg)
-    {
-        return false;
-    }
-    // TODO:
     private bool HandleSetRallyPoint(SetRallyPointMessage msg)
     {
-        return false;
+        foreach (var entityId in msg.producer_entity_ids)
+        {
+            if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var producer))
+                return false;
+
+            producer!.SetRallyPoint(msg.target_position);
+        }
+        return true;
     }
     // TODO:
     private bool HandleStartResearch(StartResearchMessage msg)
@@ -308,6 +315,11 @@ public sealed class SimulationContext
     }
     // TODO:
     private bool HandleGatherResources(GatherResourcesMessage msg)
+    {
+        return false;
+    }
+    // TODO:
+    private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
     {
         return false;
     }
@@ -457,11 +469,21 @@ public sealed class BuildingState : EntityState
         : base(entityId, ownerPlayerId, currentPos)
     {
         Type = buildingType;
+        RallyPoint = new Vector2(currentPos.X + 1, currentPos.Y + 1);
     }
     public int BuildProgression { get; private set; } = 0;
     public BuildingType Type;
     public string[] ProductionQueue { get; private set; } = [];
     public int ProductionProgress { get; private set; }
+    public Vector2 RallyPoint {get; private set; }
+    internal void SetRallyPoint(Vector2 newPos)
+    {
+        RallyPoint = newPos;
+    }
+    internal void CancelProduction(string entityId)
+    {
+        ProductionQueue = ProductionQueue.Where(x => !x.Equals(entityId)).ToArray();
+    }
     internal void QueueProduction(string unitDefinitionId)
     {
         ProductionQueue = ProductionQueue.Append(unitDefinitionId).ToArray();

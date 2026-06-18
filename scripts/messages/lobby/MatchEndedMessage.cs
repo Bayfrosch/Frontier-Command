@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class MatchEndedMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     private static readonly StringName[] VALID_REASONS = {
         "victory_conditions", "surrender", "all_opponents_disconnected", "admin_ended"
     };

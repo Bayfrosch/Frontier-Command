@@ -19,10 +19,6 @@ Gameplay-Befehlsklassen implementieren zusaetzlich das Marker-Interface
 `CommandInterface`. Befehle mit `queue_mode` implementieren ausserdem das
 Marker-Interface `QueueableCommandInterface`.
 
-Die `IMPLEMENTS`-Arrays der Nachrichtenklassen enthalten Interface-Namen fuer
-Runtime-Introspection. Eine GDScript-Interface-Addon-Implementierung gibt es im
-aktuellen Code aber nicht.
-
 ## Serialisierungsregeln
 
 - Nachrichtenklassen serialisieren nach `Godot.Collections.Dictionary`.
@@ -78,7 +74,6 @@ upgrade_structure
 cancel_structure_upgrade
 train_units
 cancel_production
-reorder_production
 set_rally_point
 start_research
 cancel_research
@@ -639,21 +634,6 @@ Die Validierung verlangt `player_id`, einen nicht negativen Tick,
 
 Die Validierung verlangt alle obigen Felder, mit einem nicht negativen Tick.
 
-### REORDER_PRODUCTION
-
-```csharp
-{
-    "player_id": "player-id",
-    "issued_at_tick": 120,
-    "producer_entity_id": "factory-1",
-    "queue_item_id": "queue-item-1",
-    "new_index": 0,
-}
-```
-
-Die Validierung verlangt alle obigen Felder sowie nicht negative Werte fuer
-`issued_at_tick` und `new_index`.
-
 ### SET_RALLY_POINT
 
 ```csharp
@@ -661,30 +641,12 @@ Die Validierung verlangt alle obigen Felder sowie nicht negative Werte fuer
     "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_ids": new string[] { "factory-1" },
-    "target": {
-        "kind": "position",
-        "position": new Vector2(100.0f, 250.0f),
-    },
+    "target_position": new Vector2(100.0f, 250.0f),
 }
 ```
 
-```csharp
-{
-    "player_id": "player-id",
-    "issued_at_tick": 120,
-    "producer_entity_ids": new string[] { "factory-1" },
-    "target": {
-        "kind": "entity",
-        "entity_id": "entity-1",
-    },
-}
-```
-
-`target` darf `null`/Nil sein, um den Rally Point zu loeschen. Die Validierung
-verlangt `player_id`, einen nicht negativen Tick und mindestens eine
-Producer-ID. Wenn target nicht Nil ist, muss es ein Dictionary mit
-`kind = position` und einer Vector2-`position` oder `kind = entity` und nicht
-leerer `entity_id` sein.
+Die Validierung verlangt `player_id`, einen nicht negativen Tick und
+mindestens eine Producer-ID.
 
 ## Forschungs- Und Fortschrittsbefehle
 

@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class ResyncRequestMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     private static readonly StringName[] VALID_REASONS = {
         "missing_delta", "checksum_mismatch", "reconnect"
     };

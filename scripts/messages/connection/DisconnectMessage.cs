@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class DisconnectMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     private static readonly StringName[] VALID_REASONS = {
         "client_quit", "timeout", "kicked", "server_shutdown", "protocol_error"
     };

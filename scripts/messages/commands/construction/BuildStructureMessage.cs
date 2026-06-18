@@ -6,9 +6,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class BuildStructureMessage : MessageBase, CommandInterface, QueueableCommandInterface
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface", "CommandInterface", "QueueableCommandInterface"
-    };
     public StringName message_type = GameMessages.BUILD_STRUCTURE;
     public string player_id = "";
     public int issued_at_tick = -1;

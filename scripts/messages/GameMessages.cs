@@ -3,6 +3,7 @@ using Godot;
 [GlobalClass]
 public partial class GameMessages : RefCounted
 {
+    public static readonly StringName DEBUG_SPAWN_UNIT = "debug_spawn_unit";
     public static readonly StringName CLIENT_HELLO = "client_hello";
     public static readonly StringName SERVER_HELLO = "server_hello";
     public static readonly StringName PING = "ping";
@@ -36,7 +37,6 @@ public partial class GameMessages : RefCounted
     public static readonly StringName CANCEL_STRUCTURE_UPGRADE = "cancel_structure_upgrade";
     public static readonly StringName TRAIN_UNITS = "train_units";
     public static readonly StringName CANCEL_PRODUCTION = "cancel_production";
-    public static readonly StringName REORDER_PRODUCTION = "reorder_production";
     public static readonly StringName SET_RALLY_POINT = "set_rally_point";
     public static readonly StringName START_RESEARCH = "start_research";
     public static readonly StringName CANCEL_RESEARCH = "cancel_research";

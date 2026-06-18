@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class GatherResourcesMessage : MessageBase, CommandInterface, QueueableCommandInterface
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface", "CommandInterface", "QueueableCommandInterface"
-    };
     public StringName message_type = GameMessages.GATHER_RESOURCES;
     public string player_id = "";
     public int issued_at_tick = -1;

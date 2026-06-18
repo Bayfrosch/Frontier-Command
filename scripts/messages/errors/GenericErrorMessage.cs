@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class GenericErrorMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     private static readonly StringName[] ERROR_CODES = {
         "unsupported_protocol_version", "authentication_failed", "permission_denied", "match_not_found", "match_full", "invalid_match_settings", "player_not_ready", "request_timeout", "internal_server_error"
     };

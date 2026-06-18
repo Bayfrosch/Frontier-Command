@@ -5,9 +5,6 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class UpgradeStructureMessage : MessageBase, CommandInterface
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface", "CommandInterface"
-    };
     public StringName message_type = GameMessages.UPGRADE_STRUCTURE;
     public string player_id = "";
     public int issued_at_tick = -1;

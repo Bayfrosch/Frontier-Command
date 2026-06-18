@@ -6,9 +6,6 @@ using GArrayDictionary = Godot.Collections.Array<Godot.Collections.Dictionary>;
 [GlobalClass]
 public partial class LobbyStateMessage : MessageBase
 {
-    public static readonly StringName[] IMPLEMENTS = {
-        "MessageInterface"
-    };
     public StringName message_type = GameMessages.LOBBY_STATE;
     public string lobby_id = "";
     public string host_player_id = "";

@@ -19,10 +19,6 @@ Gameplay command classes also implement the marker interface
 `CommandInterface`. Commands that include a `queue_mode` also implement the
 marker interface `QueueableCommandInterface`.
 
-The `IMPLEMENTS` arrays on message classes contain interface names for runtime
-introspection, but there is no GDScript interface-addon implementation in the
-current code.
-
 ## Serialization Rules
 
 - Message classes serialize to `Godot.Collections.Dictionary`.
@@ -77,7 +73,6 @@ upgrade_structure
 cancel_structure_upgrade
 train_units
 cancel_production
-reorder_production
 set_rally_point
 start_research
 cancel_research
@@ -629,21 +624,6 @@ Validation requires `player_id`, a non-negative tick, `producer_entity_id`,
 
 Validation requires all fields above, with a non-negative tick.
 
-### REORDER_PRODUCTION
-
-```csharp
-{
-    "player_id": "player-id",
-    "issued_at_tick": 120,
-    "producer_entity_id": "factory-1",
-    "queue_item_id": "queue-item-1",
-    "new_index": 0,
-}
-```
-
-Validation requires all fields above, with non-negative `issued_at_tick` and
-`new_index`.
-
 ### SET_RALLY_POINT
 
 ```csharp
@@ -651,29 +631,11 @@ Validation requires all fields above, with non-negative `issued_at_tick` and
     "player_id": "player-id",
     "issued_at_tick": 120,
     "producer_entity_ids": new string[] { "factory-1" },
-    "target": {
-        "kind": "position",
-        "position": new Vector2(100.0f, 250.0f),
-    },
+    "target_position": new Vector2(100.0f, 250.0f),
 }
 ```
 
-```csharp
-{
-    "player_id": "player-id",
-    "issued_at_tick": 120,
-    "producer_entity_ids": new string[] { "factory-1" },
-    "target": {
-        "kind": "entity",
-        "entity_id": "entity-1",
-    },
-}
-```
-
-`target` may be `null`/Nil to clear the rally point. Validation requires a
-non-negative tick and at least one producer id. When target is not
-Nil, it must be a dictionary with `kind = position` and a Vector2 `position`, or
-`kind = entity` and non-empty `entity_id`.
+Validation requires a non-negative tick and at least one producer id.
 
 ## Research And Progression Commands
 
