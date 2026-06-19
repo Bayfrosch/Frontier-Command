@@ -5,513 +5,533 @@ using Godot;
 
 public sealed class SimulationContext
 {
-    public string MatchId { get; }
-    /*
-    The saved state of the match for each lobby
-    can only be edited from SimulationContext, others recieve a readonly
-    */
-    private readonly MatchState _matchState = new MatchState();
-    /*
-    SimulationContext constructor, requires a Match ID
-    connecting all message handlers to their specific message type
-    */
-    public SimulationContext(string matchId)
-    {
-        MatchId = matchId;
+	private const int CONSTRUCTION_ADVANCE = 10;
+	public string MatchId { get; }
+	/*
+	The saved state of the match for each lobby
+	can only be edited from SimulationContext, others recieve a readonly
+	*/
+	private readonly MatchState _matchState = new MatchState();
+	/*
+	SimulationContext constructor, requires a Match ID
+	connecting all message handlers to their specific message type
+	*/
+	public SimulationContext(string matchId)
+	{
+		MatchId = matchId;
 
-        // debugging
-        Register<DebugSpawnUnitsMessage>(HandleDebugSpawnUnit);
+		// debugging
+		Register<DebugSpawnUnitsMessage>(HandleDebugSpawnUnit);
 
-        // construction
-        Register<BuildStructureMessage>(HandleBuildStructure);
-        Register<CancelConstructionMessage>(HandleCancelConstruction);
-        Register<RepairTargetMessage>(HandleRepairTarget);
-        Register<CaptureTargetMessage>(HandleCaptureTarget);
-        Register<UpgradeStructureMessage>(HandleUpgradeStructure);
-        Register<CancelStructureUpgradeMessage>(HandleCancelStructureUpgrade);
+		// construction
+		Register<BuildStructureMessage>(HandleBuildStructure);
+		Register<CancelConstructionMessage>(HandleCancelConstruction);
+		Register<RepairTargetMessage>(HandleRepairTarget);
+		Register<CaptureTargetMessage>(HandleCaptureTarget);
+		Register<UpgradeStructureMessage>(HandleUpgradeStructure);
+		Register<CancelStructureUpgradeMessage>(HandleCancelStructureUpgrade);
 
-        // production
-        Register<TrainUnitsMessage>(HandleTrainUnits);
-        Register<CancelProductionMessage>(HandleCancelProduction);
-        Register<SetRallyPointMessage>(HandleSetRallyPoint);
+		// production
+		Register<TrainUnitsMessage>(HandleTrainUnits);
+		Register<CancelProductionMessage>(HandleCancelProduction);
+		Register<SetRallyPointMessage>(HandleSetRallyPoint);
 
-        // research
-        Register<StartResearchMessage>(HandleStartResearch);
-        Register<CancelResearchMessage>(HandleCancelResearch);
-        Register<ChooseCapitalUpgradeMessage>(HandleChooseCapitalUpgrade);
-        Register<SpecializeOutpostMessage>(HandleSpecializeOutpost);
+		// research
+		Register<StartResearchMessage>(HandleStartResearch);
+		Register<CancelResearchMessage>(HandleCancelResearch);
+		Register<ChooseCapitalUpgradeMessage>(HandleChooseCapitalUpgrade);
+		Register<SpecializeOutpostMessage>(HandleSpecializeOutpost);
 
-        // units 
-        Register<MoveUnitsMessage>(HandleMoveUnit);
-        Register<AttackMoveUnitsMessage>(HandleAttackMoveUnits);
-        Register<AttackTargetMessage>(HandleAttackTarget);
-        Register<StopUnitsMessage>(HandleStopUnits);
-        Register<HoldPositionMessage>(HandleHoldPosition);
-        Register<PatrolUnitsMessage>(HandlePatrolUnits);
-        Register<SetUnitStanceMessage>(HandleSetUnitStance);
-        Register<UseAbilityMessage>(HandleUseAbility);
-        Register<GatherResourcesMessage>(HandleGatherResources);
-    }
-    private void Register<TMessage>(Func<TMessage, bool> handler)
-        where TMessage : MessageBase
-    {
-        _handlers[typeof(TMessage)] = msg => handler((TMessage)msg);
-    }
-    /*
-    This funtion is for accessing information from the context provider
-    Provides a read only Object to get information
-    */
-    public IMatchStateView get()
-    {
-        return _matchState;
-    }
-    /*
-    This function is for accessing what is stored in context provider
-    can be accessed with contextProvider.push(...) to store information
-    msg Dictionary should consist of pre Defined messages (in scripts/messages)
-     */
-    public bool push(MessageBase msg)
-    {
-        if (msg is not CommandInterface)
-            return false;
+		// units 
+		Register<MoveUnitsMessage>(HandleMoveUnit);
+		Register<AttackMoveUnitsMessage>(HandleAttackMoveUnits);
+		Register<AttackTargetMessage>(HandleAttackTarget);
+		Register<StopUnitsMessage>(HandleStopUnits);
+		Register<HoldPositionMessage>(HandleHoldPosition);
+		Register<PatrolUnitsMessage>(HandlePatrolUnits);
+		Register<SetUnitStanceMessage>(HandleSetUnitStance);
+		Register<UseAbilityMessage>(HandleUseAbility);
+		Register<GatherResourcesMessage>(HandleGatherResources);
+	}
+	private void Register<TMessage>(Func<TMessage, bool> handler)
+		where TMessage : MessageBase
+	{
+		_handlers[typeof(TMessage)] = msg => handler((TMessage)msg);
+	}
+	public void AdvanceTick()
+	{
+		_matchState.IncrementTick();
 
-        var errors = msg.validate();
-        
-        if (errors.Length > 0) {
-            foreach (var err in errors)
-            {
-                Console.WriteLine(err);    
-            }
-            return false;
-        }
+		foreach (var player in _matchState.Players.Values)
+		{
+			foreach (var entity in player.Entities.Values)
+			{
+				if (entity is BuildingState building)
+				{
+					building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
+				}
+			}
+		}
+	}
+	/*
+	This funtion is for accessing information from the context provider
+	Provides a read only Object to get information
+	*/
+	public IMatchStateView get()
+	{
+		return _matchState;
+	}
+	/*
+	This function is for accessing what is stored in context provider
+	can be accessed with contextProvider.push(...) to store information
+	msg Dictionary should consist of pre Defined messages (in scripts/messages)
+	 */
+	public bool Push(MessageBase msg)
+	{
+		if (msg is not CommandInterface)
+			return false;
 
-        if (!_handlers.TryGetValue(msg.GetType(), out var handler))
-            return false;
+		var errors = msg.validate();
+		
+		if (errors.Length > 0) {
+			foreach (var err in errors)
+			{
+				Console.WriteLine(err);    
+			}
+			return false;
+		}
 
-        return handler(msg);
-    }
-    /*
-    Command Handler for directing each message type to the correct handler fuction
-    */
-    private readonly Dictionary<System.Type, Func<MessageBase, bool>> _handlers = new();
-    private bool TryGetPlayer(string playerId, out PlayerState? player)
-    {
-        player = null;
+		if (!_handlers.TryGetValue(msg.GetType(), out var handler))
+			return false;
 
-        if (string.IsNullOrEmpty(playerId))
-            return false;
+		return handler(msg);
+	}
+	/*
+	Command Handler for directing each message type to the correct handler fuction
+	*/
+	private readonly Dictionary<System.Type, Func<MessageBase, bool>> _handlers = new();
+	private bool TryGetPlayer(string playerId, out PlayerState? player)
+	{
+		player = null;
 
-        return _matchState.Players.TryGetValue(playerId, out player);
-    }
-    private bool TryGetPlayerEntity<T>(
-        string playerId,
-        string entityId,
-        out T? entity
-    ) where T : EntityState
-    {
-        entity = null;
+		if (string.IsNullOrEmpty(playerId))
+			return false;
 
-        if (string.IsNullOrEmpty(playerId))
-            return false;
+		return _matchState.Players.TryGetValue(playerId, out player);
+	}
+	private bool TryGetPlayerEntity<T>(
+		string playerId,
+		string entityId,
+		out T? entity
+	) where T : EntityState
+	{
+		entity = null;
 
-        if (!TryGetPlayer(playerId, out var player))
-            return false;
+		if (string.IsNullOrEmpty(playerId))
+			return false;
 
-        if (player is null)
-            return false;
+		if (!TryGetPlayer(playerId, out var player))
+			return false;
 
-        if (!player.Entities.TryGetValue(entityId, out var rawEntity))
-            return false;
+		if (player is null)
+			return false;
 
-        if (rawEntity is not T typedEntity)
-            return false;
+		if (!player.Entities.TryGetValue(entityId, out var rawEntity))
+			return false;
 
-        entity = typedEntity;
+		if (rawEntity is not T typedEntity)
+			return false;
 
-        if (typedEntity is null)
-            return false;
+		entity = typedEntity;
 
-        return true;
-    }
+		if (typedEntity is null)
+			return false;
 
-    private bool TryGetOwnedUnits(
-        string playerId,
-        string[] unitIds,
-        out List<UnitState>? units
-    )
-    {
-        units = new List<UnitState>();
+		return true;
+	}
 
-        foreach (var unitId in unitIds)
-        {
-            if(!TryGetPlayerEntity<UnitState>(playerId, unitId, out var unit))
-            {
-                units.Clear();
-                return false;
-            }
-            if (unit is null) 
-                return false;
-            units.Add(unit);   
-        }
-        return true;
-    }
-    /*
-    Message handlers for reacting to every pre defined message in Messages.cs
-    Message types get linked in the constructor to their coresponding handler
-    All handlers return true or false regarding wether the message was succesfully parsed
-    */
-    private bool HandleMoveUnit(MoveUnitsMessage msg)
-    {
-        if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
-            return false;
+	private bool TryGetOwnedUnits(
+		string playerId,
+		string[] unitIds,
+		out List<UnitState>? units
+	)
+	{
+		units = new List<UnitState>();
 
-        foreach (var unit in units)
-            unit.SetMoveOrder(msg.destination);
+		foreach (var unitId in unitIds)
+		{
+			if(!TryGetPlayerEntity<UnitState>(playerId, unitId, out var unit))
+			{
+				units.Clear();
+				return false;
+			}
+			if (unit is null) 
+				return false;
+			units.Add(unit);   
+		}
+		return true;
+	}
+	/*
+	Message handlers for reacting to every pre defined message in Messages.cs
+	Message types get linked in the constructor to their coresponding handler
+	All handlers return true or false regarding wether the message was succesfully parsed
+	*/
+	private bool HandleMoveUnit(MoveUnitsMessage msg)
+	{
+		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
+			return false;
 
-        return true;
-    }
-    private bool HandleBuildStructure(BuildStructureMessage msg)
-    {
-        if (!TryGetPlayer(msg.player_id, out var player) || player is null)
-            return false;
+		foreach (var unit in units)
+			unit.SetMoveOrder(msg.destination);
 
-        var id = newEntityId(msg.building_type.ToString());
-        BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type);
+		return true;
+	}
+	private bool HandleBuildStructure(BuildStructureMessage msg)
+	{
+		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
+			return false;
 
-        player.AddEntity(building);
-        return true;
-    }
-    private bool HandleCancelConstruction(CancelConstructionMessage msg)
-    {
-        if (!TryGetPlayer(msg.player_id, out var player) || player is null)
-            return false;
+		var id = NewEntityId(msg.building_type.ToString());
+		BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type);
 
-        if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.construction_site_id, out var building) || building is null)
-            return false;
-        
-        if (building.BuildProgression >= 100)
-            return false;
+		player.AddEntity(building);
+		return true;
+	}
+	private bool HandleCancelConstruction(CancelConstructionMessage msg)
+	{
+		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
+			return false;
 
-        return player.RemoveEntity(msg.construction_site_id);
-    }
-    private bool HandleRepairTarget(RepairTargetMessage msg)
-    {
-        if (!TryGetOwnedUnits(msg.player_id, msg.repair_unit_ids, out _))
-            return false;
+		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.construction_site_id, out var building) || building is null)
+			return false;
+		
+		if (building.BuildProgression >= 100)
+			return false;
 
-        if (!TryGetPlayerEntity<EntityState>(msg.player_id, msg.target_entity_id, out var entity) || entity is null)
-            return false;
+		return player.RemoveEntity(msg.construction_site_id);
+	}
+	private bool HandleRepairTarget(RepairTargetMessage msg)
+	{
+		if (!TryGetOwnedUnits(msg.player_id, msg.repair_unit_ids, out _))
+			return false;
 
-        if (entity.Health == entity.MaxHealth)
-            return false;
+		if (!TryGetPlayerEntity<EntityState>(msg.player_id, msg.target_entity_id, out var entity) || entity is null)
+			return false;
 
-        return entity.GettingRepaired = true;
-    }
-    // TODO:
-    private bool HandleCaptureTarget(CaptureTargetMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleUpgradeStructure(UpgradeStructureMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleCancelStructureUpgrade(CancelStructureUpgradeMessage msg)
-    {
-        return false;
-    }
-    private bool HandleTrainUnits(TrainUnitsMessage msg)
-    {
-        if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building) || building is null)
-            return false;
+		if (entity.Health == entity.MaxHealth)
+			return false;
 
-        for (var i = 0; i < msg.quantity; i++)
-            building.QueueProduction(msg.unit_definition_id);
+		return entity.GettingRepaired = true;
+	}
+	// TODO:
+	private bool HandleCaptureTarget(CaptureTargetMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleUpgradeStructure(UpgradeStructureMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleCancelStructureUpgrade(CancelStructureUpgradeMessage msg)
+	{
+		return false;
+	}
+	private bool HandleTrainUnits(TrainUnitsMessage msg)
+	{
+		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building) || building is null)
+			return false;
 
-        return true;
-    }
-    private bool HandleCancelProduction(CancelProductionMessage msg)
-    {
-        if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building))
-            return false;
+		for (var i = 0; i < msg.quantity; i++)
+			building.QueueProduction(msg.unit_definition_id);
 
-        if (building is null)
-            return false;
+		return true;
+	}
+	private bool HandleCancelProduction(CancelProductionMessage msg)
+	{
+		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building))
+			return false;
 
-        if (!building.ProductionQueue.Contains(msg.queue_item_id))
-            return false;
+		if (building is null)
+			return false;
 
-        building.CancelProduction(msg.queue_item_id);
-        return true;
-    }
-    
-    private bool HandleSetRallyPoint(SetRallyPointMessage msg)
-    {
-        foreach (var entityId in msg.producer_entity_ids)
-        {
-            if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var producer))
-                return false;
+		if (!building.ProductionQueue.Contains(msg.queue_item_id))
+			return false;
 
-            producer!.SetRallyPoint(msg.target_position);
-        }
-        return true;
-    }
-    // TODO:
-    private bool HandleStartResearch(StartResearchMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleCancelResearch(CancelResearchMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleChooseCapitalUpgrade(ChooseCapitalUpgradeMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleSpecializeOutpost(SpecializeOutpostMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleAttackMoveUnits(AttackMoveUnitsMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleAttackTarget(AttackTargetMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleStopUnits(StopUnitsMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleHoldPosition(HoldPositionMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandlePatrolUnits(PatrolUnitsMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleSetUnitStance(SetUnitStanceMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleUseAbility(UseAbilityMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleGatherResources(GatherResourcesMessage msg)
-    {
-        return false;
-    }
-    // TODO:
-    private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
-    {
-        if (!TryGetPlayer(msg.player_id, out var player))
-            return false;
+		building.CancelProduction(msg.queue_item_id);
+		return true;
+	}
+	
+	private bool HandleSetRallyPoint(SetRallyPointMessage msg)
+	{
+		foreach (var entityId in msg.producer_entity_ids)
+		{
+			if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var producer))
+				return false;
 
-        if (player is null)
-            return false;
+			producer!.SetRallyPoint(msg.target_position);
+		}
+		return true;
+	}
+	// TODO:
+	private bool HandleStartResearch(StartResearchMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleCancelResearch(CancelResearchMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleChooseCapitalUpgrade(ChooseCapitalUpgradeMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleSpecializeOutpost(SpecializeOutpostMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleAttackMoveUnits(AttackMoveUnitsMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleAttackTarget(AttackTargetMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleStopUnits(StopUnitsMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleHoldPosition(HoldPositionMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandlePatrolUnits(PatrolUnitsMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleSetUnitStance(SetUnitStanceMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleUseAbility(UseAbilityMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleGatherResources(GatherResourcesMessage msg)
+	{
+		return false;
+	}
+	// TODO:
+	private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
+	{
+		if (!TryGetPlayer(msg.player_id, out var player))
+			return false;
 
-        var unitId = newEntityId(msg.unit_definition_id);
-        UnitState newUnit = new UnitState(unitId, msg.player_id, msg.position);
-        player.AddEntity(newUnit);
-        return true;
-    }
+		if (player is null)
+			return false;
 
-    private static string newEntityId(string prefix)
-    {
-        return $"{prefix}-{Guid.NewGuid():N}";
-    }
+		var unitId = NewEntityId(msg.unit_definition_id);
+		UnitState newUnit = new UnitState(unitId, msg.player_id, msg.position);
+		player.AddEntity(newUnit);
+		return true;
+	}
 
-    /*
-    TODO: Setup Method which can later be replaced by a message handler
-    */
-    internal void AddPlayer(PlayerState player)
-    {
-        _matchState.AddPlayer(player);
-    }
+	private static string NewEntityId(string prefix)
+	{
+		return $"{prefix}-{Guid.NewGuid():N}";
+	}
+
+	/*
+	TODO: Setup Method which can later be replaced by a message handler
+	*/
+	internal void AddPlayer(PlayerState player)
+	{
+		_matchState.AddPlayer(player);
+	}
 }
 
 public interface IMatchStateView
 {
-    int Tick { get; }
-    IReadOnlyDictionary<string, PlayerState> Players { get; }
+	int Tick { get; }
+	IReadOnlyDictionary<string, PlayerState> Players { get; }
 }
 
 public sealed class MatchState : IMatchStateView
 {
-    public int Tick { get; private set; }
-    internal void IncrementTick()
-    {
-        Tick++;
-    }
-    public VictoryState VictoryState { get; private set; } = new();
-    /*
-    _players is the private editable version of the Dictionary
-    Players is the public version which cannot be edited but only read
-    */
-    private readonly Dictionary<string, PlayerState> _players = new(); 
-    public IReadOnlyDictionary<string, PlayerState> Players => _players;
-    internal void AddPlayer(PlayerState player)
-    {
-        _players[player.PlayerId] = player;
-    }
+	public int Tick { get; private set; }
+	internal void IncrementTick()
+	{
+		Tick++;
+	}
+	public VictoryState VictoryState { get; private set; } = new();
+	/*
+	_players is the private editable version of the Dictionary
+	Players is the public version which cannot be edited but only read
+	*/
+	private readonly Dictionary<string, PlayerState> _players = new(); 
+	public IReadOnlyDictionary<string, PlayerState> Players => _players;
+	internal void AddPlayer(PlayerState player)
+	{
+		_players[player.PlayerId] = player;
+	}
 }
 
 public sealed class VictoryState
 {
-    public string WinningPlayerId { get; private set; } = "";
-    public string VictoryReason { get; private set; } = "";
+	public string WinningPlayerId { get; private set; } = "";
+	public string VictoryReason { get; private set; } = "";
 }
 
 public sealed class PlayerState
 {
-    public PlayerState(string playerId)
-    {
-        PlayerId = playerId;
-    }
-    public string PlayerId { get; private set; } = "";
-    /*
-    _entities is the private editable version of the Dictionary
-    Entities is the public version which cannot be edited but only read
-    */
-    private readonly Dictionary<string, EntityState> _entities = new();
-    public IReadOnlyDictionary<string, EntityState> Entities => _entities;
-    internal void AddEntity(EntityState entity)
-    {
-        _entities[entity.EntityId] = entity;
-    }
-    internal bool RemoveEntity(string id)
-    {
-        return _entities.Remove(id);
-    }
-    /*
-    _research is the private editable version of the Dictionary
-    Research is the public version which cannot be edited but only read
-    */
-    private readonly Dictionary<string, bool> _research = new();
-    public IReadOnlyDictionary<string, bool> Research => _research;
-    internal void AddResearch(string research)
-    {
-        _research[research] = true;
-    }
-    public int Materials { get; private set; }
-    public int EnergyProduced { get; private set; }
-    public int EnergyConsumed { get; private set; }
+	public PlayerState(string playerId)
+	{
+		PlayerId = playerId;
+	}
+	public string PlayerId { get; private set; } = "";
+	/*
+	_entities is the private editable version of the Dictionary
+	Entities is the public version which cannot be edited but only read
+	*/
+	private readonly Dictionary<string, EntityState> _entities = new();
+	public IReadOnlyDictionary<string, EntityState> Entities => _entities;
+	internal void AddEntity(EntityState entity)
+	{
+		_entities[entity.EntityId] = entity;
+	}
+	internal bool RemoveEntity(string id)
+	{
+		return _entities.Remove(id);
+	}
+	/*
+	_research is the private editable version of the Dictionary
+	Research is the public version which cannot be edited but only read
+	*/
+	private readonly Dictionary<string, bool> _research = new();
+	public IReadOnlyDictionary<string, bool> Research => _research;
+	internal void AddResearch(string research)
+	{
+		_research[research] = true;
+	}
+	public int Materials { get; private set; }
+	public int EnergyProduced { get; private set; }
+	public int EnergyConsumed { get; private set; }
 }
 
 public abstract class EntityState
 {
-    protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos)
-    {
-        EntityId = entityId;
-        OwnerPlayerId = ownerPlayerId;
-        CurrentPosition = currentPos;
-    }
-    public string EntityId { get; private set; } = "";
-    public string? OwnerPlayerId { get; private set; }
-    public Vector2 CurrentPosition { get; protected set; }
-    public int Health { get; private set; }
-    public int MaxHealth { get; private set; }
-    public bool GettingRepaired = false;
+	protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos)
+	{
+		EntityId = entityId;
+		OwnerPlayerId = ownerPlayerId;
+		CurrentPosition = currentPos;
+	}
+	public string EntityId { get; private set; } = "";
+	public string? OwnerPlayerId { get; private set; }
+	public Vector2 CurrentPosition { get; protected set; }
+	public int Health { get; private set; }
+	public int MaxHealth { get; private set; }
+	public bool GettingRepaired = false;
 }
 
 public sealed class UnitState : EntityState
 {
-    public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos)
-        : base(entityId, ownerPlayerId, currentPos)
-    {
-    }
-    public string UnitType { get; private set; } = "";
-    public Vector2 TargetPosition { get; private set; }
-    public bool HasMoveOrder { get; private set; }
-    public int AttackDamage { get; private set; }
-    public float AttackRange { get; private set; }
-    public float MovementSpeed { get; private set; }
-    
-    internal void SetMoveOrder(Vector2 targetPosition)
-    {
-        TargetPosition = targetPosition;
-        HasMoveOrder = true;
-    }
-    internal void AdvanceMovement(float deltaSeconds)
-    {
-        if(!HasMoveOrder)
-            return;
+	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos)
+		: base(entityId, ownerPlayerId, currentPos)
+	{
+	}
+	public string UnitType { get; private set; } = "";
+	public Vector2 TargetPosition { get; private set; }
+	public bool HasMoveOrder { get; private set; }
+	public int AttackDamage { get; private set; }
+	public float AttackRange { get; private set; }
+	public float MovementSpeed { get; private set; }
+	
+	internal void SetMoveOrder(Vector2 targetPosition)
+	{
+		TargetPosition = targetPosition;
+		HasMoveOrder = true;
+	}
+	internal void AdvanceMovement(float deltaSeconds)
+	{
+		if(!HasMoveOrder)
+			return;
 
-        Vector2 direction = TargetPosition - CurrentPosition;
-        float distance = direction.Length();
+		Vector2 direction = TargetPosition - CurrentPosition;
+		float distance = direction.Length();
 
-        if (distance <= 2.0f)
-        {
-            HasMoveOrder = false;
-            return;
-        }
+		if (distance <= 2.0f)
+		{
+			HasMoveOrder = false;
+			return;
+		}
 
-        CurrentPosition += direction.Normalized() * MovementSpeed * deltaSeconds;
-    }
+		CurrentPosition += direction.Normalized() * MovementSpeed * deltaSeconds;
+	}
 }
 
 public enum BuildingType
 {
-    BASIC_GENERATOR,
+	BASIC_GENERATOR,
 }
 
 public sealed class BuildingState : EntityState
 {
-    public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType buildingType)
-        : base(entityId, ownerPlayerId, currentPos)
-    {
-        Type = buildingType;
-        RallyPoint = new Vector2(currentPos.X + 1, currentPos.Y + 1);
-    }
-    public int BuildProgression { get; private set; } = 0;
-    public BuildingType Type;
-    public string[] ProductionQueue { get; private set; } = [];
-    public int ProductionProgress { get; private set; }
-    public Vector2 RallyPoint {get; private set; }
-    internal void SetRallyPoint(Vector2 newPos)
-    {
-        RallyPoint = newPos;
-    }
-    internal void CancelProduction(string entityId)
-    {
-        ProductionQueue = ProductionQueue.Where(x => !x.Equals(entityId)).ToArray();
-    }
-    internal void QueueProduction(string unitDefinitionId)
-    {
-        ProductionQueue = ProductionQueue.Append(unitDefinitionId).ToArray();
-    }
+	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType buildingType)
+		: base(entityId, ownerPlayerId, currentPos)
+	{
+		Type = buildingType;
+		RallyPoint = new Vector2(currentPos.X + 1, currentPos.Y + 1);
+	}
+	public int BuildProgression { get; private set; } = 0;
+	internal void AdvanceConstruction(int amount)
+	{
+		BuildProgression = Math.Min(100, BuildProgression + amount);
+	}
+	public BuildingType Type;
+	public string[] ProductionQueue { get; private set; } = [];
+	public int ProductionProgress { get; private set; }
+	public Vector2 RallyPoint {get; private set; }
+	internal void SetRallyPoint(Vector2 newPos)
+	{
+		RallyPoint = newPos;
+	}
+	internal void CancelProduction(string entityId)
+	{
+		ProductionQueue = ProductionQueue.Where(x => !x.Equals(entityId)).ToArray();
+	}
+	internal void QueueProduction(string unitDefinitionId)
+	{
+		ProductionQueue = ProductionQueue.Append(unitDefinitionId).ToArray();
+	}
 }
 
 public sealed class OutpostState : EntityState
 {
-    public OutpostState(string entityId, string ownerPlayerId, Vector2 currentPos)
-        : base(entityId, ownerPlayerId, currentPos)
-    {
-    }
-    public string OutpostSpecialization { get; private set; } = "";
+	public OutpostState(string entityId, string ownerPlayerId, Vector2 currentPos)
+		: base(entityId, ownerPlayerId, currentPos)
+	{
+	}
+	public string OutpostSpecialization { get; private set; } = "";
 }
 
 public sealed class ResourceFieldState : EntityState
 {
-    public ResourceFieldState(string entityId, string ownerPlayerId, Vector2 currentPos)
-        : base(entityId, ownerPlayerId, currentPos)
-    {
-    }
+	public ResourceFieldState(string entityId, string ownerPlayerId, Vector2 currentPos)
+		: base(entityId, ownerPlayerId, currentPos)
+	{
+	}
 }

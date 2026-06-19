@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://cvhwaiobgyeik"]
+
+[ext_resource type="Script" uid="uid://cxl1u640k8unh" path="res://scripts/client/TestBuilding.cs" id="1_n8bkc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n8bkc"]
+bg_color = Color(0, 0.59552544, 0.08755032, 1)
+
+[node name="Building" type="Node2D" unique_id=989638719]
+script = ExtResource("1_n8bkc")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=359346199]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=1852751780]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "B"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="BodyRender" unique_id=233179202]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -19.0
+offset_top = -6.0
+offset_right = 19.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_n8bkc")
+show_percentage = false

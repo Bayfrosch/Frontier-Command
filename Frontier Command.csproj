@@ -1,12 +1,11 @@
 <Project Sdk="Godot.NET.Sdk/4.6.3">
+  <ItemGroup>
+    <PackageReference Include="gdUnit4.api" Version="5.0.0" />
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>FrontierCommand</RootNamespace>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="gdUnit4.api" Version="5.0.0" />
-  </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@ public partial class TimeTickSystem : Node
 
     private double _accumulator;
     private int _currentTick;
+    public int CurrentTick => _currentTick;
 
     public override void _Process(double delta)
     {
