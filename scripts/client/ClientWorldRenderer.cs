@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class ClientWorldRenderer : Node
 {
@@ -21,18 +22,36 @@ public partial class ClientWorldRenderer : Node
 		simulation.StateChanged += SyncFromState;
 	}
 
+	/*
+	Synchronizes simulated EntityStates with rendered entities
+	Spawns and removes buildings according to the given list of existing entities
+	Cannot change actual values, can only render
+	*/
 	private void SyncFromState()
 	{
 		var state = simulation.GetState();
+		var existingBuildingIds = new HashSet<string>();
 
+		// Build
 		foreach (var player in state.Players.Values)
 		{
 			foreach (var entity in player.Entities.Values)
 			{
 				if (entity is BuildingState buildingState)
 				{
+					existingBuildingIds.Add(buildingState.EntityId);
 					SyncBuilding(buildingState);
 				}
+			}
+		}
+
+		// Remove
+		foreach (var entityId in buildingsById.Keys.ToArray())
+		{
+			if (!existingBuildingIds.Contains(entityId))
+			{
+				buildingsById[entityId].QueueFree();
+				buildingsById.Remove(entityId);
 			}
 		}
 	}

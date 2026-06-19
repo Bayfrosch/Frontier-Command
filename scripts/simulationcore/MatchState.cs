@@ -5,7 +5,7 @@ using Godot;
 
 public sealed class SimulationContext
 {
-	private const int CONSTRUCTION_ADVANCE = 10;
+	private const int CONSTRUCTION_ADVANCE = 5;
 	public string MatchId { get; }
 	/*
 	The saved state of the match for each lobby
@@ -58,6 +58,10 @@ public sealed class SimulationContext
 	{
 		_handlers[typeof(TMessage)] = msg => handler((TMessage)msg);
 	}
+	/*
+	Processes a Tick by going through all entities
+	Advances BuildingState construction by set constant
+	*/
 	public void AdvanceTick()
 	{
 		_matchState.IncrementTick();
@@ -110,6 +114,10 @@ public sealed class SimulationContext
 	Command Handler for directing each message type to the correct handler fuction
 	*/
 	private readonly Dictionary<System.Type, Func<MessageBase, bool>> _handlers = new();
+	/*
+	TryGetPlayer gets a playerId as string and gives a PlayerState if found or null
+	Returns true if opperation had success and false otherwise
+	*/
 	private bool TryGetPlayer(string playerId, out PlayerState? player)
 	{
 		player = null;
@@ -119,6 +127,11 @@ public sealed class SimulationContext
 
 		return _matchState.Players.TryGetValue(playerId, out player);
 	}
+	/*
+	TryGetPlayerEntity gets a generic which is an EntityState
+	It searches for the specific EntityState of the given playerId
+	returns true if opperation had success and false otherwise
+	*/
 	private bool TryGetPlayerEntity<T>(
 		string playerId,
 		string entityId,

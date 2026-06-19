@@ -1,6 +1,12 @@
 using Godot;
 using System;
 
+/*
+Simulates local game
+Emits a Signal on every change with every Tick
+Can Push messages to the SimulationCore and therefore change values
+This makes it the connection between client and simulation
+*/
 public partial class LocalSimulationNode : Node
 {
     [Signal]

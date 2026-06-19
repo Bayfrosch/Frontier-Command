@@ -1,6 +1,9 @@
 using Godot;
 using System;
 
+/*
+Entity object used in Client to render entities
+*/
 public interface ClientEntity
 {
     string EntityId {get; }

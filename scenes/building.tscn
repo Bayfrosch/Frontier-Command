@@ -5,6 +5,9 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n8bkc"]
 bg_color = Color(0, 0.59552544, 0.08755032, 1)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n8bkc"]
+size = Vector2(40, 40)
+
 [node name="Building" type="Node2D" unique_id=989638719]
 script = ExtResource("1_n8bkc")
 
@@ -45,3 +48,10 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/fill = SubResource("StyleBoxFlat_n8bkc")
 show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=203866379]
+position = Vector2(19, 20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=374974786]
+position = Vector2(1, 0)
+shape = SubResource("RectangleShape2D_n8bkc")
