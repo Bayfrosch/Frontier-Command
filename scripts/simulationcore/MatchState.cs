@@ -356,8 +356,8 @@ public sealed class SimulationContext
 		if (player is null)
 			return false;
 
-		var unitId = NewEntityId(msg.unit_definition_id);
-		UnitState newUnit = new UnitState(unitId, msg.player_id, msg.position);
+		var unitId = NewEntityId(msg.unit_type.ToString());
+		UnitState newUnit = new UnitState(unitId, msg.player_id, msg.position, msg.unit_type);
 		player.AddEntity(newUnit);
 		return true;
 	}
@@ -462,11 +462,12 @@ public abstract class EntityState
 
 public sealed class UnitState : EntityState
 {
-	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos)
+	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, UnitType unitType = UnitType.BASIC_INFANTRY)
 		: base(entityId, ownerPlayerId, currentPos)
 	{
+		Type = unitType;
 	}
-	public string UnitType { get; private set; } = "";
+	public UnitType Type { get; private set; }
 	public Vector2 TargetPosition { get; private set; }
 	public bool HasMoveOrder { get; private set; }
 	public int AttackDamage { get; private set; }
@@ -488,6 +489,7 @@ public sealed class UnitState : EntityState
 
 		if (distance <= 2.0f)
 		{
+			TargetPosition = Vector2.Zero;
 			HasMoveOrder = false;
 			return;
 		}
@@ -499,6 +501,11 @@ public sealed class UnitState : EntityState
 public enum BuildingType
 {
 	BASIC_GENERATOR,
+}
+
+public enum UnitType
+{
+	BASIC_INFANTRY,
 }
 
 public sealed class BuildingState : EntityState

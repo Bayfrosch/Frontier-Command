@@ -5,10 +5,16 @@ using System.Linq;
 
 public partial class ClientWorldRenderer : Node
 {
-	[Export] public PackedScene BuildingScene { get; set; } = null!;
+	// Building Scenes
+	public PackedScene TestBuildingScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/building.tscn");
+	public PackedScene BasicGeneratorScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/building.tscn");
+
+	// Unit Scenes
+	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
 
 	private LocalSimulationNode simulation = null!;
-	private readonly Dictionary<string, TestBuilding> buildingsById = new();
+	private readonly Dictionary<string, ClientBuilding> buildingsById = new();
+	private readonly Dictionary<string, ClientUnit> unitsById = new();
 
 	public override void _Ready()
 	{
@@ -31,6 +37,7 @@ public partial class ClientWorldRenderer : Node
 	{
 		var state = simulation.GetState();
 		var existingBuildingIds = new HashSet<string>();
+		var existingUnitIds = new HashSet<string>();
 
 		// Build
 		foreach (var player in state.Players.Values)
@@ -41,7 +48,11 @@ public partial class ClientWorldRenderer : Node
 				{
 					existingBuildingIds.Add(buildingState.EntityId);
 					SyncBuilding(buildingState);
-				}
+				} else if (entity is UnitState unitState)
+				{
+					existingUnitIds.Add(unitState.EntityId);
+					SyncUnit(unitState);
+				}	
 			}
 		}
 
@@ -56,15 +67,47 @@ public partial class ClientWorldRenderer : Node
 		}
 	}
 
+	private PackedScene GetBuildingScene(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.BASIC_GENERATOR => BasicGeneratorScene,
+			_ => TestBuildingScene
+		};
+	}
+
+	private PackedScene GetUnitScene(UnitType type)
+	{
+		return type switch
+		{
+			UnitType.BASIC_INFANTRY => BasicInfantryScene,
+			_ => BasicInfantryScene
+		};
+	}
+
 	private void SyncBuilding(BuildingState buildingState)
 	{
 		if (!buildingsById.TryGetValue(buildingState.EntityId, out var building))
 		{
-			building = BuildingScene.Instantiate<TestBuilding>();
+			var scene = GetBuildingScene(buildingState.Type);
+			building = scene.Instantiate<ClientBuilding>();
 			AddChild(building);
 			buildingsById[buildingState.EntityId] = building;
 		}
 
 		building.ApplyState(buildingState);
+	}
+
+	private void SyncUnit(UnitState unitState)
+	{
+		if (!unitsById.TryGetValue(unitState.EntityId, out var unit))
+		{
+			var scene = GetUnitScene(unitState.Type);
+			unit = scene.Instantiate<ClientUnit>();
+			AddChild(unit);
+			unitsById[unitState.EntityId] = unit;
+		}
+
+		unit.ApplyState(unitState);
 	}
 }

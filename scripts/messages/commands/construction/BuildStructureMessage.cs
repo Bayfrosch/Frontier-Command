@@ -36,7 +36,7 @@ public partial class BuildStructureMessage : MessageBase, CommandInterface, Queu
         ("issued_at_tick", issued_at_tick), 
         ("queue_mode", queue_mode), 
         ("construction_unit_id", construction_unit_id), 
-        ("building_type", Variant.From(building_type.ToString())), 
+        ("building_type", Variant.From(building_type)), 
         ("position", position), 
         ("rotation_radians", rotation_radians));
     public override void from_payload(GDictionary payload)

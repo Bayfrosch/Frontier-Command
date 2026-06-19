@@ -5,6 +5,7 @@ public partial class TestScene : Node2D
 {
 	private TimeTickSystem gameLoop = null!;
 	private LocalSimulationNode simulationCore = null!;
+	private bool SpawnUnits = false;
 	public override void _Ready()
 	{
 		gameLoop = GetNode<TimeTickSystem>("GameLoop");
@@ -13,6 +14,20 @@ public partial class TestScene : Node2D
 
 	public override void _Input(InputEvent @event)
 	{
+		if (@event is InputEventKey keyEvent && keyEvent.Pressed)
+		{
+			if (simulationCore is null)
+			{
+				GD.PushError("SimulationCore node was not found or has the wrong script");
+				return;
+			}
+
+			if (keyEvent.Keycode == Key.Space)
+			{
+				SpawnUnits = !SpawnUnits;
+			}
+		}
+		
 		if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed)
 		{
 			if (simulationCore is null)
@@ -35,13 +50,26 @@ public partial class TestScene : Node2D
 
 	private void HandleLeftMouseButton()
 	{
-		var command = new BuildStructureMessage(
-			BuildingType.BASIC_GENERATOR,
-			"player_1",
-			gameLoop.CurrentTick,
-			"worker_1",
-			GetGlobalMousePosition()
-		);
+		MessageBase command = null;
+		if (!SpawnUnits) {
+			command = new BuildStructureMessage(
+				//TODO:
+				BuildingType.BASIC_GENERATOR,
+				"player_1",
+				gameLoop.CurrentTick,
+				"worker_1",
+				GetGlobalMousePosition()
+			);
+		} else
+		{
+			command = new DebugSpawnUnitsMessage(
+				"player_1",
+				gameLoop.CurrentTick,
+				//TODO:
+				UnitType.BASIC_INFANTRY,
+				GetGlobalMousePosition()		
+			);
+		}
 
 		if (!simulationCore.Push(command))
 			GD.Print("Command couldn't be processed. ", command);
@@ -59,7 +87,7 @@ public partial class TestScene : Node2D
 
 		if (CurrentBuilding.BuildProgression >= 100)
 		{
-			GD.Print("Cannot delete finished Building");
+			GD.Print("Cannot cancel finished Building");
 			return;
 		}
 

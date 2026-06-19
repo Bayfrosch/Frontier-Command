@@ -2,13 +2,12 @@
 
 [ext_resource type="Script" uid="uid://br2ef71l1w2ki" path="res://scripts/client/TestScene.cs" id="1_j8ivh"]
 [ext_resource type="Script" uid="uid://dydin2bng3rwv" path="res://scripts/simulationcore/TimeTickSystem.cs" id="2_j8ivh"]
-[ext_resource type="PackedScene" uid="uid://cvhwaiobgyeik" path="res://scenes/building.tscn" id="2_nd71p"]
+[ext_resource type="PackedScene" uid="uid://cvhwaiobgyeik" path="res://scenes/buildings/building.tscn" id="2_nd71p"]
 [ext_resource type="Script" uid="uid://cvf4mreu4cle8" path="res://scripts/client/LocalSimulationNode.cs" id="4_7ddre"]
 [ext_resource type="Script" uid="uid://coflhkb34duy2" path="res://scripts/client/ClientWorldRenderer.cs" id="5_qjeyg"]
 
 [node name="Node2D" type="Node2D" unique_id=897403920]
 script = ExtResource("1_j8ivh")
-BuildingScene = ExtResource("2_nd71p")
 
 [node name="GameLoop" type="Node" parent="." unique_id=1792138315]
 script = ExtResource("2_j8ivh")
