@@ -12,7 +12,10 @@ public partial class ClientWorldRenderer : Node
 	// Unit Scenes
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
 
-	private LocalSimulationNode simulation = null!;
+	private static readonly Color DefaultUnitColor = new(0.7169325f, 0.3354848f, 0.33498362f, 1f);
+	private static readonly Color SelectedUnitColor = new(0.2f, 0.8f, 1f, 1f);
+	private LocalSimulationNode simulation = null;
+	private TestScene Scene = null;
 	private readonly Dictionary<string, ClientBuilding> buildingsById = new();
 	private readonly Dictionary<string, ClientUnit> unitsById = new();
 
@@ -26,6 +29,26 @@ public partial class ClientWorldRenderer : Node
 		}
 
 		simulation.StateChanged += SyncFromState;
+
+		Scene = GetParent<TestScene>();
+		if (Scene is null)
+		{
+			GD.Print("Scene not found");
+			return;
+		}
+
+		Scene.UnitSelection += OnUnitSelection;
+	}
+
+	private void OnUnitSelection()
+	{
+		foreach (var unit in unitsById.Values)
+		{
+			var bodyRender = unit.GetNode<ColorRect>("BodyRender");
+			bodyRender.Color = Scene.SelectedUnitIds.Contains(unit.EntityId)
+				? SelectedUnitColor
+				: DefaultUnitColor;
+		}
 	}
 
 	/*

@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" uid="uid://d4jmyrk11g5jd" path="res://scripts/client/units/TestUnit.cs" id="1_jdc4a"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1iage"]
+size = Vector2(40, 40)
+
 [node name="BasicInfantry" type="Node2D" unique_id=1169432479]
 script = ExtResource("1_jdc4a")
 
@@ -27,3 +30,10 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Inf"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="." unique_id=892104924]
+position = Vector2(19, 20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=2108000842]
+position = Vector2(1, 0)
+shape = SubResource("RectangleShape2D_1iage")

@@ -1,27 +1,39 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class TestScene : Node2D
 {
-	private TimeTickSystem gameLoop = null!;
-	private LocalSimulationNode simulationCore = null!;
+	[Signal] 
+	public delegate void UnitSelectionEventHandler();
+	private TimeTickSystem gameLoop = null;
+	private LocalSimulationNode simulationCore = null;
 	private bool SpawnUnits = false;
+	private bool SpawnMode = false;
+	private HashSet<string> UnitSelectionIds = new();
+	public IReadOnlyCollection<string> SelectedUnitIds => UnitSelectionIds;
 	public override void _Ready()
 	{
 		gameLoop = GetNode<TimeTickSystem>("GameLoop");
 		simulationCore = GetNode<LocalSimulationNode>("SimulationCore");
+		if (simulationCore is null)
+		{
+			GD.PushError("SimulationCore node was not found or has the wrong script");
+			return;
+		}
 	}
 
-	public override void _Input(InputEvent @event)
+	private void _on_spawn_button_pressed()
+	{
+		SpawnMode = !SpawnMode;
+		GD.Print($"Spawn Mode: {SpawnMode}");
+	}
+
+	public override void _UnhandledInput(InputEvent @event)
 	{
 		if (@event is InputEventKey keyEvent && keyEvent.Pressed)
 		{
-			if (simulationCore is null)
-			{
-				GD.PushError("SimulationCore node was not found or has the wrong script");
-				return;
-			}
-
 			if (keyEvent.Keycode == Key.Space)
 			{
 				SpawnUnits = !SpawnUnits;
@@ -30,15 +42,11 @@ public partial class TestScene : Node2D
 		
 		if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed)
 		{
-			if (simulationCore is null)
+			bool leftClicked = mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed;
+			bool shiftHeld = Input.IsKeyPressed(Key.Shift);
+			if (leftClicked)
 			{
-				GD.PushError("SimulationCore node was not found or has the wrong script");
-				return;
-			}
-
-			if (mouseEvent.ButtonIndex == MouseButton.Left)
-			{
-				HandleLeftMouseButton();
+				HandleLeftMouseButton(shiftHeld);
 			}
 
 			else if (mouseEvent.ButtonIndex == MouseButton.Right)
@@ -48,44 +56,72 @@ public partial class TestScene : Node2D
 		}
 	}
 
-	private void HandleLeftMouseButton()
+	private void HandleLeftMouseButton(bool shiftHeld)
 	{
-		MessageBase command = null;
-		if (!SpawnUnits) {
-			command = new BuildStructureMessage(
-				//TODO:
-				BuildingType.BASIC_GENERATOR,
-				"player_1",
-				gameLoop.CurrentTick,
-				"worker_1",
-				GetGlobalMousePosition()
-			);
+		if (SpawnMode) {
+			MessageBase command = null;
+			if (!SpawnUnits) {
+				command = new BuildStructureMessage(
+					//TODO:
+					BuildingType.BASIC_GENERATOR,
+					"player_1",
+					gameLoop.CurrentTick,
+					"worker_1",
+					GetGlobalMousePosition()
+				);
+			} else
+			{
+				command = new DebugSpawnUnitsMessage(
+					"player_1",
+					gameLoop.CurrentTick,
+					//TODO:
+					UnitType.BASIC_INFANTRY,
+					GetGlobalMousePosition()		
+				);
+			}
+
+			if (!simulationCore.Push(command))
+				GD.Print("Command couldn't be processed. ", command);
+
+			GD.Print("Command send");
 		} else
 		{
-			command = new DebugSpawnUnitsMessage(
-				"player_1",
-				gameLoop.CurrentTick,
-				//TODO:
-				UnitType.BASIC_INFANTRY,
-				GetGlobalMousePosition()		
-			);
+			var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
+			if (CurrentEntity is null || CurrentEntity is ClientBuilding)
+			{
+				UnitSelectionIds.Clear();
+				EmitSignal(SignalName.UnitSelection);
+				return;
+			}
+
+			if (CurrentEntity is not ClientUnit unit)
+			{
+				return;
+			}
+
+			if (!shiftHeld)
+			{
+				UnitSelectionIds.Clear();
+			}
+			UnitSelectionIds.Add(unit.EntityId);
+			EmitSignal(SignalName.UnitSelection);
 		}
-
-		if (!simulationCore.Push(command))
-			GD.Print("Command couldn't be processed. ", command);
-
-		GD.Print("Command send");
 	}
 
 	private void HandleRightMouseButton()
 	{
-		var CurrentBuilding = GetBuildingUnderMouse(GetGlobalMousePosition());
+		var CurrentBuilding = GetEntityUnderMouse(GetGlobalMousePosition());
 		if (CurrentBuilding is null) {
 			GD.Print("No buiding was clicked");
 			return;
 		}
 
-		if (CurrentBuilding.BuildProgression >= 100)
+		if (CurrentBuilding is not ClientBuilding building)
+		{
+			return;
+		}
+
+		if (building.BuildProgression >= 100)
 		{
 			GD.Print("Cannot cancel finished Building");
 			return;
@@ -94,7 +130,7 @@ public partial class TestScene : Node2D
 		var command = new CancelConstructionMessage(
 			"player_1",
 			gameLoop.CurrentTick,
-			CurrentBuilding.EntityId
+			building.EntityId
 		);
 
 		if (!simulationCore.Push(command))
@@ -102,7 +138,7 @@ public partial class TestScene : Node2D
 
 		GD.Print("Command send");
 	}
-	private TestBuilding? GetBuildingUnderMouse(Vector2 worldPosition)
+	private ClientEntity? GetEntityUnderMouse(Vector2 worldPosition)
 	{
 		var query = new PhysicsPointQueryParameters2D
 		{
@@ -113,17 +149,37 @@ public partial class TestScene : Node2D
 
 		var results = GetWorld2D().DirectSpaceState.IntersectPoint(query);
 
-		foreach (var result in results)
-		{
-			if (result["collider"].AsGodotObject() is Area2D area)
-			{
-				var building = area.GetParent() as TestBuilding;
+		return results
+			.Select(result => ExtractClientEntity(result))
+			.Where(entity => entity is not null)
+			.OrderBy(entity => GetSelectionPriority(entity))
+			.FirstOrDefault();
+	}
 
-				if (building is not null)
-					return building;
-			}
-		}
+	private int GetSelectionPriority(ClientEntity entity)
+	{
+		bool isOwned = entity.OwnerPlayerId == "player_1";
 
-		return null;
+		if (entity is ClientUnit && isOwned)
+			return 0;
+
+		if (entity is ClientBuilding && isOwned)
+			return 1;
+
+		if (entity is ClientUnit)
+			return 2;
+
+		if (entity is ClientBuilding)
+			return 3;
+
+		return 4;
+	}
+
+	private ClientEntity? ExtractClientEntity(Godot.Collections.Dictionary result)
+	{
+		if (result["collider"].AsGodotObject() is not Area2D area)
+			return null;
+
+		return area.GetParent() as ClientEntity;
 	}
 }

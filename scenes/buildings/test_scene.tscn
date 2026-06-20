@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://br2ef71l1w2ki" path="res://scripts/client/TestScene.cs" id="1_j8ivh"]
 [ext_resource type="Script" uid="uid://dydin2bng3rwv" path="res://scripts/simulationcore/TimeTickSystem.cs" id="2_j8ivh"]
-[ext_resource type="PackedScene" uid="uid://cvhwaiobgyeik" path="res://scenes/buildings/building.tscn" id="2_nd71p"]
 [ext_resource type="Script" uid="uid://cvf4mreu4cle8" path="res://scripts/client/LocalSimulationNode.cs" id="4_7ddre"]
 [ext_resource type="Script" uid="uid://coflhkb34duy2" path="res://scripts/client/ClientWorldRenderer.cs" id="5_qjeyg"]
 
@@ -17,4 +16,12 @@ script = ExtResource("4_7ddre")
 
 [node name="WorldRenderer" type="Node" parent="." unique_id=2024183592]
 script = ExtResource("5_qjeyg")
-BuildingScene = ExtResource("2_nd71p")
+
+[node name="Button" type="Button" parent="." unique_id=1400612674]
+offset_right = 8.0
+offset_bottom = 8.0
+focus_mode = 0
+toggle_mode = true
+text = "Spawn"
+
+[connection signal="pressed" from="Button" to="." method="_on_spawn_button_pressed"]
