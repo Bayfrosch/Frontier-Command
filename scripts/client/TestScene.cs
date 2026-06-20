@@ -30,7 +30,7 @@ public partial class TestScene : Node2D
 		GD.Print($"Spawn Mode: {SpawnMode}");
 	}
 
-	public override void _UnhandledInput(InputEvent @event)
+	public override void _Input(InputEvent @event)
 	{
 		if (@event is InputEventKey keyEvent && keyEvent.Pressed)
 		{
@@ -42,6 +42,9 @@ public partial class TestScene : Node2D
 		
 		if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed)
 		{
+			if (GetViewport().GuiGetHoveredControl() is BaseButton) 
+				return;
+			
 			bool leftClicked = mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed;
 			bool shiftHeld = Input.IsKeyPressed(Key.Shift);
 			if (leftClicked)
