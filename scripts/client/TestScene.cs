@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks.Dataflow;
 
 public partial class TestScene : Node2D
 {
@@ -13,6 +14,13 @@ public partial class TestScene : Node2D
 	private bool SpawnMode = false;
 	private HashSet<string> UnitSelectionIds = new();
 	public IReadOnlyCollection<string> SelectedUnitIds => UnitSelectionIds;
+	// Selection Box
+	private bool IsDraggingSelection = false;
+	private Vector2 SelectionStartPos;
+	private Vector2 SelectionEndPos;
+	private bool IsPotentialSelectionDrag = false;
+	private const float DragThreshold = 6f;
+	private bool shiftHeld = false;
 	public override void _Ready()
 	{
 		gameLoop = GetNode<TimeTickSystem>("GameLoop");
@@ -40,23 +48,98 @@ public partial class TestScene : Node2D
 			}
 		}
 		
-		if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed)
-		{
+		if (@event is InputEventMouseButton mouseEvent) {
 			if (GetViewport().GuiGetHoveredControl() is BaseButton) 
 				return;
 			
-			bool leftClicked = mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed;
-			bool shiftHeld = Input.IsKeyPressed(Key.Shift);
-			if (leftClicked)
+			shiftHeld = Input.IsKeyPressed(Key.Shift);
+			
+			if (mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed)
 			{
-				HandleLeftMouseButton(shiftHeld);
+				SelectionStartPos = GetGlobalMousePosition();
+				SelectionEndPos = GetGlobalMousePosition();
+				IsPotentialSelectionDrag = !SpawnMode;
+				IsDraggingSelection = false;
 			}
 
-			else if (mouseEvent.ButtonIndex == MouseButton.Right)
+			if (mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
+			{
+				SelectionEndPos = GetGlobalMousePosition();
+				
+				if (IsDraggingSelection)
+				{
+					HandleSelectionBox(SelectionStartPos, SelectionEndPos);
+				} else
+				{
+					HandleLeftMouseButton(shiftHeld);
+				}
+
+				IsPotentialSelectionDrag = false;
+				IsDraggingSelection = false;
+				QueueRedraw();
+			}
+			
+			if (mouseEvent.ButtonIndex == MouseButton.Right)
 			{
 				HandleRightMouseButton(shiftHeld);
 			}
 		}
+
+		if (@event is InputEventMouseMotion && IsPotentialSelectionDrag)
+		{
+			SelectionEndPos = GetGlobalMousePosition();
+
+			if (Input.IsMouseButtonPressed(MouseButton.Left) &&
+				SelectionStartPos.DistanceTo(SelectionEndPos) >= DragThreshold)
+			{
+				IsDraggingSelection = true;
+				QueueRedraw();
+			}
+		}
+	}
+
+	public override void _Draw()
+	{
+		if (!IsDraggingSelection)
+			return;
+
+		var rect = new Rect2(
+			SelectionStartPos,
+			SelectionEndPos - SelectionStartPos
+		).Abs();
+
+		DrawRect(rect, new Color(0.2f, 0.9f, 0.0f, 0.8f), false, 2f);
+	}
+
+
+	private void HandleSelectionBox(Vector2 start, Vector2 end)
+	{
+		var rect = new Rect2(
+			start,
+			end - start
+		).Abs();
+
+		if (!shiftHeld)
+			UnitSelectionIds.Clear();
+
+		var worldRenderer = GetNode<ClientWorldRenderer>("WorldRenderer");
+
+		foreach (var child in worldRenderer.GetChildren())
+		{
+			if (child is not ClientUnit unit)
+				continue;
+
+
+			if (unit.OwnerPlayerId != "player_1")
+				continue;
+
+			if (rect.HasPoint(unit.GlobalPosition))
+			{
+				UnitSelectionIds.Add(unit.EntityId);
+			}
+		}
+
+		EmitSignal(SignalName.UnitSelection);
 	}
 
 	private void HandleLeftMouseButton(bool shiftHeld)
