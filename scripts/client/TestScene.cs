@@ -54,7 +54,7 @@ public partial class TestScene : Node2D
 
 			else if (mouseEvent.ButtonIndex == MouseButton.Right)
 			{
-				HandleRightMouseButton();
+				HandleRightMouseButton(shiftHeld);
 			}
 		}
 	}
@@ -62,7 +62,7 @@ public partial class TestScene : Node2D
 	private void HandleLeftMouseButton(bool shiftHeld)
 	{
 		if (SpawnMode) {
-			MessageBase command = null;
+			MessageBase command;
 			if (!SpawnUnits) {
 				command = new BuildStructureMessage(
 					//TODO:
@@ -79,7 +79,8 @@ public partial class TestScene : Node2D
 					gameLoop.CurrentTick,
 					//TODO:
 					UnitType.BASIC_INFANTRY,
-					GetGlobalMousePosition()		
+					GetGlobalMousePosition(),
+					25f	
 				);
 			}
 
@@ -111,31 +112,43 @@ public partial class TestScene : Node2D
 		}
 	}
 
-	private void HandleRightMouseButton()
+	private void HandleRightMouseButton(bool shiftHeld)
 	{
+		MessageBase command = null;
+
 		var CurrentBuilding = GetEntityUnderMouse(GetGlobalMousePosition());
-		if (CurrentBuilding is null) {
-			GD.Print("No buiding was clicked");
-			return;
-		}
+		if (!(CurrentBuilding is null)) {
+			if (CurrentBuilding is not ClientBuilding building)
+			{
+				return;
+			}
 
-		if (CurrentBuilding is not ClientBuilding building)
+			if (building.BuildProgression >= 100)
+			{
+				GD.Print("Cannot cancel finished Building");
+				return;
+			}
+
+			command = new CancelConstructionMessage(
+				"player_1",
+				gameLoop.CurrentTick,
+				building.EntityId
+			);
+		} else
 		{
-			return;
+			command = new MoveUnitsMessage(
+				"player_1",
+				gameLoop.CurrentTick,
+				SelectedUnitIds.ToArray<string>(),
+				GetGlobalMousePosition(),
+				shiftHeld ? 1 : 0,
+				"rectangle"
+			);
 		}
 
-		if (building.BuildProgression >= 100)
-		{
-			GD.Print("Cannot cancel finished Building");
+		if (command is null) 
 			return;
-		}
-
-		var command = new CancelConstructionMessage(
-			"player_1",
-			gameLoop.CurrentTick,
-			building.EntityId
-		);
-
+		
 		if (!simulationCore.Push(command))
 			GD.Print("Command couldn't be processed. ");
 

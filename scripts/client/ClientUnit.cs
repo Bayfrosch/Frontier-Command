@@ -9,8 +9,17 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
     public int MaxHealth { get; protected set; }
     public bool GettingRepaired { get; protected set; }
     public UnitType Type { get; protected set; }
+    public Vector2 RenderPosition { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
     public float MovementSpeed { get; protected set; }
+
+
+    public virtual void ApplySpawnState(UnitState state)
+    {
+        ApplyState(state);
+        RenderPosition = state.CurrentPosition;
+        Position = state.CurrentPosition;
+    }
 
     public virtual void ApplyState(UnitState state)
     {
@@ -20,7 +29,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         MaxHealth = state.MaxHealth;
         GettingRepaired = state.GettingRepaired;
         Type = state.Type;
-        Position = state.CurrentPosition;
+        RenderPosition = state.CurrentPosition;
         TargetPosition = state.TargetPosition;
         MovementSpeed = state.MovementSpeed;
     }

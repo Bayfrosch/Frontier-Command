@@ -87,7 +87,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var unit = new UnitState("unit-1", "player-1", Vector2.Zero);
+		var unit = new UnitState("unit-1", "player-1", Vector2.Zero, 10f);
 		player.AddEntity(unit);
 		context.AddPlayer(player);
 
@@ -104,8 +104,8 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var unitA = new UnitState("unit-a", "player-1", Vector2.Zero);
-		var unitB = new UnitState("unit-b", "player-1", Vector2.Zero);
+		var unitA = new UnitState("unit-a", "player-1", Vector2.Zero, 10f);
+		var unitB = new UnitState("unit-b", "player-1", Vector2.Zero, 10f);
 		player.AddEntity(unitA);
 		player.AddEntity(unitB);
 		context.AddPlayer(player);

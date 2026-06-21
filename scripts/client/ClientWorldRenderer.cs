@@ -129,6 +129,9 @@ public partial class ClientWorldRenderer : Node
 			unit = scene.Instantiate<ClientUnit>();
 			AddChild(unit);
 			unitsById[unitState.EntityId] = unit;
+
+			unit.ApplySpawnState(unitState);
+			return;
 		}
 
 		unit.ApplyState(unitState);

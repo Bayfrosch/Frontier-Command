@@ -5,6 +5,7 @@ using Godot;
 
 public sealed class SimulationContext
 {
+	const float deltaSeconds = 1.0f / 5.0f;
 	private const int CONSTRUCTION_ADVANCE = 5;
 	public string MatchId { get; }
 	/*
@@ -73,6 +74,9 @@ public sealed class SimulationContext
 				if (entity is BuildingState building)
 				{
 					building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
+				} else if (entity is UnitState unit)
+				{
+					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
 				}
 			}
 		}
@@ -191,8 +195,10 @@ public sealed class SimulationContext
 	*/
 	private bool HandleMoveUnit(MoveUnitsMessage msg)
 	{
-		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
+		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null) {
+			GD.Print(units is null);
 			return false;
+		}
 
 		foreach (var unit in units)
 			unit.SetMoveOrder(msg.destination);
@@ -350,14 +356,14 @@ public sealed class SimulationContext
 	// TODO:
 	private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
 	{
-		if (!TryGetPlayer(msg.player_id, out var player))
+		if (!TryGetPlayer(msg.PlayerId, out var player))
 			return false;
 
 		if (player is null)
 			return false;
 
-		var unitId = NewEntityId(msg.unit_type.ToString());
-		UnitState newUnit = new UnitState(unitId, msg.player_id, msg.position, msg.unit_type);
+		var unitId = NewEntityId(msg.UnitType.ToString());
+		UnitState newUnit = new UnitState(unitId, msg.PlayerId, msg.Position, msg.MovementSpeed, msg.UnitType);
 		player.AddEntity(newUnit);
 		return true;
 	}
@@ -462,10 +468,11 @@ public abstract class EntityState
 
 public sealed class UnitState : EntityState
 {
-	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, UnitType unitType = UnitType.BASIC_INFANTRY)
+	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType = UnitType.BASIC_INFANTRY)
 		: base(entityId, ownerPlayerId, currentPos)
 	{
 		Type = unitType;
+		MovementSpeed = movementSpeed;
 	}
 	public UnitType Type { get; private set; }
 	public Vector2 TargetPosition { get; private set; }

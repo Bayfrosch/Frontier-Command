@@ -4,8 +4,8 @@ public partial class TimeTickSystem : Node
 {
     [Signal]
     public delegate void TickEventHandler(int tick);
-    private const float TICK_TIMER_MAX = 5;
-    private const double TICK_DELTA = 1.0 / TICK_TIMER_MAX;
+    public const float TICK_TIMER_MAX = 5;
+    public const float TICK_DELTA = 1.0f / TICK_TIMER_MAX;
 
     private double _accumulator;
     private int _currentTick;
