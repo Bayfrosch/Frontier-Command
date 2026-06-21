@@ -33,7 +33,7 @@ public partial class GameScene : Node2D
 			GD.PushError("SimulationCore node was not found or has the wrong script");
 			return;
 		}
-		_gui = GetNode<GUI>("CanvasLayer/GameUserInterface");
+		_gui = GetNode<GUI>("Screen/GameUserInterface");
 		_gui.SpawnPressed += _on_spawn_button_pressed;
 	}
 
