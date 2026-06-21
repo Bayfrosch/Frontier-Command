@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
 
-public partial class TestScene : Node2D
+public partial class GameScene : Node2D
 {
 	[Signal] 
 	public delegate void UnitSelectionEventHandler();
@@ -14,13 +14,16 @@ public partial class TestScene : Node2D
 	private bool SpawnMode = false;
 	private HashSet<string> UnitSelectionIds = new();
 	public IReadOnlyCollection<string> SelectedUnitIds => UnitSelectionIds;
-	// Selection Box
+	private GUI _gui;
+	private bool shiftHeld = false;
+	/*
+	Selection Box
+	*/
 	private bool IsDraggingSelection = false;
 	private Vector2 SelectionStartPos;
 	private Vector2 SelectionEndPos;
 	private bool IsPotentialSelectionDrag = false;
 	private const float DragThreshold = 6f;
-	private bool shiftHeld = false;
 	public override void _Ready()
 	{
 		gameLoop = GetNode<TimeTickSystem>("GameLoop");
@@ -30,6 +33,8 @@ public partial class TestScene : Node2D
 			GD.PushError("SimulationCore node was not found or has the wrong script");
 			return;
 		}
+		_gui = GetNode<GUI>("CanvasLayer/GameUserInterface");
+		_gui.SpawnPressed += _on_spawn_button_pressed;
 	}
 
 	private void _on_spawn_button_pressed()

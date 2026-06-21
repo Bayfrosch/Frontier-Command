@@ -15,7 +15,7 @@ public partial class ClientWorldRenderer : Node
 	private static readonly Color DefaultUnitColor = new(0.7169325f, 0.3354848f, 0.33498362f, 1f);
 	private static readonly Color SelectedUnitColor = new(0.2f, 0.8f, 1f, 1f);
 	private LocalSimulationNode simulation = null;
-	private TestScene Scene = null;
+	private GameScene Scene = null;
 	private readonly Dictionary<string, ClientBuilding> buildingsById = new();
 	private readonly Dictionary<string, ClientUnit> unitsById = new();
 
@@ -30,7 +30,7 @@ public partial class ClientWorldRenderer : Node
 
 		simulation.StateChanged += SyncFromState;
 
-		Scene = GetParent<TestScene>();
+		Scene = GetParent<GameScene>();
 		if (Scene is null)
 		{
 			GD.Print("Scene not found");

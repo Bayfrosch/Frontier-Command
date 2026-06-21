@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://rx502q8ojk4g"]
+
+[ext_resource type="Script" uid="uid://bpjym5ewin04f" path="res://scripts/client/GUI.cs" id="1_v2ydu"]
+
+[node name="GameUserInterface" type="Control" unique_id=1253293035]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_v2ydu")
+
+[node name="MainLayout" type="MarginContainer" parent="." unique_id=775742478]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainLayout" unique_id=1573905669]
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=1593961572]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="SpawnButton" type="Button" parent="MainLayout/VBoxContainer/TopBar" unique_id=1429905451]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+text = "Spawn"
+
+[node name="Spacer" type="Control" parent="MainLayout/VBoxContainer" unique_id=2002186177]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=885063121]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
