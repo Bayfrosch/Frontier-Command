@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://tlht2nkjwmk7"]
 
 [ext_resource type="Script" uid="uid://d4jmyrk11g5jd" path="res://scripts/client/units/TestUnit.cs" id="1_jdc4a"]
+[ext_resource type="Shader" uid="uid://dir0o5xxjoi5i" path="res://scenes/units/unitCircle.gdshader" id="2_qba1x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8yuvl"]
+shader = ExtResource("2_qba1x")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1iage"]
 size = Vector2(40, 40)
@@ -9,6 +13,7 @@ size = Vector2(40, 40)
 script = ExtResource("1_jdc4a")
 
 [node name="BodyRender" type="ColorRect" parent="." unique_id=1963267321]
+material = SubResource("ShaderMaterial_8yuvl")
 offset_left = -20.0
 offset_top = -20.0
 offset_right = 20.0

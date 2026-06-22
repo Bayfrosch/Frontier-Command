@@ -200,8 +200,22 @@ public sealed class SimulationContext
 			return false;
 		}
 
-		foreach (var unit in units)
-			unit.SetMoveOrder(msg.destination);
+		const float spacing = 75f;
+		int columns = (int) Math.Ceiling(Math.Sqrt(units.Count));
+		int rows = (int) Math.Ceiling(units.Count / (float)columns);
+
+		for (int i = 0; i < units.Count; i++)
+		{
+			int column = i % columns;
+			int row = i / columns;
+
+			float offsetX = (column - (columns - 1) / 2f) * spacing;
+			float offsetY = (row - (rows - 1) / 2f) * spacing;
+
+			Vector2 offsetVector = new Vector2(offsetX, offsetY);
+
+			units[i].SetMoveOrder(msg.destination + offsetVector);
+		}
 
 		return true;
 	}
