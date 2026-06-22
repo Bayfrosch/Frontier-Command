@@ -6,7 +6,7 @@ public partial class TestUnit : ClientUnit
 {
     public override void _Process(double delta)
     {
-        if (Math.Max(GlobalPosition.DistanceTo(RenderPosition), 0) <= 0.8f)
+        if (Math.Max(GlobalPosition.DistanceTo(RenderPosition), 0) <= 1.5f)
         {
             return; 
         }
