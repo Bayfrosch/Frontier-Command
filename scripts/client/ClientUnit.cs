@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public abstract partial class ClientUnit : Node2D, ClientEntity
 {
@@ -8,19 +9,26 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
     public int Health { get; protected set; }
     public int MaxHealth { get; protected set; }
     public bool GettingRepaired { get; protected set; }
+    public HashSet<Ability> Abilities { get; protected set; }
     public UnitType Type { get; protected set; }
     public Vector2 RenderPosition { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
     public float MovementSpeed { get; protected set; }
 
 
+    /*
+    Called on spawning Unit
+    */
     public virtual void ApplySpawnState(UnitState state)
     {
         ApplyState(state);
         RenderPosition = state.CurrentPosition;
         Position = state.CurrentPosition;
+        Abilities = state.Abilities;
     }
-
+    /*
+    Called on every Tick
+    */
     public virtual void ApplyState(UnitState state)
     {
         EntityId = state.EntityId;

@@ -12,8 +12,8 @@ public partial class GameScene : Node2D
 	private LocalSimulationNode simulationCore = null;
 	private bool SpawnUnits = false;
 	private bool SpawnMode = false;
-	private HashSet<string> UnitSelectionIds = new();
-	public IReadOnlyCollection<string> SelectedUnitIds => UnitSelectionIds;
+	private HashSet<string> EntitySelectionIds = new();
+	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
 	private GUI _gui;
 	private bool shiftHeld = false;
 	/*
@@ -125,7 +125,7 @@ public partial class GameScene : Node2D
 		).Abs();
 
 		if (!shiftHeld)
-			UnitSelectionIds.Clear();
+			EntitySelectionIds.Clear();
 
 		var worldRenderer = GetNode<ClientWorldRenderer>("WorldRenderer");
 
@@ -140,7 +140,7 @@ public partial class GameScene : Node2D
 
 			if (rect.HasPoint(unit.GlobalPosition))
 			{
-				UnitSelectionIds.Add(unit.EntityId);
+				EntitySelectionIds.Add(unit.EntityId);
 			}
 		}
 
@@ -179,23 +179,23 @@ public partial class GameScene : Node2D
 		} else
 		{
 			var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
-			if (CurrentEntity is null || CurrentEntity is ClientBuilding)
+			if (CurrentEntity is null)
 			{
-				UnitSelectionIds.Clear();
+				EntitySelectionIds.Clear();
 				EmitSignal(SignalName.UnitSelection);
 				return;
 			}
 
-			if (CurrentEntity is not ClientUnit unit)
+			if (CurrentEntity is ClientBuilding)
 			{
-				return;
+				EntitySelectionIds.Clear();
 			}
 
 			if (!shiftHeld)
 			{
-				UnitSelectionIds.Clear();
+				EntitySelectionIds.Clear();
 			}
-			UnitSelectionIds.Add(unit.EntityId);
+			EntitySelectionIds.Add(CurrentEntity.EntityId);
 			EmitSignal(SignalName.UnitSelection);
 		}
 	}
@@ -227,7 +227,7 @@ public partial class GameScene : Node2D
 			command = new MoveUnitsMessage(
 				"player_1",
 				gameLoop.CurrentTick,
-				SelectedUnitIds.ToArray<string>(),
+				SelectedEntityIds.ToArray<string>(),
 				GetGlobalMousePosition(),
 				shiftHeld ? 1 : 0,
 				"rectangle"

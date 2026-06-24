@@ -45,7 +45,7 @@ public partial class ClientWorldRenderer : Node
 		foreach (var unit in unitsById.Values)
 		{
 			var bodyRender = unit.GetNode<ColorRect>("BodyRender");
-			bodyRender.Color = Scene.SelectedUnitIds.Contains(unit.EntityId)
+			bodyRender.Color = Scene.SelectedEntityIds.Contains(unit.EntityId)
 				? SelectedUnitColor
 				: DefaultUnitColor;
 		}
@@ -116,6 +116,9 @@ public partial class ClientWorldRenderer : Node
 			building = scene.Instantiate<ClientBuilding>();
 			AddChild(building);
 			buildingsById[buildingState.EntityId] = building;
+
+			building.ApplySpawnState(buildingState);
+			return;
 		}
 
 		building.ApplyState(buildingState);

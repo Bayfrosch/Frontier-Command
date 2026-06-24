@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 public sealed class SimulationContext
 {
@@ -471,6 +472,7 @@ public abstract class EntityState
 		EntityId = entityId;
 		OwnerPlayerId = ownerPlayerId;
 		CurrentPosition = currentPos;
+		Abilities = new HashSet<Ability>();
 	}
 	public string EntityId { get; private set; } = "";
 	public string? OwnerPlayerId { get; private set; }
@@ -478,6 +480,27 @@ public abstract class EntityState
 	public int Health { get; private set; }
 	public int MaxHealth { get; private set; }
 	public bool GettingRepaired = false;
+	public HashSet<Ability> Abilities { get; set; }
+}
+
+public static class AbilityCatalog
+{
+	public static HashSet<Ability> ForBuilding(BuildingType type)
+	{
+		var abilities = new HashSet<Ability>();
+		switch (type)
+		{
+			case BuildingType.BASIC_GENERATOR:
+				abilities.Add(new Ability
+				{
+					Name = "Test",
+					unlocked = true,
+					Cost = 20
+				});
+				break;
+		}
+		return abilities;
+	}
 }
 
 public sealed class UnitState : EntityState
@@ -536,6 +559,7 @@ public sealed class BuildingState : EntityState
 	{
 		Type = buildingType;
 		RallyPoint = new Vector2(currentPos.X + 1, currentPos.Y + 1);
+		Abilities = AbilityCatalog.ForBuilding(buildingType);
 	}
 	public int BuildProgression { get; private set; } = 0;
 	internal void AdvanceConstruction(int amount)
