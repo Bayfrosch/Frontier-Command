@@ -1,8 +1,7 @@
 using Godot;
 using System;
-using System.Reflection.Metadata;
 
-public partial class TestUnit : ClientUnit
+public partial class BasicInfantry : ClientUnit
 {
     public override void _Process(double delta)
     {

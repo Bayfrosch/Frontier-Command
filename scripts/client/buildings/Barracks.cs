@@ -4,7 +4,7 @@ using System;
 /*
 Implementation of the render BuildingState
 */
-public partial class TestBuilding : ClientBuilding
+public partial class Barracks : ClientBuilding
 {
 	private ProgressBar BuildProgressBar = null;
 	private ProgressBar ProductionProgressBar = null;
