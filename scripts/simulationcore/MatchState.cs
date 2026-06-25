@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Godot;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
@@ -361,7 +362,35 @@ public sealed class SimulationContext
 	// TODO:
 	private bool HandleUseAbility(UseAbilityMessage msg)
 	{
-		return false;
+		bool passed = false;
+		switch (msg.ability_id)
+		{
+			case "spawn_infantry": 
+				passed = HandleSpawnInfantry(msg);
+				break;
+		}
+		return passed;
+	}
+
+	private bool HandleSpawnInfantry(UseAbilityMessage msg)
+	{
+		foreach(string entityId in msg.caster_entity_ids)
+		{
+			if (!TryGetPlayerEntity(msg.player_id, entityId, out EntityState entity))
+				return false;
+
+			if (entity is not BuildingState building)
+				return false;
+
+			HandleDebugSpawnUnit(new DebugSpawnUnitsMessage(
+				msg.player_id,
+				_matchState.Tick,
+				UnitType.BASIC_INFANTRY,
+				building.RallyPoint,
+				10f
+			));
+		}
+		return true;
 	}
 	// TODO:
 	private bool HandleGatherResources(GatherResourcesMessage msg)
@@ -482,7 +511,17 @@ public abstract class EntityState
 	public bool GettingRepaired = false;
 	public HashSet<Ability> Abilities { get; set; }
 }
-
+public static class BuildingCatalog
+{
+	public static Vector2 GetFoodprintSize(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.BARRACKS => new Vector2(80, 60),
+			_ => new Vector2(0, 0)
+		};
+	}
+}
 public static class AbilityCatalog
 {
 	public static HashSet<Ability> ForBuilding(BuildingType type)
@@ -490,22 +529,25 @@ public static class AbilityCatalog
 		var abilities = new HashSet<Ability>();
 		switch (type)
 		{
-			case BuildingType.BASIC_GENERATOR:
+			case BuildingType.BARRACKS:
 				abilities.Add(new Ability
 				{
-					Name = "Test",
+					Id = "spawn_infantry",
+					Name = "Infantry",
 					unlocked = true,
 					Cost = 20
 				});
 				abilities.Add(new Ability
 				{
-					Name = "Hello",
+					Id = "spawn_rocket_troops",
+					Name = "Rocket Troops",
 					unlocked = true,
-					Cost = 15
+					Cost = 20
 				});
 				abilities.Add(new Ability
 				{
-					Name = "World",
+					Id = "spawn_sniper",
+					Name = "Sniper",
 					unlocked = false,
 					Cost = 69
 				});
@@ -556,7 +598,7 @@ public sealed class UnitState : EntityState
 
 public enum BuildingType
 {
-	BASIC_GENERATOR,
+	BARRACKS,
 }
 
 public enum UnitType
@@ -570,7 +612,7 @@ public sealed class BuildingState : EntityState
 		: base(entityId, ownerPlayerId, currentPos)
 	{
 		Type = buildingType;
-		RallyPoint = new Vector2(currentPos.X + 1, currentPos.Y + 1);
+		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(buildingType);
 		Abilities = AbilityCatalog.ForBuilding(buildingType);
 	}
 	public int BuildProgression { get; private set; } = 0;

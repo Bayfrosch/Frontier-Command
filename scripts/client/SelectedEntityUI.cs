@@ -5,6 +5,8 @@ using System.Linq;
 
 public partial class SelectedEntityUI : Control
 {
+	[Signal]
+	public delegate void AbilityPressedEventHandler(string abilityId);
 	private IReadOnlyCollection<string> SelectedEntityIds;
 	private IReadOnlyDictionary<string, EntityState> EntitiesById;
 	// Called when the node enters the scene tree for the first time.
@@ -97,6 +99,11 @@ public partial class SelectedEntityUI : Control
 				AbilityButton.AddThemeStyleboxOverride("hover", hoverStyle);
 				AbilityButton.AddThemeStyleboxOverride("pressed", pressedStyle);
 				
+				AbilityButton.Pressed += () =>
+				{
+					EmitSignal(SignalName.AbilityPressed, ability.Id);
+				};
+
 				row.AddChild(AbilityButton);
 			}
 	}

@@ -94,7 +94,7 @@ public partial class ClientWorldRenderer : Node
 	{
 		return type switch
 		{
-			BuildingType.BASIC_GENERATOR => BasicGeneratorScene,
+			BuildingType.BARRACKS => BasicGeneratorScene,
 			_ => TestBuildingScene
 		};
 	}

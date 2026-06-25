@@ -14,7 +14,7 @@ public partial class GameScene : Node2D
 	private bool SpawnMode = false;
 	private HashSet<string> EntitySelectionIds = new();
 	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
-	private GUI _gui;
+	private GUI Gui;
 	private bool shiftHeld = false;
 	/*
 	Selection Box
@@ -33,11 +33,30 @@ public partial class GameScene : Node2D
 			GD.PushError("SimulationCore node was not found or has the wrong script");
 			return;
 		}
-		_gui = GetNode<GUI>("Screen/GameUserInterface");
-		_gui.SpawnPressed += _on_spawn_button_pressed;
+		Gui = GetNode<GUI>("Screen/GameUserInterface");
+		Gui.SpawnPressed += OnSpawnButtonPressed;
+
+		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
+		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 	}
 
-	private void _on_spawn_button_pressed()
+	private void OnAbilityPressed(string abilityId)
+	{
+		var command = new UseAbilityMessage(
+			"player_1",
+			gameLoop.CurrentTick,
+			SelectedEntityIds.ToArray(),
+			abilityId,
+			shiftHeld ? 1 : 0
+		);
+
+		if (!simulationCore.Push(command))
+		{
+			GD.Print("Ability command coulnd't be processed.");
+		}
+	}
+
+	private void OnSpawnButtonPressed()
 	{
 		SpawnMode = !SpawnMode;
 		GD.Print($"Spawn Mode: {SpawnMode}");
@@ -154,7 +173,7 @@ public partial class GameScene : Node2D
 			if (!SpawnUnits) {
 				command = new BuildStructureMessage(
 					//TODO:
-					BuildingType.BASIC_GENERATOR,
+					BuildingType.BARRACKS,
 					"player_1",
 					gameLoop.CurrentTick,
 					"worker_1",
