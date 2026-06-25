@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://rx502q8ojk4g"]
 
-[ext_resource type="Script" uid="uid://bpjym5ewin04f" path="res://scripts/client/GUI.cs" id="1_v2ydu"]
 [ext_resource type="PackedScene" uid="uid://eyrsmdrj0gyx" path="res://scenes/UI/SelectedEntityUI.tscn" id="2_1x0qv"]
 
 [node name="GameUserInterface" type="Control" unique_id=1253293035]
@@ -10,7 +9,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_v2ydu")
 
 [node name="MainLayout" type="MarginContainer" parent="." unique_id=775742478]
 layout_mode = 1
