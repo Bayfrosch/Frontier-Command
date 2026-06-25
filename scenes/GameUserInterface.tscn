@@ -32,13 +32,6 @@ custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="SpawnButton" type="Button" parent="MainLayout/VBoxContainer/TopBar" unique_id=1429905451]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-focus_mode = 0
-toggle_mode = true
-text = "Spawn"
-
 [node name="Spacer" type="Control" parent="MainLayout/VBoxContainer" unique_id=2002186177]
 layout_mode = 2
 size_flags_vertical = 3

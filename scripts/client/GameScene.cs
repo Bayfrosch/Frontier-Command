@@ -1,8 +1,6 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks.Dataflow;
 
 public partial class GameScene : Node2D
 {
@@ -13,11 +11,8 @@ public partial class GameScene : Node2D
 	private string lastSelectedAbility = "";
 	private TimeTickSystem gameLoop = null;
 	private LocalSimulationNode simulationCore = null;
-	private bool SpawnUnits = false;
-	private bool SpawnMode = false;
 	private HashSet<string> EntitySelectionIds = new();
 	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
-	private GUI Gui;
 	private bool shiftHeld = false;
 	/*
 	Selection Box
@@ -36,8 +31,6 @@ public partial class GameScene : Node2D
 			GD.PushError("SimulationCore node was not found or has the wrong script");
 			return;
 		}
-		Gui = GetNode<GUI>("Screen/GameUserInterface");
-		Gui.SpawnPressed += OnSpawnButtonPressed;
 
 		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
@@ -79,22 +72,8 @@ public partial class GameScene : Node2D
 		}
 	}
 
-	private void OnSpawnButtonPressed()
-	{
-		SpawnMode = !SpawnMode;
-		GD.Print($"Spawn Mode: {SpawnMode}");
-	}
-
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventKey keyEvent && keyEvent.Pressed)
-		{
-			if (keyEvent.Keycode == Key.Space)
-			{
-				SpawnUnits = !SpawnUnits;
-			}
-		}
-		
 		if (@event is InputEventMouseButton mouseEvent) {
 			if (GetViewport().GuiGetHoveredControl() is BaseButton) 
 				return;
@@ -105,7 +84,7 @@ public partial class GameScene : Node2D
 			{
 				SelectionStartPos = GetGlobalMousePosition();
 				SelectionEndPos = GetGlobalMousePosition();
-				IsPotentialSelectionDrag = !SpawnMode;
+				IsPotentialSelectionDrag = true;
 				IsDraggingSelection = false;
 			}
 
