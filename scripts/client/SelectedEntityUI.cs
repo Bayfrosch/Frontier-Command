@@ -40,6 +40,7 @@ public partial class SelectedEntityUI : Control
 	private void HandleUnitSelection()
 	{
 		var row = GetNode<HBoxContainer>("VBoxContainer/Row1");
+		row.AddThemeConstantOverride("separation", 16);
 
 		foreach (var child in row.GetChildren())
 		{
@@ -65,14 +66,38 @@ public partial class SelectedEntityUI : Control
 			return;
 		}
 
-		foreach (Ability ability in priorizedEntity.Abilities)
-		{
-			// TODO: Render each Ability
-			var Label = new Label
+			foreach (Ability ability in priorizedEntity.Abilities)
 			{
-				Text = ability.Name,
-			};
-			row.AddChild(Label);
-		}
+				/*
+				Rendering of each Ability in bottom Row
+				Generates a Button for each Ability
+				*/
+				var AbilityButton = new Button
+				{
+					Text = ability.Name,
+					CustomMinimumSize = new Vector2(140, 60),
+				};
+
+				var normalStyle = new StyleBoxFlat
+				{
+					BgColor = new Color(0.5f, 0.5f, 0.5f),
+					CornerRadiusBottomLeft = 8,
+					CornerRadiusBottomRight = 8,
+					CornerRadiusTopLeft = 8,
+					CornerRadiusTopRight = 8,
+				};
+
+				var hoverStyle = (StyleBoxFlat)normalStyle.Duplicate();
+				hoverStyle.BgColor = new Color(0.3f,0.3f,0.3f);
+				
+				var pressedStyle = (StyleBoxFlat)normalStyle.Duplicate();
+				pressedStyle.BgColor = new Color(0.1f,0.1f,0.1f);
+
+				AbilityButton.AddThemeStyleboxOverride("normal", normalStyle);
+				AbilityButton.AddThemeStyleboxOverride("hover", hoverStyle);
+				AbilityButton.AddThemeStyleboxOverride("pressed", pressedStyle);
+				
+				row.AddChild(AbilityButton);
+			}
 	}
 }

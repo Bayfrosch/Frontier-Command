@@ -497,6 +497,18 @@ public static class AbilityCatalog
 					unlocked = true,
 					Cost = 20
 				});
+				abilities.Add(new Ability
+				{
+					Name = "Hello",
+					unlocked = true,
+					Cost = 15
+				});
+				abilities.Add(new Ability
+				{
+					Name = "World",
+					unlocked = false,
+					Cost = 69
+				});
 				break;
 		}
 		return abilities;
