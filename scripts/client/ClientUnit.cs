@@ -41,4 +41,13 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         TargetPosition = state.TargetPosition;
         MovementSpeed = state.MovementSpeed;
     }
+    public override void _Process(double delta)
+    {
+        if (Math.Max(GlobalPosition.DistanceTo(RenderPosition), 0) <= 3f)
+        {
+            return; 
+        }
+        LookAt(TargetPosition);
+        GlobalPosition = GlobalPosition.MoveToward(RenderPosition, (float) (MovementSpeed * delta));
+    }
 }
