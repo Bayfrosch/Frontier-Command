@@ -17,6 +17,7 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 15f,
+            UnitType.CONSTRUCTION_UNIT => 30f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
         };
     }

@@ -8,6 +8,9 @@ public partial class GameScene : Node2D
 {
 	[Signal] 
 	public delegate void UnitSelectionEventHandler();
+	public bool AbilityTargetSelection;
+	private Vector2? AbilityTargetPosition = null;
+	private string lastSelectedAbility = "";
 	private TimeTickSystem gameLoop = null;
 	private LocalSimulationNode simulationCore = null;
 	private bool SpawnUnits = false;
@@ -38,17 +41,37 @@ public partial class GameScene : Node2D
 
 		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
+
+		simulationCore.Push(new DebugSpawnUnitsMessage(
+			"player_1",
+			gameLoop.CurrentTick,
+			UnitType.CONSTRUCTION_UNIT,
+			new Vector2(100, 50),
+			UnitCatalog.GetMovementSpeed(UnitType.CONSTRUCTION_UNIT)
+		));
 	}
 
 	private void OnAbilityPressed(string abilityId)
 	{
+		if (AbilityCatalog.RequiresTarget(abilityId) && AbilityTargetPosition is null)
+		{
+			lastSelectedAbility = abilityId;
+			AbilityTargetSelection = true;
+			return;
+		}
+
 		var command = new UseAbilityMessage(
 			"player_1",
 			gameLoop.CurrentTick,
 			SelectedEntityIds.ToArray(),
 			abilityId,
-			shiftHeld ? 1 : 0
+			shiftHeld ? 1 : 0,
+			(AbilityTargetPosition is null) ? null : AbilityTargetPosition
 		);
+
+		AbilityTargetPosition = null;
+		AbilityTargetSelection = false;
+		lastSelectedAbility = "";
 
 		if (!simulationCore.Push(command))
 		{
@@ -168,64 +191,43 @@ public partial class GameScene : Node2D
 
 	private void HandleLeftMouseButton(bool shiftHeld)
 	{
-		if (SpawnMode) {
-			MessageBase command;
-			if (!SpawnUnits) {
-				command = new BuildStructureMessage(
-					//TODO:
-					BuildingType.BARRACKS,
-					"player_1",
-					gameLoop.CurrentTick,
-					"worker_1",
-					GetGlobalMousePosition()
-				);
-			} else
-			{
-				command = new DebugSpawnUnitsMessage(
-					"player_1",
-					gameLoop.CurrentTick,
-					//TODO:
-					UnitType.BASIC_INFANTRY,
-					GetGlobalMousePosition(),
-					25f	
-				);
-			}
-
-			if (!simulationCore.Push(command))
-				GD.Print("Command couldn't be processed. ", command);
-
-			GD.Print("Command send");
-		} else
+		if (AbilityTargetSelection)
 		{
-			var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
-			if (CurrentEntity is null)
-			{
-				EntitySelectionIds.Clear();
-				EmitSignal(SignalName.UnitSelection);
-				return;
-			}
-
-			if (CurrentEntity is ClientBuilding)
-			{
-				EntitySelectionIds.Clear();
-			}
-
-			if (!shiftHeld)
-			{
-				EntitySelectionIds.Clear();
-			}
-			EntitySelectionIds.Add(CurrentEntity.EntityId);
-			EmitSignal(SignalName.UnitSelection);
+			AbilityTargetPosition = GetGlobalMousePosition();
+			OnAbilityPressed(lastSelectedAbility);
+			return;
 		}
+
+		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
+		if (CurrentEntity is null)
+		{
+			EntitySelectionIds.Clear();
+			EmitSignal(SignalName.UnitSelection);
+			return;
+		}
+
+		if (CurrentEntity is ClientBuilding building)
+		{
+			if (building.BuildProgression < 100)
+				return;
+			EntitySelectionIds.Clear();
+		}
+
+		if (!shiftHeld)
+		{
+			EntitySelectionIds.Clear();
+		}
+		EntitySelectionIds.Add(CurrentEntity.EntityId);
+		EmitSignal(SignalName.UnitSelection);
 	}
 
 	private void HandleRightMouseButton(bool shiftHeld)
 	{
 		MessageBase command = null;
 
-		var CurrentBuilding = GetEntityUnderMouse(GetGlobalMousePosition());
-		if (!(CurrentBuilding is null)) {
-			if (CurrentBuilding is not ClientBuilding building)
+		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
+		if (!(CurrentEntity is null)) {
+			if (CurrentEntity is not ClientBuilding building)
 			{
 				return;
 			}

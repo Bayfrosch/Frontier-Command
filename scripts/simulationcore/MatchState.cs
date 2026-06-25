@@ -83,13 +83,14 @@ public abstract class EntityState
 	public HashSet<Ability> Abilities { get; set; }
 }
 
-public sealed class UnitState : EntityState
+public class UnitState : EntityState
 {
 	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType = UnitType.BASIC_INFANTRY)
 		: base(entityId, ownerPlayerId, currentPos)
 	{
 		Type = unitType;
 		MovementSpeed = movementSpeed;
+		Abilities = AbilityCatalog.ForUnit(unitType);
 	}
 	public UnitType Type { get; private set; }
 	public Vector2 TargetPosition { get; private set; }
@@ -131,16 +132,18 @@ public enum BuildingType
 public enum UnitType
 {
 	BASIC_INFANTRY,
+	CONSTRUCTION_UNIT,
 }
 
 public sealed class BuildingState : EntityState
 {
-	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType buildingType)
+	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType buildingType, string constructionUnitId)
 		: base(entityId, ownerPlayerId, currentPos)
 	{
 		Type = buildingType;
 		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(buildingType);
 		Abilities = AbilityCatalog.ForBuilding(buildingType);
+		ConstructionUnitId = constructionUnitId;
 	}
 	public int BuildProgression { get; private set; } = 0;
 	internal void AdvanceConstruction(int amount)
@@ -169,6 +172,7 @@ public sealed class BuildingState : EntityState
 	public UnitType[] ProductionQueue { get; private set; } = [];
 	public int ProductionProgress { get; private set; }
 	public Vector2 RallyPoint {get; private set; }
+	public string ConstructionUnitId { get; private set; }
 	internal void SetRallyPoint(Vector2 newPos)
 	{
 		RallyPoint = newPos;

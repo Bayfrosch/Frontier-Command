@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://3vbnfl6x03x3"]
+
+[ext_resource type="Script" uid="uid://byb22w5vlduoq" path="res://scripts/client/units/ConstructionUnit.cs" id="1_f8afd"]
+[ext_resource type="Shader" uid="uid://dir0o5xxjoi5i" path="res://scenes/units/unitCircle.gdshader" id="2_f8afd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s8v86"]
+shader = ExtResource("2_f8afd")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_exrw7"]
+radius = 20.0
+
+[node name="ConstructionUnit" type="Node2D" unique_id=480659830]
+script = ExtResource("1_f8afd")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=1712387753]
+material = SubResource("ShaderMaterial_s8v86")
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.2565697, 0.41133666, 0.9501857, 1)
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=1449466740]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Bau"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1927191661]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=785662145]
+shape = SubResource("CircleShape2D_exrw7")

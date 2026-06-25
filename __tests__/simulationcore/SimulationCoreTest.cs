@@ -73,7 +73,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var building = new BuildingState("building-1", "player-1", Vector2.Zero, BuildingType.BARRACKS);
+		var building = new BuildingState("building-1", "player-1", Vector2.Zero, BuildingType.BARRACKS, "construction-1");
 		player.AddEntity(building);
 		context.AddPlayer(player);
 

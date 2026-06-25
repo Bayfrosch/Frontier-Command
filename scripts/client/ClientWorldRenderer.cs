@@ -11,6 +11,7 @@ public partial class ClientWorldRenderer : Node
 
 	// Unit Scenes
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
+	public PackedScene ConstructionUnitScene { get; } = GD.Load<PackedScene>("res://scenes/units/constructionUnit.tscn");
 
 	private static readonly Color DefaultUnitColor = new(0.7169325f, 0.3354848f, 0.33498362f, 1f);
 	private static readonly Color SelectedUnitColor = new(0.2f, 0.8f, 1f, 1f);
@@ -40,6 +41,16 @@ public partial class ClientWorldRenderer : Node
 		Scene.UnitSelection += OnUnitSelection;
 	}
 
+	private static Color GetDefaultUnitColor(UnitType type)
+	{
+		return type switch
+		{
+			UnitType.BASIC_INFANTRY => new Color(0.7169325f, 0.3354848f, 0.33498362f, 1f),
+			UnitType.CONSTRUCTION_UNIT => new Color(0.2565697f, 0.41133666f, 0.9501857f, 1f),
+			_ => DefaultUnitColor
+		};
+	}
+
 	private void OnUnitSelection()
 	{
 		foreach (var unit in unitsById.Values)
@@ -47,7 +58,7 @@ public partial class ClientWorldRenderer : Node
 			var bodyRender = unit.GetNode<ColorRect>("BodyRender");
 			bodyRender.Color = Scene.SelectedEntityIds.Contains(unit.EntityId)
 				? SelectedUnitColor
-				: DefaultUnitColor;
+				: GetDefaultUnitColor(unit.Type);
 		}
 	}
 
@@ -104,6 +115,7 @@ public partial class ClientWorldRenderer : Node
 		return type switch
 		{
 			UnitType.BASIC_INFANTRY => BasicInfantryScene,
+			UnitType.CONSTRUCTION_UNIT => ConstructionUnitScene,
 			_ => BasicInfantryScene
 		};
 	}

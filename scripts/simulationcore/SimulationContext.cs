@@ -8,6 +8,7 @@ public sealed class SimulationContext
 	const float deltaSeconds = 1.0f / 5.0f;
 	private const int CONSTRUCTION_ADVANCE = 5;
 	private const int PRODUCTION_ADVANCE = 5;
+	private const float UNIT_SPACING = 50f;
 	public string MatchId { get; }
 	/*
 	The saved state of the match for each lobby
@@ -76,7 +77,7 @@ public sealed class SimulationContext
 			{
 				if (entity is BuildingState building)
 				{
-					building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
+					HandleAdvanceConstruction(player.PlayerId, building);
 					var unit = building.AdvanceProduction(PRODUCTION_ADVANCE);
 					if (unit is null)
 						continue;
@@ -206,6 +207,20 @@ public sealed class SimulationContext
 		}
 		return true;
 	}
+
+	private bool TryGetConstructionUnit(string playerId, string unitId, out UnitState? constructionUnit)
+	{
+		constructionUnit = null;
+
+		if (!TryGetPlayerEntity<UnitState>(playerId, unitId, out var unit))
+			return false;
+
+		if (unit.Type != UnitType.CONSTRUCTION_UNIT)
+			return false;
+
+		constructionUnit = unit;
+		return true;
+	}
 	/*
 	Message handlers for reacting to every pre defined message in Messages.cs
 	Message types get linked in the constructor to their coresponding handler
@@ -218,7 +233,6 @@ public sealed class SimulationContext
 			return false;
 		}
 
-		const float spacing = 75f;
 		int columns = (int) Math.Ceiling(Math.Sqrt(units.Count));
 		int rows = (int) Math.Ceiling(units.Count / (float)columns);
 
@@ -227,8 +241,8 @@ public sealed class SimulationContext
 			int column = i % columns;
 			int row = i / columns;
 
-			float offsetX = (column - (columns - 1) / 2f) * spacing;
-			float offsetY = (row - (rows - 1) / 2f) * spacing;
+			float offsetX = (column - (columns - 1) / 2f) * UNIT_SPACING;
+			float offsetY = (row - (rows - 1) / 2f) * UNIT_SPACING;
 
 			Vector2 offsetVector = new Vector2(offsetX, offsetY);
 
@@ -242,11 +256,39 @@ public sealed class SimulationContext
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
 			return false;
 
+		if (!TryGetConstructionUnit(msg.player_id, msg.construction_unit_id, out var unit))
+			return false;
+
 		var id = NewEntityId(msg.building_type.ToString());
-		BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type);
+		BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type, msg.construction_unit_id);
 
 		player.AddEntity(building);
+
+		var constructionTarget = building.CurrentPosition + BuildingCatalog.GetFoodprintSize(building.Type) - new Vector2(5, 5);
+		Push(new MoveUnitsMessage(
+			player.PlayerId,
+			_matchState.Tick,
+			new[] { unit.EntityId },
+			constructionTarget
+		));
+
 		return true;
+	}
+	private void HandleAdvanceConstruction(string playerId, BuildingState building)
+	{
+		if (!TryGetConstructionUnit(playerId, building.ConstructionUnitId, out var constructionUnit))
+			return;
+
+		float constructionRange = GetConstructionRange(building.Type);
+
+		if (building.CurrentPosition.DistanceSquaredTo(constructionUnit.CurrentPosition) > constructionRange * constructionRange)
+			return;
+
+		building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
+	}
+	private static float GetConstructionRange(BuildingType type)
+	{
+		return BuildingCatalog.GetFoodprintSize(type).Length() + 5f;
 	}
 	private bool HandleCancelConstruction(CancelConstructionMessage msg)
 	{
@@ -381,25 +423,28 @@ public sealed class SimulationContext
 		bool passed = false;
 		switch (msg.ability_id)
 		{
+			// Units
 			case "spawn_infantry": 
-				passed = HandleSpawnInfantry(msg);
+				passed = HandleSpawnUnit(msg, UnitType.BASIC_INFANTRY);
+				break;
+			
+			// Buildings
+			case "spawn_barracks":
+				passed = HandleSpawnBuilding(msg, BuildingType.BARRACKS);
 				break;
 		}
 		return passed;
 	}
 
-	private bool HandleSpawnInfantry(UseAbilityMessage msg)
+	private bool HandleSpawnUnit(UseAbilityMessage msg, UnitType unitType)
 	{
 		foreach(string entityId in msg.caster_entity_ids)
 		{
-			if (!TryGetPlayerEntity(msg.player_id, entityId, out EntityState entity))
-				return false;
-
-			if (entity is not BuildingState building)
+			if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var building))
 				return false;
 
 			HandleTrainUnits(new TrainUnitsMessage(
-				UnitType.BASIC_INFANTRY,
+				unitType,
 				msg.player_id,
 				_matchState.Tick,
 				building.EntityId,
@@ -408,6 +453,26 @@ public sealed class SimulationContext
 		}
 		return true;
 	}
+
+	private bool HandleSpawnBuilding(UseAbilityMessage msg, BuildingType buildingType)
+	{
+		if (msg.caster_entity_ids.Length > 1)
+			return false;
+
+		string entityId = msg.caster_entity_ids[0];
+
+		if (msg.target_position is null)
+			return false;
+
+		return HandleBuildStructure(new BuildStructureMessage(
+			buildingType,
+			msg.player_id,
+			_matchState.Tick,
+			entityId,
+			msg.target_position.Value
+		));
+	}
+
 	// TODO:
 	private bool HandleGatherResources(GatherResourcesMessage msg)
 	{

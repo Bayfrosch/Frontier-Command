@@ -6,5 +6,6 @@ public class Ability
     public string Name;
     public int Cost;
     public Image? Preview;
-    public bool unlocked;
+    public bool Unlocked;
+    public Vector2? TargetPosition;
 }

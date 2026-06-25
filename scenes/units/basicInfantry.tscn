@@ -6,8 +6,8 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8yuvl"]
 shader = ExtResource("2_qba1x")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1iage"]
-size = Vector2(40, 40)
+[sub_resource type="CircleShape2D" id="CircleShape2D_qba1x"]
+radius = 20.024984
 
 [node name="BasicInfantry" type="Node2D" unique_id=1169432479]
 script = ExtResource("1_jdc4a")
@@ -41,4 +41,4 @@ vertical_alignment = 1
 [node name="Area2D" type="Area2D" parent="." unique_id=892104924]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=2108000842]
-shape = SubResource("RectangleShape2D_1iage")
+shape = SubResource("CircleShape2D_qba1x")
