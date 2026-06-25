@@ -5,6 +5,9 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n8bkc"]
 bg_color = Color(0, 0.59552544, 0.08755032, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a3sb6"]
+bg_color = Color(0, 0.6732143, 0.77275443, 1)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_n8bkc"]
 size = Vector2(80, 60)
 
@@ -35,7 +38,7 @@ text = "B"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ProgressBar" type="ProgressBar" parent="BodyRender" unique_id=233179202]
+[node name="BuildProgressBar" type="ProgressBar" parent="BodyRender" unique_id=233179202]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -49,6 +52,22 @@ offset_bottom = -2.5
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/fill = SubResource("StyleBoxFlat_n8bkc")
+show_percentage = false
+
+[node name="ProductionProgressBar" type="ProgressBar" parent="BodyRender" unique_id=601997097]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -35.0
+offset_top = -58.0
+offset_right = 35.0
+offset_bottom = -53.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_a3sb6")
 show_percentage = false
 
 [node name="Area2D" type="Area2D" parent="." unique_id=203866379]

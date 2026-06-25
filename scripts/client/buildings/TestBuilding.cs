@@ -6,22 +6,37 @@ Implementation of the render BuildingState
 */
 public partial class TestBuilding : ClientBuilding
 {
-	private ProgressBar progressBar = null!;
+	private ProgressBar BuildProgressBar = null;
+	private ProgressBar ProductionProgressBar = null;
 
 	public override void _Ready()
 	{
-		progressBar = GetNode<ProgressBar>("BodyRender/ProgressBar");
-		progressBar.MaxValue = 100;
-		progressBar.Value = 0;
+		BuildProgressBar = GetNode<ProgressBar>("BodyRender/BuildProgressBar");
+		BuildProgressBar.MaxValue = 100;
+		BuildProgressBar.Value = 0;
+
+		ProductionProgressBar = GetNode<ProgressBar>("BodyRender/ProductionProgressBar");
+		ProductionProgressBar.Visible = false;
+		ProductionProgressBar.Value = 0;
 	}
 
 	public override void ApplyState(BuildingState state)
 	{
 		base.ApplyState(state);
 
-		progressBar.Value = state.BuildProgression;
+		BuildProgressBar.Value = state.BuildProgression;
 		if (state.BuildProgression >= 100)
-			progressBar.Visible = false;
+			BuildProgressBar.Visible = false;
+
+		if (state.ProductionProgress > 0)
+		{
+			ProductionProgressBar.Visible = true;
+			ProductionProgressBar.Value = state.ProductionProgress;
+		} else
+		{
+			ProductionProgressBar.Visible = false;
+			ProductionProgressBar.Value = 0;
+		}
 	}
 
 }

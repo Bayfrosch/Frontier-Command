@@ -7,6 +7,7 @@ public sealed class SimulationContext
 {
 	const float deltaSeconds = 1.0f / 5.0f;
 	private const int CONSTRUCTION_ADVANCE = 5;
+	private const int PRODUCTION_ADVANCE = 5;
 	public string MatchId { get; }
 	/*
 	The saved state of the match for each lobby
@@ -67,6 +68,8 @@ public sealed class SimulationContext
 	{
 		_matchState.IncrementTick();
 
+		var unitsToSpawn = new List<DebugSpawnUnitsMessage>();
+
 		foreach (var player in _matchState.Players.Values)
 		{
 			foreach (var entity in player.Entities.Values)
@@ -74,11 +77,26 @@ public sealed class SimulationContext
 				if (entity is BuildingState building)
 				{
 					building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
+					var unit = building.AdvanceProduction(PRODUCTION_ADVANCE);
+					if (unit is null)
+						continue;
+
+					unitsToSpawn.Add(new DebugSpawnUnitsMessage(
+						player.PlayerId,
+						_matchState.Tick,
+						unit.Value,
+						building.RallyPoint,
+						UnitCatalog.GetMovementSpeed(unit.Value)
+					));
 				} else if (entity is UnitState unit)
 				{
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
 				}
 			}
+		}
+		foreach (var spawnMessage in unitsToSpawn)
+		{
+			Push(spawnMessage);
 		}
 	}
 	/*
@@ -273,26 +291,26 @@ public sealed class SimulationContext
 	}
 	private bool HandleTrainUnits(TrainUnitsMessage msg)
 	{
-		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building) || building is null)
+		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building) || building is null)
 			return false;
 
 		for (var i = 0; i < msg.quantity; i++)
-			building.QueueProduction(msg.unit_definition_id);
+			building.QueueProduction(msg.UnitDefinitionId);
 
 		return true;
 	}
 	private bool HandleCancelProduction(CancelProductionMessage msg)
 	{
-		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.producer_entity_id, out var building))
+		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building))
 			return false;
 
 		if (building is null)
 			return false;
 
-		if (!building.ProductionQueue.Contains(msg.queue_item_id))
+		if (!building.ProductionQueue.Contains(msg.QueueItem))
 			return false;
 
-		building.CancelProduction(msg.queue_item_id);
+		building.CancelProduction(msg.QueueItem);
 		return true;
 	}
 	
@@ -380,12 +398,12 @@ public sealed class SimulationContext
 			if (entity is not BuildingState building)
 				return false;
 
-			HandleDebugSpawnUnit(new DebugSpawnUnitsMessage(
+			HandleTrainUnits(new TrainUnitsMessage(
+				UnitType.BASIC_INFANTRY,
 				msg.player_id,
 				_matchState.Tick,
-				UnitType.BASIC_INFANTRY,
-				building.RallyPoint,
-				10f
+				building.EntityId,
+				1
 			));
 		}
 		return true;
@@ -395,7 +413,6 @@ public sealed class SimulationContext
 	{
 		return false;
 	}
-	// TODO:
 	private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
 	{
 		if (!TryGetPlayer(msg.PlayerId, out var player))

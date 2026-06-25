@@ -97,6 +97,7 @@ public sealed class UnitState : EntityState
 	public int AttackDamage { get; private set; }
 	public float AttackRange { get; private set; }
 	public float MovementSpeed { get; private set; }
+    public int ProductionTime { get; private set; }
 	
 	internal void SetMoveOrder(Vector2 targetPosition)
 	{
@@ -146,21 +147,39 @@ public sealed class BuildingState : EntityState
 	{
 		BuildProgression = Math.Min(100, BuildProgression + amount);
 	}
+    internal UnitType? AdvanceProduction(int amount)
+    {
+        if (ProductionQueue.Length <= 0)
+            return null;
+        var currentUnit = ProductionQueue[0];
+        var productionTime = UnitCatalog.GetProductionTime(currentUnit);
+        ProductionProgress = Math.Min(productionTime, ProductionProgress + amount);
+
+        if (ProductionProgress == productionTime)
+        {
+            //TODO: Spawn Unit
+            var finishedUnit = ProductionQueue[0];
+            ProductionQueue = ProductionQueue.Skip(1).ToArray();
+            ProductionProgress = 0;
+            return finishedUnit;
+        }
+        return null;
+    }
 	public BuildingType Type;
-	public string[] ProductionQueue { get; private set; } = [];
+	public UnitType[] ProductionQueue { get; private set; } = [];
 	public int ProductionProgress { get; private set; }
 	public Vector2 RallyPoint {get; private set; }
 	internal void SetRallyPoint(Vector2 newPos)
 	{
 		RallyPoint = newPos;
 	}
-	internal void CancelProduction(string entityId)
+	internal void CancelProduction(UnitType entityId)
 	{
 		ProductionQueue = ProductionQueue.Where(x => !x.Equals(entityId)).ToArray();
 	}
-	internal void QueueProduction(string unitDefinitionId)
+	internal void QueueProduction(UnitType unitType)
 	{
-		ProductionQueue = ProductionQueue.Append(unitDefinitionId).ToArray();
+		ProductionQueue = ProductionQueue.Append(unitType).ToArray();
 	}
 }
 
