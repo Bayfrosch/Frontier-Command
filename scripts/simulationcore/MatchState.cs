@@ -142,7 +142,7 @@ public sealed class BuildingState : EntityState
 		: base(entityId, ownerPlayerId, currentPos)
 	{
 		Type = buildingType;
-		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(buildingType);
+		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(buildingType) / 2f + new Vector2(20f, 20f);
 		Abilities = AbilityCatalog.ForBuilding(buildingType);
 		ConstructionUnitId = constructionUnitId;
 	}
@@ -161,7 +161,6 @@ public sealed class BuildingState : EntityState
 
 		if (ProductionProgress == productionTime)
 		{
-			//TODO: Spawn Unit
 			var finishedUnit = ProductionQueue[0];
 			ProductionQueue = ProductionQueue.Skip(1).ToArray();
 			ProductionProgress = 0;

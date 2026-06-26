@@ -264,7 +264,7 @@ public sealed class SimulationContext
 
 		player.AddEntity(building);
 
-		var constructionTarget = building.CurrentPosition + BuildingCatalog.GetFoodprintSize(building.Type) - new Vector2(5, 5);
+		var constructionTarget = FindShortestPathToBuilding(unit.CurrentPosition, building);
 		Push(new MoveUnitsMessage(
 			player.PlayerId,
 			_matchState.Tick,
@@ -274,6 +274,24 @@ public sealed class SimulationContext
 
 		return true;
 	}
+	private Vector2 FindShortestPathToBuilding(Vector2 unitPosition, BuildingState building)
+	{
+		var buildingSize = BuildingCatalog.GetFoodprintSize(building.Type);
+		var buildingCenter = building.CurrentPosition;
+		var direction = unitPosition - buildingCenter;
+
+		if (direction == Vector2.Zero)
+			direction = Vector2.Right;
+
+		direction = direction.Normalized();
+
+		var distanceToBuildingEdge = Math.Min(
+			Math.Abs(buildingSize.X/2f / direction.X),
+			Math.Abs(buildingSize.Y/2f / direction.Y)
+		);
+
+		return buildingCenter + direction * (distanceToBuildingEdge + GetConstructionRange(building.Type) / 2);
+	}
 	private void HandleAdvanceConstruction(string playerId, BuildingState building)
 	{
 		if (!TryGetConstructionUnit(playerId, building.ConstructionUnitId, out var constructionUnit))
@@ -281,14 +299,33 @@ public sealed class SimulationContext
 
 		float constructionRange = GetConstructionRange(building.Type);
 
-		if (building.CurrentPosition.DistanceSquaredTo(constructionUnit.CurrentPosition) > constructionRange * constructionRange)
+		if (DistanceSquaredToBuildingFootprint(constructionUnit.CurrentPosition, building) > constructionRange * constructionRange)
 			return;
 
 		building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
 	}
+	private static float DistanceSquaredToBuildingFootprint(Vector2 point, BuildingState building)
+	{
+		var size = BuildingCatalog.GetFoodprintSize(building.Type);
+		var halfSize = size / 2f;
+
+		float closestX = Math.Clamp(
+			point.X,
+			building.CurrentPosition.X - halfSize.X,
+			building.CurrentPosition.X + halfSize.X
+		);
+
+		float closestY = Math.Clamp(
+			point.Y,
+			building.CurrentPosition.Y - halfSize.Y,
+			building.CurrentPosition.Y + halfSize.Y
+		);
+		
+		return point.DistanceSquaredTo(new Vector2(closestX, closestY));
+	}
 	private static float GetConstructionRange(BuildingType type)
 	{
-		return BuildingCatalog.GetFoodprintSize(type).Length() + 5f;
+		return 10f;
 	}
 	private bool HandleCancelConstruction(CancelConstructionMessage msg)
 	{
