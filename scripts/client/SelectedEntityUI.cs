@@ -1,7 +1,9 @@
 using Godot;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 public partial class SelectedEntityUI : Control
 {
@@ -9,6 +11,7 @@ public partial class SelectedEntityUI : Control
 	public delegate void AbilityPressedEventHandler(string abilityId);
 	private IReadOnlyCollection<string> SelectedEntityIds;
 	private IReadOnlyDictionary<string, EntityState> EntitiesById;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -54,13 +57,33 @@ public partial class SelectedEntityUI : Control
 			return;
 		}
 
-		var selectedId = SelectedEntityIds.First();
-		if (!EntitiesById.TryGetValue(selectedId, out var priorizedEntity))
+		if (!EntitiesById.TryGetValue(SelectedEntityIds.First(), out var priorizedEntity))
 			return;
 
 		if (SelectedEntityIds.Count > 1)
 		{
-			// TODO: Select priority Unit (Special first, most second)
+			var selectedUnits = SelectedEntityIds
+				.Select(id => EntitiesById.TryGetValue(id, out var entity) ? entity : null)
+				.OfType<UnitState>()
+				.ToList();
+
+			var capitalUnit = selectedUnits
+				.FirstOrDefault(unit => UnitCatalog.GetCapitalUnits().Contains(unit.Type));
+
+			if (capitalUnit is not null)
+			{
+				priorizedEntity = capitalUnit;
+			}
+			else if (selectedUnits.Count > 0)
+			{
+				var mostCommonType = selectedUnits
+					.GroupBy(unit => unit.Type)
+					.OrderByDescending(group => group.Count())
+					.First()
+					.Key;
+
+				priorizedEntity = selectedUnits.First(unit => unit.Type == mostCommonType);
+			}
 		}
 
 		if (priorizedEntity.Abilities is null || priorizedEntity.Abilities.Count <= 0)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 
 public static class UnitCatalog
@@ -19,6 +20,14 @@ public static class UnitCatalog
             UnitType.BASIC_INFANTRY => 15f,
             UnitType.CONSTRUCTION_UNIT => 30f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
+        };
+    }
+
+    public static List<UnitType> GetCapitalUnits()
+    {
+        return new List<UnitType>
+        {
+            UnitType.OVERLORD,
         };
     }
 }

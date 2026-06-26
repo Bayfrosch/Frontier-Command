@@ -62,6 +62,16 @@ public static class AbilityCatalog
 					Cost = 1000,
 				});
 				break;
+
+			case UnitType.BASIC_INFANTRY:
+				abilities.Add(new Ability
+				{
+					Id = "capture_building",
+					Name = "Einnehmen",
+					Unlocked = true,
+					Cost = 0,
+				});
+				break;
 		}
 		return abilities;
 	}
