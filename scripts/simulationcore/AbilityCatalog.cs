@@ -13,6 +13,7 @@ public static class AbilityCatalog
 			
 			// Buildings
 			"spawn_barracks" => true,
+			"cancel_construction" => false,
 			_ => throw new ArgumentOutOfRangeException(abilityId, "abilityId not defined in Catalog")
 		};
 	}
@@ -21,6 +22,16 @@ public static class AbilityCatalog
 		var abilities = new HashSet<Ability>();
 		switch (type)
 		{
+			case BuildingType.CONSTRUCTION_SITE:
+				abilities.Add(new Ability
+				{
+					Id = "cancel_construction",
+					Name = "Abbrechen",
+					Unlocked = true,
+					Cost = 0
+				});
+				break;
+
 			case BuildingType.BARRACKS:
 				abilities.Add(new Ability
 				{

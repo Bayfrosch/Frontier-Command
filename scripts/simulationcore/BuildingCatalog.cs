@@ -10,4 +10,11 @@ public static class BuildingCatalog
 			_ => new Vector2(0, 0)
 		};
 	}
+
+	public static BuildingType GetFootprintType(BuildingState building)
+	{
+		return building.Type == BuildingType.CONSTRUCTION_SITE
+			? building.pendingBuilding
+			: building.Type;
+	}
 }

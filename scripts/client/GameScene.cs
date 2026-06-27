@@ -187,8 +187,6 @@ public partial class GameScene : Node2D
 
 		if (CurrentEntity is ClientBuilding building)
 		{
-			if (building.BuildProgression < 100)
-				return;
 			EntitySelectionIds.Clear();
 		}
 
@@ -205,24 +203,7 @@ public partial class GameScene : Node2D
 		MessageBase command = null;
 
 		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
-		if (!(CurrentEntity is null)) {
-			if (CurrentEntity is not ClientBuilding building)
-			{
-				return;
-			}
-
-			if (building.BuildProgression >= 100)
-			{
-				GD.Print("Cannot cancel finished Building");
-				return;
-			}
-
-			command = new CancelConstructionMessage(
-				"player_1",
-				gameLoop.CurrentTick,
-				building.EntityId
-			);
-		} else
+		if (CurrentEntity is null) 
 		{
 			command = new MoveUnitsMessage(
 				"player_1",

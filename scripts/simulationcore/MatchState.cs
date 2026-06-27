@@ -126,6 +126,7 @@ public class UnitState : EntityState
 
 public enum BuildingType
 {
+	CONSTRUCTION_SITE,
 	BARRACKS,
 }
 
@@ -138,18 +139,25 @@ public enum UnitType
 
 public sealed class BuildingState : EntityState
 {
-	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType buildingType, string constructionUnitId)
+	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType pendingBuildingType, string constructionUnitId)
 		: base(entityId, ownerPlayerId, currentPos)
 	{
-		Type = buildingType;
-		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(buildingType) / 2f + new Vector2(20f, 20f);
-		Abilities = AbilityCatalog.ForBuilding(buildingType);
+		Type = BuildingType.CONSTRUCTION_SITE;
+		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(pendingBuildingType) / 2f + new Vector2(20f, 20f);
+		Abilities = AbilityCatalog.ForBuilding(BuildingType.CONSTRUCTION_SITE);
 		ConstructionUnitId = constructionUnitId;
+		pendingBuilding = pendingBuildingType;
 	}
 	public int BuildProgression { get; private set; } = 0;
 	internal void AdvanceConstruction(int amount)
 	{
 		BuildProgression = Math.Min(100, BuildProgression + amount);
+
+		if (BuildProgression >= 100)
+		{
+			Type = pendingBuilding;
+			Abilities = AbilityCatalog.ForBuilding(pendingBuilding);
+		}
 	}
 	internal UnitType? AdvanceProduction(int amount)
 	{
@@ -173,6 +181,7 @@ public sealed class BuildingState : EntityState
 	public int ProductionProgress { get; private set; }
 	public Vector2 RallyPoint {get; private set; }
 	public string ConstructionUnitId { get; private set; }
+	public BuildingType pendingBuilding { get; private set; }
 	internal void SetRallyPoint(Vector2 newPos)
 	{
 		RallyPoint = newPos;

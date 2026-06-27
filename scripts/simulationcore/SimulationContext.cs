@@ -276,7 +276,7 @@ public sealed class SimulationContext
 	}
 	private Vector2 FindShortestPathToBuilding(Vector2 unitPosition, BuildingState building)
 	{
-		var buildingSize = BuildingCatalog.GetFoodprintSize(building.Type);
+		var buildingSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
 		var buildingCenter = building.CurrentPosition;
 		var direction = unitPosition - buildingCenter;
 
@@ -294,6 +294,9 @@ public sealed class SimulationContext
 	}
 	private void HandleAdvanceConstruction(string playerId, BuildingState building)
 	{
+		if (!(building.Type == BuildingType.CONSTRUCTION_SITE))
+			return;
+
 		if (!TryGetConstructionUnit(playerId, building.ConstructionUnitId, out var constructionUnit))
 			return;
 
@@ -306,7 +309,7 @@ public sealed class SimulationContext
 	}
 	private static float DistanceSquaredToBuildingFootprint(Vector2 point, BuildingState building)
 	{
-		var size = BuildingCatalog.GetFoodprintSize(building.Type);
+		var size = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
 		var halfSize = size / 2f;
 
 		float closestX = Math.Clamp(
@@ -466,6 +469,15 @@ public sealed class SimulationContext
 				break;
 			
 			// Buildings
+			case "cancel_construction":
+				var cmsg = new CancelConstructionMessage (
+					msg.player_id,
+					msg.issued_at_tick,
+					msg.caster_entity_ids[0]
+				);
+				HandleCancelConstruction(cmsg);
+				break;
+
 			case "spawn_barracks":
 				passed = HandleSpawnBuilding(msg, BuildingType.BARRACKS);
 				break;
@@ -491,7 +503,7 @@ public sealed class SimulationContext
 		return true;
 	}
 
-	private bool HandleSpawnBuilding(UseAbilityMessage msg, BuildingType buildingType)
+	private bool HandleSpawnBuilding(UseAbilityMessage msg, BuildingType pendingBuilding)
 	{
 		if (msg.caster_entity_ids.Length > 1)
 			return false;
@@ -502,7 +514,7 @@ public sealed class SimulationContext
 			return false;
 
 		return HandleBuildStructure(new BuildStructureMessage(
-			buildingType,
+			pendingBuilding,
 			msg.player_id,
 			_matchState.Tick,
 			entityId,

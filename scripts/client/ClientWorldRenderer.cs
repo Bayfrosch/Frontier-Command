@@ -6,8 +6,8 @@ using System.Linq;
 public partial class ClientWorldRenderer : Node
 {
 	// Building Scenes
-	public PackedScene TestBuildingScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/building.tscn");
-	public PackedScene BasicGeneratorScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/building.tscn");
+	public PackedScene BasicBarracksScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/Barracks.tscn");
+	public PackedScene ConstructionSiteScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
 
 	// Unit Scenes
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
@@ -105,8 +105,9 @@ public partial class ClientWorldRenderer : Node
 	{
 		return type switch
 		{
-			BuildingType.BARRACKS => BasicGeneratorScene,
-			_ => TestBuildingScene
+			BuildingType.BARRACKS => BasicBarracksScene,
+			BuildingType.CONSTRUCTION_SITE => ConstructionSiteScene,
+			_ => throw new Exception("BuildingScene does not exist")
 		};
 	}
 
@@ -122,18 +123,24 @@ public partial class ClientWorldRenderer : Node
 
 	private void SyncBuilding(BuildingState buildingState)
 	{
-		if (!buildingsById.TryGetValue(buildingState.EntityId, out var building))
+		if (buildingsById.TryGetValue(buildingState.EntityId, out var building) 
+		&& building.Type != buildingState.Type)
+		{
+			building.QueueFree();
+			buildingsById.Remove(buildingState.EntityId);
+			building = null;
+		} 
+		if (!buildingsById.TryGetValue(buildingState.EntityId, out var _building))
 		{
 			var scene = GetBuildingScene(buildingState.Type);
-			building = scene.Instantiate<ClientBuilding>();
-			AddChild(building);
-			buildingsById[buildingState.EntityId] = building;
+			_building = scene.Instantiate<ClientBuilding>();
+			AddChild(_building);
+			buildingsById[buildingState.EntityId] = _building;
 
-			building.ApplySpawnState(buildingState);
+			_building.ApplySpawnState(buildingState);
 			return;
 		}
-
-		building.ApplyState(buildingState);
+		_building.ApplyState(buildingState);
 	}
 
 	private void SyncUnit(UnitState unitState)
