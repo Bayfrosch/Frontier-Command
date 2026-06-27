@@ -6,6 +6,9 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8yuvl"]
 shader = ExtResource("2_qba1x")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qba1x"]
+bg_color = Color(0.21854621, 0.7179883, 0, 1)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_qba1x"]
 radius = 20.024984
 
@@ -37,6 +40,14 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Inf"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="BodyRender" unique_id=1092368675]
+layout_mode = 0
+offset_top = 35.0
+offset_right = 40.0
+offset_bottom = 39.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_qba1x")
+show_percentage = false
 
 [node name="Area2D" type="Area2D" parent="." unique_id=892104924]
 

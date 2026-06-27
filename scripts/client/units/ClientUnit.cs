@@ -14,7 +14,12 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
     public Vector2 RenderPosition { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
     public float MovementSpeed { get; protected set; }
+    private ProgressBar HealthBar;
 
+    public override void _Ready()
+    {
+        HealthBar = GetNode<ProgressBar>("BodyRender/HealthBar");
+    }
 
     /*
     Called on spawning Unit
@@ -25,6 +30,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         RenderPosition = state.CurrentPosition;
         Position = state.CurrentPosition;
         Abilities = state.Abilities;
+        HealthBar.MaxValue = MaxHealth;
     }
     /*
     Called on every Tick
@@ -40,6 +46,8 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         RenderPosition = state.CurrentPosition;
         TargetPosition = state.TargetPosition;
         MovementSpeed = state.MovementSpeed;
+
+        HealthBar.Value = Health;
     }
     public override void _Process(double delta)
     {
