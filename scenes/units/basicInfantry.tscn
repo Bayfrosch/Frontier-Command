@@ -41,11 +41,11 @@ text = "Inf"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HealthBar" type="ProgressBar" parent="BodyRender" unique_id=1092368675]
-layout_mode = 0
-offset_top = 35.0
-offset_right = 40.0
-offset_bottom = 39.0
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=1092368675]
+offset_left = -20.0
+offset_top = 15.0
+offset_right = 20.0
+offset_bottom = 19.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_qba1x")
 show_percentage = false
 

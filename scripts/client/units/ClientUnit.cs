@@ -15,10 +15,14 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
     public Vector2 TargetPosition { get; protected set; }
     public float MovementSpeed { get; protected set; }
     private ProgressBar HealthBar;
+    private Control BodyRender;
 
     public override void _Ready()
     {
-        HealthBar = GetNode<ProgressBar>("BodyRender/HealthBar");
+        HealthBar = GetNode<ProgressBar>("HealthBar");
+        BodyRender = GetNode<Control>("BodyRender");
+
+        BodyRender.PivotOffset = BodyRender.Size / 2f;
     }
 
     /*
@@ -55,7 +59,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         {
             return; 
         }
-        LookAt(TargetPosition);
+        BodyRender.Rotation = (TargetPosition - GlobalPosition).Angle();
         GlobalPosition = GlobalPosition.MoveToward(RenderPosition, (float) (MovementSpeed * delta));
     }
 }
