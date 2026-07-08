@@ -205,6 +205,9 @@ public partial class GameScene : Node2D
 		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
 		if (CurrentEntity is null) 
 		{
+			if (SelectedEntityIds.Count <= 0)
+				return;
+			
 			command = new MoveUnitsMessage(
 				"player_1",
 				gameLoop.CurrentTick,

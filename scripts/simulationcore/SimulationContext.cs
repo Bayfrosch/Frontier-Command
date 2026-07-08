@@ -9,6 +9,7 @@ public sealed class SimulationContext
 	private const int CONSTRUCTION_ADVANCE = 5;
 	private const int PRODUCTION_ADVANCE = 5;
 	private const float UNIT_SPACING = 50f;
+	private const float COLLISION_RADIUS = 10f;
 	public string MatchId { get; }
 	/*
 	The saved state of the match for each lobby
@@ -536,9 +537,58 @@ public sealed class SimulationContext
 			return false;
 
 		var unitId = NewEntityId(msg.UnitType.ToString());
-		UnitState newUnit = new UnitState(unitId, msg.PlayerId, msg.Position, msg.MovementSpeed, msg.UnitType);
+		var spawnPosition = msg.Position;
+		var targetPosition = GetOccupiedOffsetPosition(spawnPosition);
+		UnitState newUnit = new UnitState(unitId, msg.PlayerId, spawnPosition, msg.MovementSpeed, msg.UnitType);
+
 		player.AddEntity(newUnit);
+
+		if (targetPosition != spawnPosition)
+			newUnit.SetMoveOrder(targetPosition);
+
 		return true;
+	}
+
+	private Vector2 GetOccupiedOffsetPosition(Vector2 requestedPosition)
+	{
+		if (!IsPositionOccupied(requestedPosition))
+			return requestedPosition;
+
+		for (var ring = 1; ring <= 8; ring++)
+		{
+			foreach (var direction in GetSpawnDirectionsForRing(ring))
+			{
+				var candidate = requestedPosition + direction * UNIT_SPACING;
+				if (!IsPositionOccupied(candidate))
+					return candidate;
+			}
+		}
+
+		return requestedPosition + new Vector2(UNIT_SPACING * 9f, 0f);
+	}
+
+	private static IEnumerable<Vector2> GetSpawnDirectionsForRing(int ring)
+	{
+		yield return new Vector2(ring, 0);
+		yield return new Vector2(-ring, 0);
+		yield return new Vector2(0, ring);
+		yield return new Vector2(0, -ring);
+		yield return new Vector2(ring, ring);
+		yield return new Vector2(ring, -ring);
+		yield return new Vector2(-ring, ring);
+		yield return new Vector2(-ring, -ring);
+	}
+
+	private bool IsPositionOccupied(Vector2 position)
+	{
+		var collisionDistanceSquared = COLLISION_RADIUS * COLLISION_RADIUS;
+
+		return _matchState.Players.Values
+			.SelectMany(player => player.Entities.Values)
+			.OfType<EntityState>()
+			.Any(entity =>
+				entity.CurrentPosition.DistanceSquaredTo(position) <= collisionDistanceSquared
+				|| entity is UnitState unit && unit.HasMoveOrder && unit.TargetPosition.DistanceSquaredTo(position) <= collisionDistanceSquared);
 	}
 
 	private static string NewEntityId(string prefix)

@@ -1,5 +1,6 @@
 using Godot;
 using GdUnit4;
+using System.Linq;
 using static GdUnit4.Assertions;
 
 [TestSuite]
@@ -125,6 +126,27 @@ public class SimulationCoreTest
 		AssertThat(unitB.TargetPosition).IsEqual(destination);
 	}
 
+	[TestCase]
+	public void Push_DebugSpawnUnit_AssignsDistinctMoveTargets_WhenSpawnPositionIsOccupied()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		var position = new Vector2(10, 20);
+
+		AssertThat(context.Push(CreateSpawnMessage("player-1", position))).IsTrue();
+		AssertThat(context.Push(CreateSpawnMessage("player-1", position))).IsTrue();
+		AssertThat(context.Push(CreateSpawnMessage("player-1", position))).IsTrue();
+
+		var units = player.Entities.Values.OfType<UnitState>().ToArray();
+		AssertThat(units.Length).IsEqual(3);
+		AssertThat(units.All(unit => unit.CurrentPosition == position)).IsTrue();
+		AssertThat(units.Count(unit => !unit.HasMoveOrder)).IsEqual(1);
+		AssertThat(units.Any(unit => unit.TargetPosition == position + new Vector2(32f, 0f))).IsTrue();
+		AssertThat(units.Any(unit => unit.TargetPosition == position + new Vector2(-32f, 0f))).IsTrue();
+	}
+
 	private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
 	{
 		return new MoveUnitsMessage(
@@ -132,6 +154,17 @@ public class SimulationCoreTest
 			p_issued_at_tick: 0,
 			p_unit_ids: new[] { unitId },
 			p_destination: destination
+		);
+	}
+
+	private static DebugSpawnUnitsMessage CreateSpawnMessage(string playerId, Vector2 position)
+	{
+		return new DebugSpawnUnitsMessage(
+			playerId,
+			0,
+			UnitType.BASIC_INFANTRY,
+			position,
+			UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
 		);
 	}
 }
