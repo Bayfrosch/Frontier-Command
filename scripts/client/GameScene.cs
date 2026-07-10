@@ -11,6 +11,8 @@ public partial class GameScene : Node2D
 	private string lastSelectedAbility = "";
 	private TimeTickSystem gameLoop = null;
 	private LocalSimulationNode simulationCore = null;
+	private readonly PackedScene ConstructionSitePreviewScene = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
+	private Node2D constructionPreview = null;
 	private HashSet<string> EntitySelectionIds = new();
 	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
 	private bool shiftHeld = false;
@@ -59,6 +61,12 @@ public partial class GameScene : Node2D
 		}
 	}
 
+	public override void _Process(double delta)
+	{
+		if (constructionPreview is not null)
+			constructionPreview.GlobalPosition = GetGlobalMousePosition();
+	}
+
 	private void PruneDeletedSelectedEntities()
 	{
 		if (EntitySelectionIds.Count <= 0)
@@ -82,6 +90,7 @@ public partial class GameScene : Node2D
 		{
 			lastSelectedAbility = abilityId;
 			AbilityTargetSelection = true;
+			ShowConstructionPreview(abilityId);
 			return;
 		}
 
@@ -97,6 +106,7 @@ public partial class GameScene : Node2D
 		AbilityTargetPosition = null;
 		AbilityTargetSelection = false;
 		lastSelectedAbility = "";
+		ClearConstructionPreview();
 
 		if (!simulationCore.Push(command))
 		{
@@ -141,6 +151,12 @@ public partial class GameScene : Node2D
 
 			if (mouseEvent.ButtonIndex == MouseButton.Right)
 			{
+				if (AbilityTargetSelection)
+				{
+					ClearAbilityTargetSelection();
+					return;
+				}
+
 				HandleRightMouseButton(shiftHeld);
 			}
 		}
@@ -200,6 +216,56 @@ public partial class GameScene : Node2D
 		}
 
 		EmitSignal(SignalName.UnitSelection);
+	}
+
+	private void ShowConstructionPreview(string abilityId)
+	{
+		ClearConstructionPreview();
+
+		if (abilityId != "spawn_barracks")
+			return;
+
+		constructionPreview = ConstructionSitePreviewScene.Instantiate<Node2D>();
+		constructionPreview.Modulate = new Color(1f, 1f, 1f, 0.45f);
+		constructionPreview.ZIndex = 100;
+		DisablePreviewPicking(constructionPreview);
+		AddChild(constructionPreview);
+		constructionPreview.GlobalPosition = GetGlobalMousePosition();
+	}
+
+	private void ClearAbilityTargetSelection()
+	{
+		AbilityTargetPosition = null;
+		AbilityTargetSelection = false;
+		lastSelectedAbility = "";
+		ClearConstructionPreview();
+	}
+
+	private void ClearConstructionPreview()
+	{
+		if (constructionPreview is null)
+			return;
+
+		constructionPreview.QueueFree();
+		constructionPreview = null;
+	}
+
+	private static void DisablePreviewPicking(Node node)
+	{
+		if (node is Area2D area)
+		{
+			area.Monitoring = false;
+			area.Monitorable = false;
+			area.CollisionLayer = 0;
+			area.CollisionMask = 0;
+		}
+		else if (node is CollisionShape2D collisionShape)
+		{
+			collisionShape.Disabled = true;
+		}
+
+		foreach (var child in node.GetChildren())
+			DisablePreviewPicking(child);
 	}
 
 	private void HandleLeftMouseButton(bool shiftHeld)
