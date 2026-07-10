@@ -147,6 +147,67 @@ public class SimulationCoreTest
 		AssertThat(units.Any(unit => unit.TargetPosition == position + new Vector2(-32f, 0f))).IsTrue();
 	}
 
+	[TestCase]
+	public void AdvanceTick_BasicInfantryDamagesAttackTarget_AfterWindup_WhenEnemyIsInRange()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var enemyPlayer = new PlayerState("player-2");
+		var attacker = new UnitState("attacker-1", "player-1", Vector2.Zero, 10f, UnitType.BASIC_INFANTRY);
+		var target = new UnitState("target-1", "player-2", new Vector2(50, 0), 10f, UnitType.BASIC_INFANTRY);
+		player.AddEntity(attacker);
+		enemyPlayer.AddEntity(target);
+		context.AddPlayer(player);
+		context.AddPlayer(enemyPlayer);
+
+		var msg = new AttackTargetMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_unit_ids: new[] { "attacker-1" },
+			p_target_id: "target-1"
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(target.Health).IsEqual(target.MaxHealth);
+
+		context.AdvanceTick();
+		AssertThat(target.Health).IsEqual(target.MaxHealth);
+
+		context.AdvanceTick();
+		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));
+	}
+
+	[TestCase]
+	public void AdvanceTick_BasicInfantryMovesTowardAttackTarget_WhenEnemyIsOutOfRange()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var enemyPlayer = new PlayerState("player-2");
+		var attacker = new UnitState("attacker-1", "player-1", Vector2.Zero, 100f, UnitType.BASIC_INFANTRY);
+		var target = new UnitState("target-1", "player-2", new Vector2(200, 0), 10f, UnitType.BASIC_INFANTRY);
+		player.AddEntity(attacker);
+		enemyPlayer.AddEntity(target);
+		context.AddPlayer(player);
+		context.AddPlayer(enemyPlayer);
+
+		var msg = new AttackTargetMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_unit_ids: new[] { "attacker-1" },
+			p_target_id: "target-1"
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+
+		context.AdvanceTick();
+
+		AssertThat(target.Health).IsEqual(target.MaxHealth);
+		AssertThat(attacker.HasAttackOrder).IsTrue();
+		AssertThat(attacker.HasMoveOrder).IsTrue();
+		AssertThat(attacker.CurrentPosition).IsEqual(new Vector2(20, 0));
+		AssertThat(attacker.AttackWindupProgress).IsEqual(0f);
+	}
+
 	private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
 	{
 		return new MoveUnitsMessage(

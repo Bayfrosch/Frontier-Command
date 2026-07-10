@@ -110,6 +110,7 @@ public sealed class SimulationContext
 					));
 				} else if (entity is UnitState unit)
 				{
+					HandleAdvanceAttack(unit);
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
 				}
 				
@@ -262,6 +263,57 @@ public sealed class SimulationContext
 
 		constructionUnit = unit;
 		return true;
+	}
+
+	private bool TryGetEntityById(string entityId, out EntityState? entity)
+	{
+		entity = _matchState.Players.Values
+			.SelectMany(player => player.Entities.Values)
+			.FirstOrDefault(entity => entity.EntityId == entityId);
+
+		return entity is not null;
+	}
+
+	private void HandleAdvanceAttack(UnitState unit)
+	{
+		if (!unit.HasAttackOrder)
+			return;
+
+		if (!TryGetEntityById(unit.AttackTargetId, out var target) || target is null)
+		{
+			unit.ClearAttackOrder();
+			unit.ClearMoveOrder();
+			return;
+		}
+
+		if (target.OwnerPlayerId == unit.OwnerPlayerId || target.Health <= 0)
+		{
+			unit.ClearAttackOrder();
+			unit.ClearMoveOrder();
+			return;
+		}
+
+		if (unit.AttackDamage <= 0 || unit.AttackRange <= 0f)
+		{
+			unit.ClearAttackOrder();
+			unit.ClearMoveOrder();
+			return;
+		}
+
+		var attackRangeSquared = unit.AttackRange * unit.AttackRange;
+		if (unit.CurrentPosition.DistanceSquaredTo(target.CurrentPosition) > attackRangeSquared)
+		{
+			unit.ResetAttackWindup();
+			unit.SetMoveOrder(target.CurrentPosition, preserveAttackOrder: true);
+			return;
+		}
+
+		unit.ClearMoveOrder();
+		if (!unit.AdvanceAttackWindup(TimeTickSystem.TICK_DELTA))
+			return;
+
+		target.TakeDamage(unit.AttackDamage);
+		unit.ClearAttackOrder();
 	}
 	/*
 	Message handlers for reacting to every pre defined message in Messages.cs
@@ -477,8 +529,26 @@ public sealed class SimulationContext
 	// TODO:
 	private bool HandleAttackTarget(AttackTargetMessage msg)
 	{
+		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
+			return false;
 
-		return false;
+		if (!TryGetEntityById(msg.target_id, out var target) || target is null)
+			return false;
+
+		if (target.OwnerPlayerId == msg.player_id)
+			return false;
+
+		var attackOrderAssigned = false;
+		foreach (var unit in units)
+		{
+			if (unit.AttackDamage <= 0 || unit.AttackRange <= 0f)
+				continue;
+
+			unit.SetAttackOrder(target.EntityId);
+			attackOrderAssigned = true;
+		}
+
+		return attackOrderAssigned;
 	}
 	// TODO:
 	private bool HandleStopUnits(StopUnitsMessage msg)

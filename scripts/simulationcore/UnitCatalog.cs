@@ -18,7 +18,31 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 10,
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
+            UnitType.CONSTRUCTION_UNIT => 0,
+            UnitType.OVERLORD => 0,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    public static float GetAttackRange(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => 120f,
+            UnitType.CONSTRUCTION_UNIT => 0f,
+            UnitType.OVERLORD => 0f,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    public static float GetAttackWindupTime(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => 0.4f,
+            UnitType.CONSTRUCTION_UNIT => 0f,
+            UnitType.OVERLORD => 0f,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
 

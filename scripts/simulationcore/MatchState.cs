@@ -159,20 +159,55 @@ public class UnitState : EntityState
 	{
 		Type = unitType;
 		MovementSpeed = movementSpeed;
+		AttackDamage = UnitCatalog.GetAttackDamage(unitType);
+		AttackRange = UnitCatalog.GetAttackRange(unitType);
+		AttackWindupTime = UnitCatalog.GetAttackWindupTime(unitType);
 		Abilities = AbilityCatalog.ForUnit(unitType);
 	}
 	public UnitType Type { get; private set; }
 	public Vector2 TargetPosition { get; private set; }
 	public bool HasMoveOrder { get; private set; }
+	public string AttackTargetId { get; private set; } = "";
+	public bool HasAttackOrder { get; private set; }
 	public int AttackDamage { get; private set; }
 	public float AttackRange { get; private set; }
+	public float AttackWindupTime { get; private set; }
+	public float AttackWindupProgress { get; private set; }
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
 
-	internal void SetMoveOrder(Vector2 targetPosition)
+	internal void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false)
 	{
 		TargetPosition = targetPosition;
 		HasMoveOrder = true;
+		if (!preserveAttackOrder)
+			ClearAttackOrder();
+	}
+	internal void ClearMoveOrder()
+	{
+		TargetPosition = Vector2.Zero;
+		HasMoveOrder = false;
+	}
+	internal void SetAttackOrder(string targetEntityId)
+	{
+		AttackTargetId = targetEntityId;
+		HasAttackOrder = true;
+		ResetAttackWindup();
+	}
+	internal void ClearAttackOrder()
+	{
+		AttackTargetId = "";
+		HasAttackOrder = false;
+		ResetAttackWindup();
+	}
+	internal void ResetAttackWindup()
+	{
+		AttackWindupProgress = 0f;
+	}
+	internal bool AdvanceAttackWindup(float deltaSeconds)
+	{
+		AttackWindupProgress += deltaSeconds;
+		return AttackWindupProgress >= AttackWindupTime;
 	}
 	internal void AdvanceMovement(float deltaSeconds)
 	{
@@ -186,8 +221,7 @@ public class UnitState : EntityState
 		if (distance <= travelDistance || distance <= 2.0f)
 		{
 			CurrentPosition = TargetPosition;
-			TargetPosition = Vector2.Zero;
-			HasMoveOrder = false;
+			ClearMoveOrder();
 			return;
 		}
 

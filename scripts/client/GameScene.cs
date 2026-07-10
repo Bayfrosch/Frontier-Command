@@ -219,6 +219,9 @@ public partial class GameScene : Node2D
 		}
 		else if (CurrentEntity.OwnerPlayerId != "player_1")
 		{
+			if (SelectedEntityIds.Count <= 0)
+				return;
+
 			command = new AttackTargetMessage (
 				"player_1",
 				gameLoop.CurrentTick,
