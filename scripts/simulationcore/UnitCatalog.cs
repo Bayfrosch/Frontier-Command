@@ -22,12 +22,23 @@ public static class UnitCatalog
         };
     }
 
+    public static int GetMaxHealth(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => 100,
+            UnitType.CONSTRUCTION_UNIT => 150,
+            UnitType.OVERLORD => 1000,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
     public static float GetMovementSpeed(UnitType type)
     {
         return type switch
         {
-            UnitType.BASIC_INFANTRY => 30f,
-            UnitType.CONSTRUCTION_UNIT => 30f,
+            UnitType.BASIC_INFANTRY => 100f,
+            UnitType.CONSTRUCTION_UNIT => 100f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
         };
     }

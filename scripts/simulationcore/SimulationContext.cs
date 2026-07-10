@@ -71,17 +71,29 @@ public sealed class SimulationContext
 		_matchState.IncrementTick();
 
 		var unitsToSpawn = new List<DebugSpawnUnitsMessage>();
+		var entitiesToRemove = new List<string>();
 
+		var projectilesToRemove = new List<string>();
+
+		foreach (var projectile in _matchState.Projectiles.Values)
+		{
+			if (!TryGetPlayerEntity<EntityState>(projectile.TargetPlayerId, projectile.TargetEntityId, out var target)) 
+			{
+				projectilesToRemove.Add(projectile.ProjectileId);
+				continue;
+			}
+			
+			if (projectile.AdvanceMovement(target, TimeTickSystem.TICK_DELTA))
+			{
+				target.TakeDamage(projectile.WeaponDefinition.Damage);
+				projectilesToRemove.Add(projectile.ProjectileId);
+			}
+		}
+		
 		foreach (var player in _matchState.Players.Values)
 		{
 			foreach (var entity in player.Entities.Values)
 			{
-				if (entity.Health <= 0)
-				{
-					player.RemoveEntity(entity.EntityId);
-					continue;
-				}
-				
 				if (entity is BuildingState building)
 				{
 					HandleAdvanceConstruction(player.PlayerId, building);
@@ -100,8 +112,31 @@ public sealed class SimulationContext
 				{
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
 				}
+				
+				if (entity.Health <= 0)
+				{
+					entitiesToRemove.Add(entity.EntityId);
+					continue;
+				}
 			}
 		}
+
+		// Remove destroyed entities and projectiles from the match state
+		foreach (var entityId in entitiesToRemove)
+		{
+			foreach (var player in _matchState.Players.Values)
+			{
+				if (player.Entities.ContainsKey(entityId))
+				{
+					player.RemoveEntity(entityId);
+				}
+			}
+		}
+		foreach (var projectileId in projectilesToRemove)
+		{
+			_matchState.Projectiles.Remove(projectileId);
+		}
+
 		foreach (var spawnMessage in unitsToSpawn)
 		{
 			Push(spawnMessage);
@@ -442,6 +477,7 @@ public sealed class SimulationContext
 	// TODO:
 	private bool HandleAttackTarget(AttackTargetMessage msg)
 	{
+
 		return false;
 	}
 	// TODO:

@@ -217,6 +217,16 @@ public partial class GameScene : Node2D
 				"rectangle"
 			);
 		}
+		else if (CurrentEntity.OwnerPlayerId != "player_1")
+		{
+			command = new AttackTargetMessage (
+				"player_1",
+				gameLoop.CurrentTick,
+				SelectedEntityIds.ToArray(),
+				CurrentEntity.EntityId,
+				shiftHeld ? 1 : 0
+			);
+		}
 
 		if (command is null) 
 			return;
@@ -226,6 +236,7 @@ public partial class GameScene : Node2D
 
 		GD.Print("Command send");
 	}
+
 	private ClientEntity? GetEntityUnderMouse(Vector2 worldPosition)
 	{
 		var query = new PhysicsPointQueryParameters2D

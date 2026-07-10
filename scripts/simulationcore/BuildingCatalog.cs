@@ -11,6 +11,16 @@ public static class BuildingCatalog
 		};
 	}
 
+	public static int GetMaxHealth(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.CONSTRUCTION_SITE => 200,
+			BuildingType.BARRACKS => 500,
+			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+		};
+	}
+
 	public static BuildingType GetFootprintType(BuildingState building)
 	{
 		return building.Type == BuildingType.CONSTRUCTION_SITE

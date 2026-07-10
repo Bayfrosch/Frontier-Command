@@ -14,6 +14,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
     public Vector2 RenderPosition { get; protected set; }
     public Vector2 TargetPosition { get; protected set; }
     public float MovementSpeed { get; protected set; }
+    public bool HasMoveOrder { get; protected set; }
     private ProgressBar HealthBar;
     private Control BodyRender;
 
@@ -49,17 +50,23 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         Type = state.Type;
         RenderPosition = state.CurrentPosition;
         TargetPosition = state.TargetPosition;
+        HasMoveOrder = state.HasMoveOrder;
         MovementSpeed = state.MovementSpeed;
 
         HealthBar.Value = Health;
     }
     public override void _Process(double delta)
     {
-        if (Math.Max(GlobalPosition.DistanceTo(RenderPosition), 0) <= 3f)
+        var distanceToRenderPosition = GlobalPosition.DistanceTo(RenderPosition);
+        if (distanceToRenderPosition <= 3f)
         {
+            GlobalPosition = RenderPosition;
             return; 
         }
-        BodyRender.Rotation = (TargetPosition - GlobalPosition).Angle();
+
+        if (HasMoveOrder)
+            BodyRender.Rotation = (RenderPosition - GlobalPosition).Angle();
+
         GlobalPosition = GlobalPosition.MoveToward(RenderPosition, (float) (MovementSpeed * delta));
     }
 }

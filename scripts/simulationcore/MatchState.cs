@@ -15,8 +15,10 @@ public sealed class MatchState : IMatchStateView
 	_players is the private editable version of the Dictionary
 	Players is the public version which cannot be edited but only read
 	*/
-	private readonly Dictionary<string, PlayerState> _players = new(); 
+	private readonly Dictionary<string, PlayerState> _players = new();
 	public IReadOnlyDictionary<string, PlayerState> Players => _players;
+	public readonly Dictionary<string, ProjectileState> Projectiles = new();
+	public IReadOnlyDictionary<string, ProjectileState> ProjectilesView => Projectiles;
 	internal void AddPlayer(PlayerState player)
 	{
 		_players[player.PlayerId] = player;
@@ -27,6 +29,60 @@ public sealed class VictoryState
 {
 	public string WinningPlayerId { get; private set; } = "";
 	public string VictoryReason { get; private set; } = "";
+}
+
+public sealed class ProjectileState
+{
+	public string ProjectileId { get; private set; } = "";
+	public string SourceEntityId { get; private set; } = "";
+	public string SourcePlayerId { get; private set; } = "";
+	public string TargetEntityId { get; private set; } = "";
+	public string TargetPlayerId { get; private set; } = "";
+	public Vector2 CurrentPosition { get; private set; }
+	public WeaponDefinition WeaponDefinition { get; private set; }
+	/*
+	Returns true if the projectile has reached its target and should be removed, false otherwise
+	Projectiles live with false and get removed with true.
+	*/
+	public bool AdvanceMovement(EntityState? TargetEntity, float deltaSeconds)
+	{
+		if (TargetEntity is null)
+			return true;
+		
+		var toTarget = TargetEntity.CurrentPosition - CurrentPosition;
+		var distance = toTarget.Length();
+		var travelDistance = WeaponDefinition.ProjectileSpeed * deltaSeconds;
+
+		if (distance <= travelDistance || distance <= 2.0f)
+		{
+			CurrentPosition = TargetEntity.CurrentPosition;
+			return true;
+		}
+		
+		CurrentPosition += toTarget.Normalized() * travelDistance;
+		return false;
+	}
+
+		
+}
+
+public enum WeaponDeliveryType
+{
+	INSTANT,
+	PROJECTILE
+}
+
+public sealed class WeaponDefinition
+{
+	public string WeaponId { get; init; }
+	public int Damage { get; init; }
+	public float Range { get; init; }
+	public float Cooldown { get; init; }
+	public float WindupTime { get; init; }
+	public WeaponDeliveryType DeliveryType { get; init; }
+	public float ProjectileSpeed { get; init; }
+	public bool Guided { get; init; }
+	public float SplashRadius { get; init; }
 }
 
 public sealed class PlayerState
@@ -67,12 +123,14 @@ public sealed class PlayerState
 
 public abstract class EntityState
 {
-	protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos)
+	protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos, int maxHealth)
 	{
 		EntityId = entityId;
 		OwnerPlayerId = ownerPlayerId;
 		CurrentPosition = currentPos;
 		Abilities = new HashSet<Ability>();
+		MaxHealth = Math.Max(1, maxHealth);
+		Health = MaxHealth;
 	}
 	public string EntityId { get; private set; } = "";
 	public string? OwnerPlayerId { get; private set; }
@@ -81,12 +139,23 @@ public abstract class EntityState
 	public int MaxHealth { get; private set; }
 	public bool GettingRepaired = false;
 	public HashSet<Ability> Abilities { get; set; }
+	internal void TakeDamage(int damage)
+	{
+		Health = Math.Max(0, Health - damage);
+	}
+	protected void SetMaxHealth(int maxHealth, bool healToFull)
+	{
+		MaxHealth = Math.Max(1, maxHealth);
+		Health = healToFull
+			? MaxHealth
+			: Math.Min(Health, MaxHealth);
+	}
 }
 
 public class UnitState : EntityState
 {
 	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType = UnitType.BASIC_INFANTRY)
-		: base(entityId, ownerPlayerId, currentPos)
+		: base(entityId, ownerPlayerId, currentPos, UnitCatalog.GetMaxHealth(unitType))
 	{
 		Type = unitType;
 		MovementSpeed = movementSpeed;
@@ -99,7 +168,7 @@ public class UnitState : EntityState
 	public float AttackRange { get; private set; }
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
-	
+
 	internal void SetMoveOrder(Vector2 targetPosition)
 	{
 		TargetPosition = targetPosition;
@@ -107,20 +176,22 @@ public class UnitState : EntityState
 	}
 	internal void AdvanceMovement(float deltaSeconds)
 	{
-		if(!HasMoveOrder)
+		if (!HasMoveOrder)
 			return;
 
-		Vector2 direction = TargetPosition - CurrentPosition;
-		float distance = direction.Length();
+		var direction = TargetPosition - CurrentPosition;
+		var distance = direction.Length();
+		var travelDistance = MovementSpeed * deltaSeconds;
 
-		if (distance <= 2.0f)
+		if (distance <= travelDistance || distance <= 2.0f)
 		{
+			CurrentPosition = TargetPosition;
 			TargetPosition = Vector2.Zero;
 			HasMoveOrder = false;
 			return;
 		}
 
-		CurrentPosition += direction.Normalized() * MovementSpeed * deltaSeconds;
+		CurrentPosition += direction.Normalized() * travelDistance;
 	}
 }
 
@@ -140,7 +211,7 @@ public enum UnitType
 public sealed class BuildingState : EntityState
 {
 	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType pendingBuildingType, string constructionUnitId)
-		: base(entityId, ownerPlayerId, currentPos)
+		: base(entityId, ownerPlayerId, currentPos, BuildingCatalog.GetMaxHealth(BuildingType.CONSTRUCTION_SITE))
 	{
 		Type = BuildingType.CONSTRUCTION_SITE;
 		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(pendingBuildingType) / 2f + new Vector2(20f, 20f);
@@ -156,6 +227,7 @@ public sealed class BuildingState : EntityState
 		if (BuildProgression >= 100)
 		{
 			Type = pendingBuilding;
+			SetMaxHealth(BuildingCatalog.GetMaxHealth(pendingBuilding), true);
 			Abilities = AbilityCatalog.ForBuilding(pendingBuilding);
 		}
 	}
@@ -179,7 +251,7 @@ public sealed class BuildingState : EntityState
 	public BuildingType Type;
 	public UnitType[] ProductionQueue { get; private set; } = [];
 	public int ProductionProgress { get; private set; }
-	public Vector2 RallyPoint {get; private set; }
+	public Vector2 RallyPoint { get; private set; }
 	public string ConstructionUnitId { get; private set; }
 	public BuildingType pendingBuilding { get; private set; }
 	internal void SetRallyPoint(Vector2 newPos)
@@ -199,7 +271,7 @@ public sealed class BuildingState : EntityState
 public sealed class OutpostState : EntityState
 {
 	public OutpostState(string entityId, string ownerPlayerId, Vector2 currentPos)
-		: base(entityId, ownerPlayerId, currentPos)
+		: base(entityId, ownerPlayerId, currentPos, 1)
 	{
 	}
 	public string OutpostSpecialization { get; private set; } = "";
@@ -208,7 +280,7 @@ public sealed class OutpostState : EntityState
 public sealed class ResourceFieldState : EntityState
 {
 	public ResourceFieldState(string entityId, string ownerPlayerId, Vector2 currentPos)
-		: base(entityId, ownerPlayerId, currentPos)
+		: base(entityId, ownerPlayerId, currentPos, 1)
 	{
 	}
 }
