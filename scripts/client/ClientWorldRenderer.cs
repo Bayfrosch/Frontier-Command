@@ -82,21 +82,31 @@ public partial class ClientWorldRenderer : Node
 				{
 					existingBuildingIds.Add(buildingState.EntityId);
 					SyncBuilding(buildingState);
-				} else if (entity is UnitState unitState)
+				}
+				else if (entity is UnitState unitState)
 				{
 					existingUnitIds.Add(unitState.EntityId);
 					SyncUnit(unitState);
-				}	
+				}
 			}
 		}
 
-		// Remove
+		// Remove Buildings that no longer exist
 		foreach (var entityId in buildingsById.Keys.ToArray())
 		{
 			if (!existingBuildingIds.Contains(entityId))
 			{
 				buildingsById[entityId].QueueFree();
 				buildingsById.Remove(entityId);
+			}
+		}
+		// Remove Units that no longer exist
+		foreach (var entityId in unitsById.Keys.ToArray())
+		{
+			if (!existingUnitIds.Contains(entityId))
+			{
+				unitsById[entityId].QueueFree();
+				unitsById.Remove(entityId);
 			}
 		}
 	}
@@ -123,13 +133,13 @@ public partial class ClientWorldRenderer : Node
 
 	private void SyncBuilding(BuildingState buildingState)
 	{
-		if (buildingsById.TryGetValue(buildingState.EntityId, out var building) 
+		if (buildingsById.TryGetValue(buildingState.EntityId, out var building)
 		&& building.Type != buildingState.Type)
 		{
 			building.QueueFree();
 			buildingsById.Remove(buildingState.EntityId);
 			building = null;
-		} 
+		}
 		if (!buildingsById.TryGetValue(buildingState.EntityId, out var _building))
 		{
 			var scene = GetBuildingScene(buildingState.Type);

@@ -76,6 +76,12 @@ public sealed class SimulationContext
 		{
 			foreach (var entity in player.Entities.Values)
 			{
+				if (entity.Health <= 0)
+				{
+					player.RemoveEntity(entity.EntityId);
+					continue;
+				}
+				
 				if (entity is BuildingState building)
 				{
 					HandleAdvanceConstruction(player.PlayerId, building);
