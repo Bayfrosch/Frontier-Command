@@ -169,6 +169,7 @@ public class UnitState : EntityState
 	public bool HasMoveOrder { get; private set; }
 	public string AttackTargetId { get; private set; } = "";
 	public bool HasAttackOrder { get; private set; }
+	public Vector2 AttackFormationOffset { get; private set; }
 	public int AttackDamage { get; private set; }
 	public float AttackRange { get; private set; }
 	public float AttackWindupTime { get; private set; }
@@ -188,15 +189,17 @@ public class UnitState : EntityState
 		TargetPosition = Vector2.Zero;
 		HasMoveOrder = false;
 	}
-	internal void SetAttackOrder(string targetEntityId)
+	internal void SetAttackOrder(string targetEntityId, Vector2 formationOffset)
 	{
 		AttackTargetId = targetEntityId;
+		AttackFormationOffset = formationOffset;
 		HasAttackOrder = true;
 		ResetAttackWindup();
 	}
 	internal void ClearAttackOrder()
 	{
 		AttackTargetId = "";
+		AttackFormationOffset = Vector2.Zero;
 		HasAttackOrder = false;
 		ResetAttackWindup();
 	}

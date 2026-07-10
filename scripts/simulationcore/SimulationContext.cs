@@ -304,7 +304,7 @@ public sealed class SimulationContext
 		if (unit.CurrentPosition.DistanceSquaredTo(target.CurrentPosition) > attackRangeSquared)
 		{
 			unit.ResetAttackWindup();
-			unit.SetMoveOrder(target.CurrentPosition, preserveAttackOrder: true);
+			unit.SetMoveOrder(target.CurrentPosition + unit.AttackFormationOffset, preserveAttackOrder: true);
 			return;
 		}
 
@@ -313,7 +313,10 @@ public sealed class SimulationContext
 			return;
 
 		target.TakeDamage(unit.AttackDamage);
-		unit.ClearAttackOrder();
+		unit.ResetAttackWindup();
+
+		if (target.Health <= 0)
+			unit.ClearAttackOrder();
 	}
 	/*
 	Message handlers for reacting to every pre defined message in Messages.cs
@@ -327,20 +330,9 @@ public sealed class SimulationContext
 			return false;
 		}
 
-		int columns = (int) Math.Ceiling(Math.Sqrt(units.Count));
-		int rows = (int) Math.Ceiling(units.Count / (float)columns);
-
 		for (int i = 0; i < units.Count; i++)
 		{
-			int column = i % columns;
-			int row = i / columns;
-
-			float offsetX = (column - (columns - 1) / 2f) * UNIT_SPACING;
-			float offsetY = (row - (rows - 1) / 2f) * UNIT_SPACING;
-
-			Vector2 offsetVector = new Vector2(offsetX, offsetY);
-
-			units[i].SetMoveOrder(msg.destination + offsetVector);
+			units[i].SetMoveOrder(msg.destination + GetFormationOffset(i, units.Count));
 		}
 
 		return true;
@@ -539,12 +531,13 @@ public sealed class SimulationContext
 			return false;
 
 		var attackOrderAssigned = false;
-		foreach (var unit in units)
-		{
-			if (unit.AttackDamage <= 0 || unit.AttackRange <= 0f)
-				continue;
+		var attackers = units
+			.Where(unit => unit.AttackDamage > 0 && unit.AttackRange > 0f)
+			.ToArray();
 
-			unit.SetAttackOrder(target.EntityId);
+		for (var i = 0; i < attackers.Length; i++)
+		{
+			attackers[i].SetAttackOrder(target.EntityId, GetFormationOffset(i, attackers.Length));
 			attackOrderAssigned = true;
 		}
 
@@ -689,6 +682,22 @@ public sealed class SimulationContext
 		yield return new Vector2(ring, -ring);
 		yield return new Vector2(-ring, ring);
 		yield return new Vector2(-ring, -ring);
+	}
+
+	private static Vector2 GetFormationOffset(int index, int count)
+	{
+		if (count <= 1)
+			return Vector2.Zero;
+
+		int columns = (int) Math.Ceiling(Math.Sqrt(count));
+		int row = index / columns;
+		int column = index % columns;
+
+		float offsetX = (column - (columns - 1) / 2f) * UNIT_SPACING;
+		int rows = (int) Math.Ceiling(count / (float)columns);
+		float offsetY = (row - (rows - 1) / 2f) * UNIT_SPACING;
+
+		return new Vector2(offsetX, offsetY);
 	}
 
 	private bool IsPositionOccupied(Vector2 position)

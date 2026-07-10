@@ -4,7 +4,7 @@ using System.Linq;
 
 public partial class GameScene : Node2D
 {
-	[Signal] 
+	[Signal]
 	public delegate void UnitSelectionEventHandler();
 	public bool AbilityTargetSelection;
 	private Vector2? AbilityTargetPosition = null;
@@ -35,6 +35,9 @@ public partial class GameScene : Node2D
 		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 
+
+		// Debuging 
+		// Spawn units in order to test the game
 		simulationCore.Push(new DebugSpawnUnitsMessage(
 			"player_1",
 			gameLoop.CurrentTick,
@@ -42,6 +45,17 @@ public partial class GameScene : Node2D
 			new Vector2(100, 50),
 			UnitCatalog.GetMovementSpeed(UnitType.CONSTRUCTION_UNIT)
 		));
+
+		for (int i = 0; i < 3; i++)
+		{
+			simulationCore.Push(new DebugSpawnUnitsMessage(
+				"player_2",
+				gameLoop.CurrentTick,
+				UnitType.BASIC_INFANTRY,
+				new Vector2(150 + i * 50, 100),
+				UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
+			));
+		}
 	}
 
 	private void OnAbilityPressed(string abilityId)
@@ -74,12 +88,13 @@ public partial class GameScene : Node2D
 
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventMouseButton mouseEvent) {
-			if (GetViewport().GuiGetHoveredControl() is BaseButton) 
+		if (@event is InputEventMouseButton mouseEvent)
+		{
+			if (GetViewport().GuiGetHoveredControl() is BaseButton)
 				return;
-			
+
 			shiftHeld = Input.IsKeyPressed(Key.Shift);
-			
+
 			if (mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed)
 			{
 				SelectionStartPos = GetGlobalMousePosition();
@@ -91,11 +106,12 @@ public partial class GameScene : Node2D
 			if (mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
 			{
 				SelectionEndPos = GetGlobalMousePosition();
-				
+
 				if (IsDraggingSelection)
 				{
 					HandleSelectionBox(SelectionStartPos, SelectionEndPos);
-				} else
+				}
+				else
 				{
 					HandleLeftMouseButton(shiftHeld);
 				}
@@ -104,7 +120,7 @@ public partial class GameScene : Node2D
 				IsDraggingSelection = false;
 				QueueRedraw();
 			}
-			
+
 			if (mouseEvent.ButtonIndex == MouseButton.Right)
 			{
 				HandleRightMouseButton(shiftHeld);
@@ -203,11 +219,11 @@ public partial class GameScene : Node2D
 		MessageBase command = null;
 
 		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
-		if (CurrentEntity is null) 
+		if (CurrentEntity is null)
 		{
 			if (SelectedEntityIds.Count <= 0)
 				return;
-			
+
 			command = new MoveUnitsMessage(
 				"player_1",
 				gameLoop.CurrentTick,
@@ -222,7 +238,7 @@ public partial class GameScene : Node2D
 			if (SelectedEntityIds.Count <= 0)
 				return;
 
-			command = new AttackTargetMessage (
+			command = new AttackTargetMessage(
 				"player_1",
 				gameLoop.CurrentTick,
 				SelectedEntityIds.ToArray(),
@@ -231,9 +247,9 @@ public partial class GameScene : Node2D
 			);
 		}
 
-		if (command is null) 
+		if (command is null)
 			return;
-		
+
 		if (!simulationCore.Push(command))
 			GD.Print("Command couldn't be processed. ");
 
