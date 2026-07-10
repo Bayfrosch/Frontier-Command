@@ -364,6 +364,27 @@ public class SimulationCoreTest
 		AssertThat(secondBuilder.ConstructionTargetId).IsEqual(site.EntityId);
 	}
 
+	[TestCase]
+	public void Push_UseAbilityMessage_SellBuilding_RemovesCompletedBuilding()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var building = new BuildingState("building-1", "player-1", Vector2.Zero, BuildingType.BARRACKS, "builder-1");
+		building.AdvanceConstruction(100);
+		player.AddEntity(building);
+		context.AddPlayer(player);
+
+		var msg = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "building-1" },
+			p_ability_id: "sell_building"
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(player.Entities.ContainsKey("building-1")).IsFalse();
+	}
+
 	private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
 	{
 		return new MoveUnitsMessage(

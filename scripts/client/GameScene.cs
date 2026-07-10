@@ -31,6 +31,7 @@ public partial class GameScene : Node2D
 			GD.PushError("SimulationCore node was not found or has the wrong script");
 			return;
 		}
+		simulationCore.StateChanged += PruneDeletedSelectedEntities;
 
 		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
@@ -56,6 +57,23 @@ public partial class GameScene : Node2D
 				UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
 			));
 		}
+	}
+
+	private void PruneDeletedSelectedEntities()
+	{
+		if (EntitySelectionIds.Count <= 0)
+			return;
+
+		var existingEntityIds = simulationCore.GetState()
+			.Players.Values
+			.SelectMany(player => player.Entities.Keys)
+			.ToHashSet();
+
+		var removedSelection = EntitySelectionIds.RemoveWhere(entityId => !existingEntityIds.Contains(entityId));
+		if (removedSelection <= 0)
+			return;
+
+		EmitSignal(SignalName.UnitSelection);
 	}
 
 	private void OnAbilityPressed(string abilityId)

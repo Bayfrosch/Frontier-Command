@@ -631,11 +631,35 @@ public sealed class SimulationContext
 				HandleCancelConstruction(cmsg);
 				break;
 
+			case "sell_building":
+				passed = HandleSellBuilding(msg);
+				break;
+
 			case "spawn_barracks":
 				passed = HandleSpawnBuilding(msg, BuildingType.BARRACKS);
 				break;
 		}
 		return passed;
+	}
+
+	private bool HandleSellBuilding(UseAbilityMessage msg)
+	{
+		var soldBuilding = false;
+		foreach (var entityId in msg.caster_entity_ids)
+		{
+			if (!TryGetPlayer(msg.player_id, out var player) || player is null)
+				return false;
+			
+			if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var building) || building is null)
+				continue;
+
+			if (building.Type == BuildingType.CONSTRUCTION_SITE)
+				continue;
+
+			soldBuilding |= player.RemoveEntity(building.EntityId);
+		}
+
+		return soldBuilding;
 	}
 
 	private bool HandleSpawnUnit(UseAbilityMessage msg, UnitType unitType)
