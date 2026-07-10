@@ -246,6 +246,19 @@ public partial class GameScene : Node2D
 				shiftHeld ? 1 : 0
 			);
 		}
+		else if (CurrentEntity is ClientBuilding { Type: BuildingType.CONSTRUCTION_SITE })
+		{
+			if (SelectedEntityIds.Count <= 0)
+				return;
+
+			command = new RepairTargetMessage(
+				"player_1",
+				gameLoop.CurrentTick,
+				SelectedEntityIds.ToArray(),
+				CurrentEntity.EntityId,
+				shiftHeld ? 1 : 0
+			);
+		}
 
 		if (command is null)
 			return;

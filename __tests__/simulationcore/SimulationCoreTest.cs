@@ -280,6 +280,90 @@ public class SimulationCoreTest
 		AssertThat(target.Health).IsEqual(target.MaxHealth);
 	}
 
+	[TestCase]
+	public void Push_BuildStructure_AssignsConstructionUnitToCreatedSite()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		var msg = new BuildStructureMessage(
+			BuildingType.BARRACKS,
+			"player-1",
+			0,
+			"builder-1",
+			Vector2.Zero
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(site.ConstructionUnitId).IsEqual("builder-1");
+		AssertThat(builder.HasConstructionOrder).IsTrue();
+		AssertThat(builder.ConstructionTargetId).IsEqual(site.EntityId);
+		AssertThat(builder.HasMoveOrder).IsTrue();
+	}
+
+	[TestCase]
+	public void Push_MoveUnits_ClearsConstructionOrderAndStopsProgress()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new BuildStructureMessage(
+			BuildingType.BARRACKS,
+			"player-1",
+			0,
+			"builder-1",
+			Vector2.Zero
+		))).IsTrue();
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+
+		AssertThat(context.Push(CreateMoveMessage("player-1", "builder-1", new Vector2(200, 0)))).IsTrue();
+		context.AdvanceTick();
+
+		AssertThat(builder.HasConstructionOrder).IsFalse();
+		AssertThat(site.BuildProgression).IsEqual(0);
+	}
+
+	[TestCase]
+	public void Push_RepairTarget_AssignsSelectedConstructionUnitToConstructionSite()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var firstBuilder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		var secondBuilder = new UnitState("builder-2", "player-1", new Vector2(100, 0), 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(firstBuilder);
+		player.AddEntity(secondBuilder);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new BuildStructureMessage(
+			BuildingType.BARRACKS,
+			"player-1",
+			0,
+			"builder-1",
+			Vector2.Zero
+		))).IsTrue();
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+
+		var assignMessage = new RepairTargetMessage(
+			"player-1",
+			0,
+			new[] { "builder-2" },
+			site.EntityId
+		);
+
+		AssertThat(context.Push(assignMessage)).IsTrue();
+		AssertThat(site.ConstructionUnitId).IsEqual("builder-2");
+		AssertThat(firstBuilder.HasConstructionOrder).IsFalse();
+		AssertThat(secondBuilder.HasConstructionOrder).IsTrue();
+		AssertThat(secondBuilder.ConstructionTargetId).IsEqual(site.EntityId);
+	}
+
 	private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
 	{
 		return new MoveUnitsMessage(

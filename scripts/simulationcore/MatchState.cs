@@ -170,6 +170,8 @@ public class UnitState : EntityState
 	public string AttackTargetId { get; private set; } = "";
 	public bool HasAttackOrder { get; private set; }
 	public Vector2 AttackFormationOffset { get; private set; }
+	public string ConstructionTargetId { get; private set; } = "";
+	public bool HasConstructionOrder { get; private set; }
 	public int AttackDamage { get; private set; }
 	public float AttackRange { get; private set; }
 	public float AttackWindupTime { get; private set; }
@@ -177,12 +179,14 @@ public class UnitState : EntityState
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
 
-	internal void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false)
+	internal void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
 		TargetPosition = targetPosition;
 		HasMoveOrder = true;
 		if (!preserveAttackOrder)
 			ClearAttackOrder();
+		if (!preserveConstructionOrder)
+			ClearConstructionOrder();
 	}
 	internal void ClearMoveOrder()
 	{
@@ -202,6 +206,17 @@ public class UnitState : EntityState
 		AttackFormationOffset = Vector2.Zero;
 		HasAttackOrder = false;
 		ResetAttackWindup();
+	}
+	internal void SetConstructionOrder(string targetEntityId)
+	{
+		ConstructionTargetId = targetEntityId;
+		HasConstructionOrder = true;
+		ClearAttackOrder();
+	}
+	internal void ClearConstructionOrder()
+	{
+		ConstructionTargetId = "";
+		HasConstructionOrder = false;
 	}
 	internal void ResetAttackWindup()
 	{
@@ -291,6 +306,14 @@ public sealed class BuildingState : EntityState
 	public Vector2 RallyPoint { get; private set; }
 	public string ConstructionUnitId { get; private set; }
 	public BuildingType pendingBuilding { get; private set; }
+	internal void AssignConstructionUnit(string constructionUnitId)
+	{
+		ConstructionUnitId = constructionUnitId;
+	}
+	internal void ClearConstructionUnit()
+	{
+		ConstructionUnitId = "";
+	}
 	internal void SetRallyPoint(Vector2 newPos)
 	{
 		RallyPoint = newPos;

@@ -349,14 +349,7 @@ public sealed class SimulationContext
 		BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type, msg.construction_unit_id);
 
 		player.AddEntity(building);
-
-		var constructionTarget = FindShortestPathToBuilding(unit.CurrentPosition, building);
-		Push(new MoveUnitsMessage(
-			player.PlayerId,
-			_matchState.Tick,
-			new[] { unit.EntityId },
-			constructionTarget
-		));
+		AssignConstructionUnitToSite(unit, building);
 
 		return true;
 	}
@@ -386,12 +379,20 @@ public sealed class SimulationContext
 		if (!TryGetConstructionUnit(playerId, building.ConstructionUnitId, out var constructionUnit))
 			return;
 
+		if (!constructionUnit.HasConstructionOrder || constructionUnit.ConstructionTargetId != building.EntityId)
+			return;
+
+		if (constructionUnit.HasMoveOrder)
+			return;
+
 		float constructionRange = GetConstructionRange(building.Type);
 
 		if (DistanceSquaredToBuildingFootprint(constructionUnit.CurrentPosition, building) > constructionRange * constructionRange)
 			return;
 
 		building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
+		if (building.Type != BuildingType.CONSTRUCTION_SITE)
+			constructionUnit.ClearConstructionOrder();
 	}
 	private static float DistanceSquaredToBuildingFootprint(Vector2 point, BuildingState building)
 	{
@@ -437,10 +438,56 @@ public sealed class SimulationContext
 		if (!TryGetPlayerEntity<EntityState>(msg.player_id, msg.target_entity_id, out var entity) || entity is null)
 			return false;
 
+		if (entity is BuildingState { Type: BuildingType.CONSTRUCTION_SITE } constructionSite)
+			return HandleAssignConstruction(msg.player_id, msg.repair_unit_ids, constructionSite);
+
 		if (entity.Health == entity.MaxHealth)
 			return false;
 
 		return entity.GettingRepaired = true;
+	}
+
+	private bool HandleAssignConstruction(string playerId, string[] constructionUnitIds, BuildingState constructionSite)
+	{
+		foreach (var unitId in constructionUnitIds)
+		{
+			if (!TryGetConstructionUnit(playerId, unitId, out var constructionUnit) || constructionUnit is null)
+				continue;
+
+			AssignConstructionUnitToSite(constructionUnit, constructionSite);
+			return true;
+		}
+
+		return false;
+	}
+
+	private void AssignConstructionUnitToSite(UnitState constructionUnit, BuildingState constructionSite)
+	{
+		if (constructionUnit.HasConstructionOrder
+		&& constructionUnit.ConstructionTargetId != constructionSite.EntityId
+		&& TryGetEntityById(constructionUnit.ConstructionTargetId, out var previousSite)
+		&& previousSite is BuildingState previousConstructionSite
+		&& previousConstructionSite.ConstructionUnitId == constructionUnit.EntityId)
+		{
+			previousConstructionSite.ClearConstructionUnit();
+		}
+
+		if (!string.IsNullOrEmpty(constructionSite.ConstructionUnitId)
+		&& constructionSite.ConstructionUnitId != constructionUnit.EntityId
+		&& TryGetPlayerEntity<UnitState>(constructionSite.OwnerPlayerId ?? "", constructionSite.ConstructionUnitId, out var previousConstructionUnit)
+		&& previousConstructionUnit is not null
+		&& previousConstructionUnit.ConstructionTargetId == constructionSite.EntityId)
+		{
+			previousConstructionUnit.ClearConstructionOrder();
+			previousConstructionUnit.ClearMoveOrder();
+		}
+
+		constructionSite.AssignConstructionUnit(constructionUnit.EntityId);
+		constructionUnit.SetConstructionOrder(constructionSite.EntityId);
+		constructionUnit.SetMoveOrder(
+			FindShortestPathToBuilding(constructionUnit.CurrentPosition, constructionSite),
+			preserveConstructionOrder: true
+		);
 	}
 	// TODO:
 	private bool HandleCaptureTarget(CaptureTargetMessage msg)
