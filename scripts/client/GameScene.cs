@@ -32,7 +32,7 @@ public partial class GameScene : Node2D
 			return;
 		}
 
-		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
+		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 
 		simulationCore.Push(new DebugSpawnUnitsMessage(

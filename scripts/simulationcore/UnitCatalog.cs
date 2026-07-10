@@ -13,11 +13,20 @@ public static class UnitCatalog
         };
     }
 
+    public static int GetAttackDamage(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => 10,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
+        };
+    }
+
     public static float GetMovementSpeed(UnitType type)
     {
         return type switch
         {
-            UnitType.BASIC_INFANTRY => 15f,
+            UnitType.BASIC_INFANTRY => 30f,
             UnitType.CONSTRUCTION_UNIT => 30f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
         };

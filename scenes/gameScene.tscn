@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://rx502q8ojk4g" path="res://scenes/GameUserInterface.tscn" id="2_4doxw"]
 [ext_resource type="Script" uid="uid://dydin2bng3rwv" path="res://scripts/simulationcore/TimeTickSystem.cs" id="2_j8ivh"]
 [ext_resource type="Script" uid="uid://cvf4mreu4cle8" path="res://scripts/client/LocalSimulationNode.cs" id="4_7ddre"]
+[ext_resource type="Script" uid="uid://bciyihg0tcvnk" path="res://scripts/client/CameraController.cs" id="5_5a1sk"]
 [ext_resource type="Script" uid="uid://coflhkb34duy2" path="res://scripts/client/ClientWorldRenderer.cs" id="5_qjeyg"]
 
 [node name="Node2D" type="Node2D" unique_id=897403920]
@@ -18,6 +19,9 @@ script = ExtResource("4_7ddre")
 [node name="WorldRenderer" type="Node" parent="." unique_id=2024183592]
 script = ExtResource("5_qjeyg")
 
-[node name="Screen" type="CanvasLayer" parent="." unique_id=1854727095]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=206206417]
+script = ExtResource("5_5a1sk")
 
-[node name="GameUserInterface" parent="Screen" unique_id=1253293035 instance=ExtResource("2_4doxw")]
+[node name="Screen" type="CanvasLayer" parent="Camera2D" unique_id=1854727095]
+
+[node name="GameUserInterface" parent="Camera2D/Screen" unique_id=1253293035 instance=ExtResource("2_4doxw")]
