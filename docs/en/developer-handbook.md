@@ -79,7 +79,7 @@ Current entity types:
 * `UnitState`
 * `BuildingState`
 * `OutpostState`
-* `ResourceFieldState`
+* `ResourceState`
 
 Shared entity data includes:
 
@@ -97,8 +97,8 @@ Unit types are defined by `UnitType` in `MatchState.cs`.
 Current unit types:
 
 * `BASIC_INFANTRY`
+* `RPG_TROOPER`
 * `CONSTRUCTION_UNIT`
-* `OVERLORD`
 
 Unit gameplay values live in `UnitCatalog.cs`.
 
@@ -118,6 +118,7 @@ Current building types:
 
 * `CONSTRUCTION_SITE`
 * `BARRACKS`
+* `RESOURCE_SPAWNER`
 
 Building gameplay values live in `BuildingCatalog.cs`.
 
@@ -127,8 +128,11 @@ Buildings may:
 * Complete into another building type
 * Have abilities
 * Produce units
+* Spawn and track resource sources
 * Be sold if completed
 * Be cancelled if still a construction site
+
+Resource spawners create neutral `ResourceState` entries around themselves when they complete construction. Each `ResourceState` stores its resource type, max amount, current amount, and source spawner id. The completed spawner tracks the ids it created in `ResourceEntityIds`.
 
 ## Abilities
 

@@ -26,6 +26,7 @@ public sealed class SimulationContext
 
 		// debugging
 		Register<DebugSpawnUnitsMessage>(HandleDebugSpawnUnit);
+		Register<DebugSpawnBuildingMessage>(HandleDebugSpawnBuilding);
 
 		// construction
 		Register<BuildStructureMessage>(HandleBuildStructure);
@@ -100,6 +101,8 @@ public sealed class SimulationContext
 				if (entity is BuildingState building)
 				{
 					HandleAdvanceConstruction(player.PlayerId, building);
+					HandleAdvanceResourceSpawner(building);
+
 					var unit = building.AdvanceProduction(PRODUCTION_ADVANCE);
 					if (unit is null)
 						continue;
@@ -271,6 +274,12 @@ public sealed class SimulationContext
 
 	private bool TryGetEntityById(string entityId, out EntityState? entity)
 	{
+		entity = _matchState.Resources.Values
+			.FirstOrDefault(resource => resource.EntityId == entityId);
+
+		if (entity is not null)
+			return true;
+
 		entity = _matchState.Players.Values
 			.SelectMany(player => player.Entities.Values)
 			.FirstOrDefault(entity => entity.EntityId == entityId);
@@ -384,6 +393,37 @@ public sealed class SimulationContext
 		AssignConstructionUnitToSite(unit, building);
 
 		return true;
+	}
+	private void HandleAdvanceResourceSpawner(BuildingState building)
+	{
+		if (building.Type != BuildingType.RESOURCE_SPAWNER || building.HasSpawnedResources)
+			return;
+
+		var resourceType = ResourceCatalog.GetSpawnerResourceType(building.Type);
+		var resourceCount = ResourceCatalog.GetSpawnerResourceCount(building.Type);
+		var resourceRadius = ResourceCatalog.GetSpawnerResourceRadius(building.Type);
+		var maxAmount = ResourceCatalog.GetMaxAmount(resourceType);
+
+		for (var i = 0; i < resourceCount; i++)
+		{
+			var angle = Math.Tau * i / resourceCount;
+			var offset = new Vector2(
+				(float)Math.Cos(angle) * resourceRadius,
+				(float)Math.Sin(angle) * resourceRadius
+			);
+			var resource = new ResourceState(
+				NewEntityId(resourceType.ToString()),
+				resourceType,
+				building.EntityId,
+				building.CurrentPosition + offset,
+				maxAmount
+			);
+
+			_matchState.AddResource(resource);
+			building.RegisterSpawnedResource(resource.EntityId);
+		}
+
+		building.MarkResourcesSpawned();
 	}
 	private Vector2 FindShortestPathToBuilding(Vector2 unitPosition, BuildingState building)
 	{
@@ -678,6 +718,10 @@ public sealed class SimulationContext
 			case "spawn_barracks":
 				passed = HandleSpawnBuilding(msg, BuildingType.BARRACKS);
 				break;
+
+			case "spawn_resource_spawner":
+				passed = HandleSpawnBuilding(msg, BuildingType.RESOURCE_SPAWNER);
+				break;
 		}
 		return passed;
 	}
@@ -765,6 +809,34 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	private bool HandleDebugSpawnBuilding(DebugSpawnBuildingMessage msg)
+	{
+		if (!TryGetPlayer(msg.PlayerId, out var player))
+			return false;
+
+		if (player is null)
+			return false;
+
+		var buildingId = NewEntityId(msg.BuildingType.ToString());
+		var building = new BuildingState(
+			buildingId,
+			msg.PlayerId,
+			msg.Position,
+			msg.BuildingType,
+			msg.ConstructionUnitId
+		);
+
+		if (msg.SpawnCompleted)
+			building.AdvanceConstruction(100);
+
+		player.AddEntity(building);
+
+		if (msg.SpawnCompleted)
+			HandleAdvanceResourceSpawner(building);
+
+		return true;
+	}
+
 	private Vector2 GetOccupiedOffsetPosition(Vector2 requestedPosition)
 	{
 		if (!IsPositionOccupied(requestedPosition))
@@ -841,4 +913,5 @@ public interface IMatchStateView
 {
 	int Tick { get; }
 	IReadOnlyDictionary<string, PlayerState> Players { get; }
+	IReadOnlyDictionary<string, ResourceState> Resources { get; }
 }

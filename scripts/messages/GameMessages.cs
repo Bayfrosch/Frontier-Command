@@ -4,6 +4,7 @@ using Godot;
 public partial class GameMessages : RefCounted
 {
 	public static readonly StringName DEBUG_SPAWN_UNIT = "debug_spawn_unit";
+	public static readonly StringName DEBUG_SPAWN_BUILDING = "debug_spawn_building";
 	public static readonly StringName CLIENT_HELLO = "client_hello";
 	public static readonly StringName SERVER_HELLO = "server_hello";
 	public static readonly StringName PING = "ping";

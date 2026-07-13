@@ -19,6 +19,7 @@ public partial class LocalSimulationNode : Node
         Context = new SimulationContext("test_match");
         Context.AddPlayer(new PlayerState("player_1"));
         Context.AddPlayer(new PlayerState("player_2"));
+        Context.AddPlayer(new PlayerState("neutral"));
 
         var gameLoop = GetNode<TimeTickSystem>("../GameLoop");
         gameLoop.Tick += OnTick;

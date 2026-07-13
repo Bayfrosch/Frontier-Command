@@ -753,7 +753,7 @@ rate_limited
 
 The current state messages carry dictionaries and dictionary arrays. There are
 no implemented typed `PlayerState`, `EntityState`, `UnitState`, `BuildingState`,
-`OutpostState`, or `ResourceFieldState` message classes.
+`OutpostState`, or `ResourceState` message classes.
 
 ### STATE_SNAPSHOT
 

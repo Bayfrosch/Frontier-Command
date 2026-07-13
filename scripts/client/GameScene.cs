@@ -50,16 +50,23 @@ public partial class GameScene : Node2D
 			UnitCatalog.GetMovementSpeed(UnitType.CONSTRUCTION_UNIT)
 		));
 
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			simulationCore.Push(new DebugSpawnUnitsMessage(
 				"player_2",
 				gameLoop.CurrentTick,
 				UnitType.BASIC_INFANTRY,
-				new Vector2(150 + i * 50, 100),
+				new Vector2(-500, 0 + i * 50),
 				UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
 			));
 		}
+		// Sawn resources
+		simulationCore.Push(new DebugSpawnBuildingMessage(
+			"neutral",
+			gameLoop.CurrentTick,
+			BuildingType.RESOURCE_SPAWNER,
+			new Vector2(800, 100)
+		));
 	}
 
 	public override void _Process(double delta)

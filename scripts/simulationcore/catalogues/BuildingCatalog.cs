@@ -7,6 +7,7 @@ public static class BuildingCatalog
 		return type switch
 		{
 			BuildingType.BARRACKS => new Vector2(80, 60),
+			BuildingType.RESOURCE_SPAWNER => new Vector2(80, 80),
 			_ => new Vector2(0, 0)
 		};
 	}
@@ -17,6 +18,7 @@ public static class BuildingCatalog
 		{
 			BuildingType.CONSTRUCTION_SITE => 200,
 			BuildingType.BARRACKS => 500,
+			BuildingType.RESOURCE_SPAWNER => 350,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}

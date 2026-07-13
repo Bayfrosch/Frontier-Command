@@ -17,11 +17,21 @@ public sealed class MatchState : IMatchStateView
 	*/
 	private readonly Dictionary<string, PlayerState> _players = new();
 	public IReadOnlyDictionary<string, PlayerState> Players => _players;
+	private readonly Dictionary<string, ResourceState> _resources = new();
+	public IReadOnlyDictionary<string, ResourceState> Resources => _resources;
 	public readonly Dictionary<string, ProjectileState> Projectiles = new();
 	public IReadOnlyDictionary<string, ProjectileState> ProjectilesView => Projectiles;
 	internal void AddPlayer(PlayerState player)
 	{
 		_players[player.PlayerId] = player;
+	}
+	internal void AddResource(ResourceState resource)
+	{
+		_resources[resource.EntityId] = resource;
+	}
+	internal bool RemoveResource(string id)
+	{
+		return _resources.Remove(id);
 	}
 }
 
@@ -288,6 +298,12 @@ public enum BuildingType
 {
 	CONSTRUCTION_SITE,
 	BARRACKS,
+	RESOURCE_SPAWNER,
+}
+
+public enum ResourceType
+{
+	MATERIALS,
 }
 
 public enum UnitType
@@ -346,6 +362,9 @@ public sealed class BuildingState : EntityState
 	public Vector2 RallyPoint { get; private set; }
 	public string ConstructionUnitId { get; private set; }
 	public BuildingType pendingBuilding { get; private set; }
+	private readonly List<string> _resourceEntityIds = new();
+	public IReadOnlyList<string> ResourceEntityIds => _resourceEntityIds;
+	public bool HasSpawnedResources { get; private set; }
 	internal void AssignConstructionUnit(string constructionUnitId)
 	{
 		ConstructionUnitId = constructionUnitId;
@@ -366,6 +385,14 @@ public sealed class BuildingState : EntityState
 	{
 		ProductionQueue = ProductionQueue.Append(unitType).ToArray();
 	}
+	internal void RegisterSpawnedResource(string resourceEntityId)
+	{
+		_resourceEntityIds.Add(resourceEntityId);
+	}
+	internal void MarkResourcesSpawned()
+	{
+		HasSpawnedResources = true;
+	}
 }
 
 public sealed class OutpostState : EntityState
@@ -377,10 +404,32 @@ public sealed class OutpostState : EntityState
 	public string OutpostSpecialization { get; private set; } = "";
 }
 
-public sealed class ResourceFieldState : EntityState
+public sealed class ResourceState : EntityState
 {
-	public ResourceFieldState(string entityId, string ownerPlayerId, Vector2 currentPos)
-		: base(entityId, ownerPlayerId, currentPos, 1, ArmorClass.STRUCTURE)
+	public ResourceState(
+		string entityId,
+		ResourceType resourceType,
+		string spawnerEntityId,
+		Vector2 currentPos,
+		int maxAmount
+	)
+		: base(entityId, null, currentPos, 1, ArmorClass.STRUCTURE)
 	{
+		ResourceType = resourceType;
+		SpawnerEntityId = spawnerEntityId;
+		MaxAmount = Math.Max(0, maxAmount);
+		CurrentAmount = MaxAmount;
+	}
+	public ResourceType ResourceType { get; private set; }
+	public string SpawnerEntityId { get; private set; }
+	public int MaxAmount { get; private set; }
+	public int CurrentAmount { get; private set; }
+	public bool IsDepleted => CurrentAmount <= 0;
+
+	internal int Extract(int requestedAmount)
+	{
+		var extractedAmount = Math.Min(Math.Max(0, requestedAmount), CurrentAmount);
+		CurrentAmount -= extractedAmount;
+		return extractedAmount;
 	}
 }

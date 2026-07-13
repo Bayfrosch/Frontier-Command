@@ -148,6 +148,78 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_DebugSpawnBuilding_CreatesCompletedBuildingAtPosition()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		var position = new Vector2(30, 40);
+		var msg = new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.BARRACKS,
+			position
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+
+		var building = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(building.Type).IsEqual(BuildingType.BARRACKS);
+		AssertThat(building.CurrentPosition).IsEqual(position);
+		AssertThat(building.BuildProgression).IsEqual(100);
+		AssertThat(building.Health).IsEqual(BuildingCatalog.GetMaxHealth(BuildingType.BARRACKS));
+	}
+
+	[TestCase]
+	public void Push_DebugSpawnBuilding_CreatesConstructionSite_WhenSpawnCompletedIsFalse()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		var msg = new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.BARRACKS,
+			Vector2.Zero,
+			p_spawn_completed: false
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+
+		var building = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(building.Type).IsEqual(BuildingType.CONSTRUCTION_SITE);
+		AssertThat(building.pendingBuilding).IsEqual(BuildingType.BARRACKS);
+		AssertThat(building.BuildProgression).IsEqual(0);
+	}
+
+	[TestCase]
+	public void Push_DebugSpawnBuilding_ResourceSpawner_CreatesTrackedResourcesImmediately()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		var msg = new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.RESOURCE_SPAWNER,
+			Vector2.Zero
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+
+		var spawner = player.Entities.Values.OfType<BuildingState>().Single();
+		var resourceCount = ResourceCatalog.GetSpawnerResourceCount(BuildingType.RESOURCE_SPAWNER);
+		AssertThat(spawner.Type).IsEqual(BuildingType.RESOURCE_SPAWNER);
+		AssertThat(spawner.HasSpawnedResources).IsTrue();
+		AssertThat(spawner.ResourceEntityIds.Count).IsEqual(resourceCount);
+		AssertThat(context.get().Resources.Count).IsEqual(resourceCount);
+		AssertThat(context.get().Resources.Values.All(resource => resource.SpawnerEntityId == spawner.EntityId)).IsTrue();
+	}
+
+	[TestCase]
 	public void AdvanceTick_BasicInfantryWaitsForCooldown_AfterFiring_WhenEnemyIsInRange()
 	{
 		var context = new SimulationContext("match-1");
@@ -396,6 +468,46 @@ public class SimulationCoreTest
 		AssertThat(firstBuilder.HasConstructionOrder).IsFalse();
 		AssertThat(secondBuilder.HasConstructionOrder).IsTrue();
 		AssertThat(secondBuilder.ConstructionTargetId).IsEqual(site.EntityId);
+	}
+
+	[TestCase]
+	public void AdvanceTick_CompletedResourceSpawner_CreatesTrackedResourceStates()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new BuildStructureMessage(
+			BuildingType.RESOURCE_SPAWNER,
+			"player-1",
+			0,
+			"builder-1",
+			Vector2.Zero
+		))).IsTrue();
+
+		var spawner = player.Entities.Values.OfType<BuildingState>().Single();
+		spawner.AdvanceConstruction(100);
+
+		context.AdvanceTick();
+
+		var resourceCount = ResourceCatalog.GetSpawnerResourceCount(BuildingType.RESOURCE_SPAWNER);
+		AssertThat(spawner.Type).IsEqual(BuildingType.RESOURCE_SPAWNER);
+		AssertThat(spawner.HasSpawnedResources).IsTrue();
+		AssertThat(spawner.ResourceEntityIds.Count).IsEqual(resourceCount);
+		AssertThat(context.get().Resources.Count).IsEqual(resourceCount);
+		AssertThat(context.get().Resources.Values.All(resource =>
+			resource.SpawnerEntityId == spawner.EntityId &&
+			resource.ResourceType == ResourceType.MATERIALS &&
+			resource.CurrentAmount == ResourceCatalog.GetMaxAmount(ResourceType.MATERIALS) &&
+			resource.MaxAmount == ResourceCatalog.GetMaxAmount(ResourceType.MATERIALS)
+		)).IsTrue();
+
+		context.AdvanceTick();
+
+		AssertThat(context.get().Resources.Count).IsEqual(resourceCount);
+		AssertThat(spawner.ResourceEntityIds.Count).IsEqual(resourceCount);
 	}
 
 	[TestCase]

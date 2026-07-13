@@ -8,6 +8,10 @@ public partial class ClientWorldRenderer : Node
 	// Building Scenes
 	public PackedScene BasicBarracksScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/Barracks.tscn");
 	public PackedScene ConstructionSiteScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
+	public PackedScene ResourceSpawnerScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ResourceSpawner.tscn");
+
+	// Resource Scenes
+	public PackedScene ResourceSourceScene { get; } = GD.Load<PackedScene>("res://scenes/resources/ResourceSource.tscn");
 
 	// Unit Scenes
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
@@ -20,6 +24,7 @@ public partial class ClientWorldRenderer : Node
 	private GameScene Scene = null;
 	private readonly Dictionary<string, ClientBuilding> buildingsById = new();
 	private readonly Dictionary<string, ClientUnit> unitsById = new();
+	private readonly Dictionary<string, ClientResource> resourcesById = new();
 
 	public override void _Ready()
 	{
@@ -74,6 +79,7 @@ public partial class ClientWorldRenderer : Node
 		var state = simulation.GetState();
 		var existingBuildingIds = new HashSet<string>();
 		var existingUnitIds = new HashSet<string>();
+		var existingResourceIds = new HashSet<string>();
 
 		// Build
 		foreach (var player in state.Players.Values)
@@ -91,6 +97,12 @@ public partial class ClientWorldRenderer : Node
 					SyncUnit(unitState);
 				}
 			}
+		}
+
+		foreach (var resourceState in state.Resources.Values)
+		{
+			existingResourceIds.Add(resourceState.EntityId);
+			SyncResource(resourceState);
 		}
 
 		// Remove Buildings that no longer exist
@@ -111,6 +123,15 @@ public partial class ClientWorldRenderer : Node
 				unitsById.Remove(entityId);
 			}
 		}
+		// Remove Resources that no longer exist
+		foreach (var entityId in resourcesById.Keys.ToArray())
+		{
+			if (!existingResourceIds.Contains(entityId))
+			{
+				resourcesById[entityId].QueueFree();
+				resourcesById.Remove(entityId);
+			}
+		}
 	}
 
 	private PackedScene GetBuildingScene(BuildingType type)
@@ -118,6 +139,7 @@ public partial class ClientWorldRenderer : Node
 		return type switch
 		{
 			BuildingType.BARRACKS => BasicBarracksScene,
+			BuildingType.RESOURCE_SPAWNER => ResourceSpawnerScene,
 			BuildingType.CONSTRUCTION_SITE => ConstructionSiteScene,
 			_ => throw new Exception("BuildingScene does not exist")
 		};
@@ -170,5 +192,20 @@ public partial class ClientWorldRenderer : Node
 		}
 
 		unit.ApplyState(unitState);
+	}
+
+	private void SyncResource(ResourceState resourceState)
+	{
+		if (!resourcesById.TryGetValue(resourceState.EntityId, out var resource))
+		{
+			resource = ResourceSourceScene.Instantiate<ClientResource>();
+			AddChild(resource);
+			resourcesById[resourceState.EntityId] = resource;
+
+			resource.ApplySpawnState(resourceState);
+			return;
+		}
+
+		resource.ApplyState(resourceState);
 	}
 }

@@ -765,7 +765,7 @@ rate_limited
 Die aktuellen State-Nachrichten transportieren Dictionaries und
 Dictionary-Arrays. Es gibt keine implementierten typisierten
 `PlayerState`-, `EntityState`-, `UnitState`-, `BuildingState`-, `OutpostState`-
-oder `ResourceFieldState`-Nachrichtenklassen.
+oder `ResourceState`-Nachrichtenklassen.
 
 ### STATE_SNAPSHOT
 

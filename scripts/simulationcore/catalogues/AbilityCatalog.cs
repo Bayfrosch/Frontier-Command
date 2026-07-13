@@ -44,6 +44,17 @@ public static class AbilityCatalog
 					RequiresTarget = false
 				});
 				break;
+
+			case BuildingType.RESOURCE_SPAWNER:
+				abilities.Add(new Ability
+				{
+					Id = "sell_building",
+					Name = "Verkaufen",
+					Unlocked = true,
+					Cost = 0,
+					RequiresTarget = false
+				});
+				break;
 		}
 		return abilities;
 	}
@@ -58,6 +69,14 @@ public static class AbilityCatalog
 				{
 					Id = "spawn_barracks",
 					Name = "Baracke",
+					Unlocked = true,
+					Cost = 1000,
+					RequiresTarget = true
+				});
+				abilities.Add(new Ability
+				{
+					Id = "spawn_resource_spawner",
+					Name = "Resource Spawner",
 					Unlocked = true,
 					Cost = 1000,
 					RequiresTarget = true
