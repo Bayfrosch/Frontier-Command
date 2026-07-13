@@ -43,14 +43,6 @@ public static class AbilityCatalog
 					Cost = 20,
 					RequiresTarget = false
 				});
-				abilities.Add(new Ability
-				{
-					Id = "spawn_sniper",
-					Name = "Sniper",
-					Unlocked = false,
-					Cost = 69,
-					RequiresTarget = false
-				});
 				break;
 		}
 		return abilities;
