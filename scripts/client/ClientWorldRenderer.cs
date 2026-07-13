@@ -47,6 +47,7 @@ public partial class ClientWorldRenderer : Node
 		return type switch
 		{
 			UnitType.BASIC_INFANTRY => new Color(0.7169325f, 0.3354848f, 0.33498362f, 1f),
+			UnitType.RPG_TROOPER => new Color(0.353f, 0.137f, 0.137f),
 			UnitType.CONSTRUCTION_UNIT => new Color(0.2565697f, 0.41133666f, 0.9501857f, 1f),
 			_ => DefaultUnitColor
 		};

@@ -32,7 +32,7 @@ offset_left = -20.0
 offset_top = -20.0
 offset_right = 20.0
 offset_bottom = 20.0
-color = Color(0.351631, 0.1390509, 0.13870162, 1)
+color = Color(0.3529412, 0.13725491, 0.13725491, 1)
 
 [node name="Label" type="Label" parent="BodyRender" unique_id=873171020]
 layout_mode = 1
