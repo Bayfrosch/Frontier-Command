@@ -719,8 +719,8 @@ public sealed class SimulationContext
 				passed = HandleSpawnBuilding(msg, BuildingType.BARRACKS);
 				break;
 
-			case "spawn_resource_spawner":
-				passed = HandleSpawnBuilding(msg, BuildingType.RESOURCE_SPAWNER);
+			case "spawn_resource_gatherer":
+				passed = HandleSpawnBuilding(msg, BuildingType.RESOURCE_GATHERER);
 				break;
 		}
 		return passed;

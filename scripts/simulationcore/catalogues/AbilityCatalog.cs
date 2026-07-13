@@ -45,13 +45,21 @@ public static class AbilityCatalog
 				});
 				break;
 
-			case BuildingType.RESOURCE_SPAWNER:
+			case BuildingType.RESOURCE_GATHERER:
 				abilities.Add(new Ability
 				{
 					Id = "sell_building",
 					Name = "Verkaufen",
 					Unlocked = true,
 					Cost = 0,
+					RequiresTarget = false
+				});
+				abilities.Add(new Ability
+				{
+					Id = "spawn_gatherer",
+					Name = "Sammler",
+					Unlocked = true,
+					Cost = 150,
 					RequiresTarget = false
 				});
 				break;
@@ -75,10 +83,10 @@ public static class AbilityCatalog
 				});
 				abilities.Add(new Ability
 				{
-					Id = "spawn_resource_spawner",
-					Name = "Resource Spawner",
+					Id = "spawn_resource_gatherer",
+					Name = "Nachschub",
 					Unlocked = true,
-					Cost = 1000,
+					Cost = 1500,
 					RequiresTarget = true
 				});
 				break;

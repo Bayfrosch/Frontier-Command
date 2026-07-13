@@ -13,6 +13,11 @@ public partial class GameScene : Node2D
 	private TimeTickSystem gameLoop = null;
 	private LocalSimulationNode simulationCore = null;
 	private readonly PackedScene ConstructionSitePreviewScene = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
+	private static readonly Dictionary<string, BuildingType> ConstructionPreviewTypes = new()
+	{
+		["spawn_barracks"] = BuildingType.BARRACKS,
+		["spawn_resource_gatherer"] = BuildingType.RESOURCE_GATHERER
+	};
 	private Node2D constructionPreview = null;
 	private HashSet<string> EntitySelectionIds = new();
 	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
@@ -232,15 +237,40 @@ public partial class GameScene : Node2D
 	{
 		ClearConstructionPreview();
 
-		if (abilityId != "spawn_barracks")
+		if (!ConstructionPreviewTypes.TryGetValue(abilityId, out var previewBuildingType))
 			return;
 
 		constructionPreview = ConstructionSitePreviewScene.Instantiate<Node2D>();
+		ConfigureConstructionPreviewFootprint(constructionPreview, previewBuildingType);
 		constructionPreview.Modulate = new Color(1f, 1f, 1f, 0.45f);
 		constructionPreview.ZIndex = 100;
 		DisablePreviewPicking(constructionPreview);
 		AddChild(constructionPreview);
 		constructionPreview.GlobalPosition = GetGlobalMousePosition();
+	}
+
+	private static void ConfigureConstructionPreviewFootprint(Node2D preview, BuildingType buildingType)
+	{
+		var footprintSize = BuildingCatalog.GetFoodprintSize(buildingType);
+
+		if (preview.GetNodeOrNull<ColorRect>("BodyRender") is ColorRect body)
+		{
+			body.OffsetLeft = -footprintSize.X / 2f;
+			body.OffsetTop = -footprintSize.Y / 2f;
+			body.OffsetRight = footprintSize.X / 2f;
+			body.OffsetBottom = footprintSize.Y / 2f;
+		}
+
+		if (preview.GetNodeOrNull<CollisionShape2D>("Area2D/CollisionShape2D") is CollisionShape2D collisionShape
+			&& collisionShape.Shape is RectangleShape2D rectangleShape)
+		{
+			var previewShape = rectangleShape.Duplicate() as RectangleShape2D;
+			if (previewShape is null)
+				return;
+
+			previewShape.Size = footprintSize;
+			collisionShape.Shape = previewShape;
+		}
 	}
 
 	private void ClearAbilityTargetSelection()
