@@ -1,6 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://2n8r1c3t3pru"]
 
-[ext_resource type="Script" path="res://scripts/client/ClientResource.cs" id="1_l45r8"]
+[ext_resource type="Script" uid="uid://cru2j30mumqn8" path="res://scripts/client/ClientResource.cs" id="1_l45r8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l45r8"]
 bg_color = Color(0.1, 0.45, 0.18, 1)
@@ -8,17 +8,17 @@ bg_color = Color(0.1, 0.45, 0.18, 1)
 [sub_resource type="CircleShape2D" id="CircleShape2D_l45r8"]
 radius = 16.0
 
-[node name="ResourceSource" type="Node2D"]
+[node name="ResourceSource" type="Node2D" unique_id=648052680]
 script = ExtResource("1_l45r8")
 
-[node name="BodyRender" type="ColorRect" parent="."]
+[node name="BodyRender" type="ColorRect" parent="." unique_id=1098307342]
 offset_left = -16.0
 offset_top = -16.0
 offset_right = 16.0
 offset_bottom = 16.0
 color = Color(0.18, 0.75, 0.28, 1)
 
-[node name="Label" type="Label" parent="BodyRender"]
+[node name="Label" type="Label" parent="BodyRender" unique_id=225593541]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -32,11 +32,11 @@ offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "M"
+text = "V"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AmountBar" type="ProgressBar" parent="."]
+[node name="AmountBar" type="ProgressBar" parent="." unique_id=973018198]
 offset_left = -16.0
 offset_top = 13.0
 offset_right = 16.0
@@ -44,7 +44,7 @@ offset_bottom = 17.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_l45r8")
 show_percentage = false
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=1895800827]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=456860121]
 shape = SubResource("CircleShape2D_l45r8")

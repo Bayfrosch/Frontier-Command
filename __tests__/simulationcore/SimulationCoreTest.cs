@@ -517,9 +517,9 @@ public class SimulationCoreTest
 		AssertThat(context.get().Resources.Count).IsEqual(resourceCount);
 		AssertThat(context.get().Resources.Values.All(resource =>
 			resource.SpawnerEntityId == spawner.EntityId &&
-			resource.ResourceType == ResourceType.MATERIALS &&
-			resource.CurrentAmount == ResourceCatalog.GetMaxAmount(ResourceType.MATERIALS) &&
-			resource.MaxAmount == ResourceCatalog.GetMaxAmount(ResourceType.MATERIALS)
+			resource.ResourceType == ResourceType.VIRELIUM &&
+			resource.CurrentAmount == ResourceCatalog.GetMaxAmount(ResourceType.VIRELIUM) &&
+			resource.MaxAmount == ResourceCatalog.GetMaxAmount(ResourceType.VIRELIUM)
 		)).IsTrue();
 
 		context.AdvanceTick();
@@ -583,14 +583,14 @@ public class SimulationCoreTest
 		AssertThat(collector.HasGatherOrder).IsTrue();
 		AssertThat(collector.GatherPhase).IsEqual(ResourceCollectorGatherPhase.ReturningToDropoff);
 		AssertThat(collector.Carry).IsEqual(collector.MaxCapacity);
-		AssertThat(resource.CurrentAmount).IsEqual(ResourceCatalog.GetMaxAmount(ResourceType.MATERIALS) - collector.MaxCapacity);
+		AssertThat(resource.CurrentAmount).IsEqual(ResourceCatalog.GetMaxAmount(ResourceType.VIRELIUM) - collector.MaxCapacity);
 		AssertThat(collector.HasMoveOrder).IsTrue();
 		AssertThat(collector.TargetPosition).IsEqual(gatherer.CurrentPosition);
 
 		for (var i = 0; i < 5; i++)
 			context.AdvanceTick();
 
-		AssertThat(player.Materials).IsEqual(collector.MaxCapacity);
+		AssertThat(player.Virelium).IsEqual(collector.MaxCapacity);
 		AssertThat(collector.Carry).IsEqual(0);
 		AssertThat(collector.HasGatherOrder).IsTrue();
 		AssertThat(collector.GatherPhase).IsEqual(ResourceCollectorGatherPhase.MovingToResource);

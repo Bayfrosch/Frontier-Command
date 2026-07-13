@@ -20,6 +20,20 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_carry_bg"]
+bg_color = Color(0.23753911, 0.23753914, 0.23753902, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_carry_fill"]
+bg_color = Color(0.35963967, 0.20555303, 0.57156837, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_fo2ak"]
 radius = 20.024984
 
@@ -59,6 +73,15 @@ offset_right = 20.0
 offset_bottom = 19.0
 theme_override_styles/background = SubResource("StyleBoxFlat_614tx")
 theme_override_styles/fill = SubResource("StyleBoxFlat_8sgsk")
+show_percentage = false
+
+[node name="CarryBar" type="ProgressBar" parent="." unique_id=1537100221]
+offset_left = -20.0
+offset_top = 10.0
+offset_right = 20.0
+offset_bottom = 14.0
+theme_override_styles/background = SubResource("StyleBoxFlat_carry_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_carry_fill")
 show_percentage = false
 
 [node name="Area2D" type="Area2D" parent="." unique_id=247447422]

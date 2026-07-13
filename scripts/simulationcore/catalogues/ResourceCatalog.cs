@@ -6,7 +6,7 @@ public static class ResourceCatalog
 	{
 		return type switch
 		{
-			ResourceType.MATERIALS => 2500,
+			ResourceType.VIRELIUM => 2500,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}
@@ -15,7 +15,7 @@ public static class ResourceCatalog
 	{
 		return type switch
 		{
-			BuildingType.RESOURCE_SPAWNER => ResourceType.MATERIALS,
+			BuildingType.RESOURCE_SPAWNER => ResourceType.VIRELIUM,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}

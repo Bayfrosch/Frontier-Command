@@ -145,12 +145,12 @@ public sealed class PlayerState
 	{
 		_research[research] = true;
 	}
-	public int Materials { get; private set; }
+	public int Virelium { get; private set; }
 	public int EnergyProduced { get; private set; }
 	public int EnergyConsumed { get; private set; }
 	internal void AddMaterials(int amount)
 	{
-		Materials += Math.Max(0, amount);
+		Virelium += Math.Max(0, amount);
 	}
 }
 
@@ -385,7 +385,7 @@ public enum BuildingType
 
 public enum ResourceType
 {
-	MATERIALS,
+	VIRELIUM,
 }
 
 public enum UnitType
