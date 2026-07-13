@@ -205,9 +205,6 @@ public class UnitState : EntityState
 	public Vector2 AttackFormationOffset { get; private set; }
 	public string ConstructionTargetId { get; private set; } = "";
 	public bool HasConstructionOrder { get; private set; }
-	public string ResourceTargetId { get; private set; } = "";
-	public string ResourceDropoffBuildingId { get; private set; } = "";
-	public bool HasGatherOrder { get; private set; }
 	public int AttackDamage { get; private set; }
 	public WeaponClass WeaponClass { get; private set; }
 	public float AttackRange { get; private set; }
@@ -219,7 +216,7 @@ public class UnitState : EntityState
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
 
-	internal void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false, bool preserveGatherOrder = false)
+	internal virtual void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
 		TargetPosition = targetPosition;
 		HasMoveOrder = true;
@@ -227,8 +224,6 @@ public class UnitState : EntityState
 			ClearAttackOrder();
 		if (!preserveConstructionOrder)
 			ClearConstructionOrder();
-		if (!preserveGatherOrder)
-			ClearGatherOrder();
 	}
 	internal void ClearMoveOrder()
 	{
@@ -241,7 +236,6 @@ public class UnitState : EntityState
 		AttackFormationOffset = formationOffset;
 		HasAttackOrder = true;
 		ResetAttackWindup();
-		ClearGatherOrder();
 	}
 	internal void ClearAttackOrder()
 	{
@@ -255,26 +249,11 @@ public class UnitState : EntityState
 		ConstructionTargetId = targetEntityId;
 		HasConstructionOrder = true;
 		ClearAttackOrder();
-		ClearGatherOrder();
 	}
 	internal void ClearConstructionOrder()
 	{
 		ConstructionTargetId = "";
 		HasConstructionOrder = false;
-	}
-	internal void SetGatherOrder(string resourceTargetId, string resourceDropoffBuildingId = "")
-	{
-		ResourceTargetId = resourceTargetId;
-		ResourceDropoffBuildingId = resourceDropoffBuildingId;
-		HasGatherOrder = true;
-		ClearAttackOrder();
-		ClearConstructionOrder();
-	}
-	internal void ClearGatherOrder()
-	{
-		ResourceTargetId = "";
-		ResourceDropoffBuildingId = "";
-		HasGatherOrder = false;
 	}
 	internal void ResetAttackWindup()
 	{
@@ -312,6 +291,41 @@ public class UnitState : EntityState
 		}
 
 		CurrentPosition += direction.Normalized() * travelDistance;
+	}
+}
+
+public sealed class ResourceCollectorState : UnitState
+{
+	public ResourceCollectorState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed)
+		: base(entityId, ownerPlayerId, currentPos, movementSpeed, UnitType.RESOURCE_COLLECTOR)
+	{
+	}
+
+	public string ResourceTargetId { get; private set; } = "";
+	public string ResourceDropoffBuildingId { get; private set; } = "";
+	public bool HasGatherOrder { get; private set; }
+
+	internal override void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
+	{
+		base.SetMoveOrder(targetPosition, preserveAttackOrder, preserveConstructionOrder);
+		ClearGatherOrder();
+	}
+
+	internal void SetGatherOrder(string resourceTargetId, Vector2 resourcePosition, string resourceDropoffBuildingId = "")
+	{
+		ResourceTargetId = resourceTargetId;
+		ResourceDropoffBuildingId = resourceDropoffBuildingId;
+		HasGatherOrder = true;
+		ClearAttackOrder();
+		ClearConstructionOrder();
+		base.SetMoveOrder(resourcePosition);
+	}
+
+	internal void ClearGatherOrder()
+	{
+		ResourceTargetId = "";
+		ResourceDropoffBuildingId = "";
+		HasGatherOrder = false;
 	}
 }
 

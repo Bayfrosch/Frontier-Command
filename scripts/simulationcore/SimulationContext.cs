@@ -119,7 +119,8 @@ public sealed class SimulationContext
 					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
 					HandleAdvanceAttack(unit);
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
-					HandleAdvanceGatherResources(unit);
+					if (unit is ResourceCollectorState collector)
+						HandleAdvanceGatherResources(collector);
 				}
 				
 				if (entity.Health <= 0)
@@ -809,37 +810,36 @@ public sealed class SimulationContext
 		var gatherOrderAssigned = false;
 		foreach (var collectorId in msg.harvester_entity_ids)
 		{
-			if (!TryGetPlayerEntity<UnitState>(msg.player_id, collectorId, out var collector)
+			if (!TryGetPlayerEntity<ResourceCollectorState>(msg.player_id, collectorId, out var collector)
 				|| collector is null
 				|| collector.Type != UnitType.RESOURCE_COLLECTOR)
 			{
 				continue;
 			}
 
-			collector.SetGatherOrder(resource.EntityId, msg.refinery_entity_id);
-			collector.SetMoveOrder(resource.CurrentPosition, preserveGatherOrder: true);
+			collector.SetGatherOrder(resource.EntityId, resource.CurrentPosition, msg.refinery_entity_id);
 			gatherOrderAssigned = true;
 		}
 
 		return gatherOrderAssigned;
 	}
 
-	private void HandleAdvanceGatherResources(UnitState unit)
+	private void HandleAdvanceGatherResources(ResourceCollectorState collector)
 	{
-		if (!unit.HasGatherOrder || unit.HasMoveOrder)
+		if (!collector.HasGatherOrder || collector.HasMoveOrder)
 			return;
 
-		if (!_matchState.Resources.TryGetValue(unit.ResourceTargetId, out var resource))
+		if (!_matchState.Resources.TryGetValue(collector.ResourceTargetId, out var resource))
 		{
-			unit.ClearGatherOrder();
+			collector.ClearGatherOrder();
 			return;
 		}
 
-		CollectResources(unit, resource, unit.ResourceDropoffBuildingId);
-		unit.ClearGatherOrder();
+		CollectResources(collector, resource, collector.ResourceDropoffBuildingId);
+		collector.ClearGatherOrder();
 	}
 
-	private void CollectResources(UnitState collector, ResourceState resource, string resourceGathererId)
+	private void CollectResources(ResourceCollectorState collector, ResourceState resource, string resourceGathererId)
 	{
 		GD.Print($"CollectResources placeholder: {collector.EntityId} reached {resource.EntityId}.");
 	}
@@ -855,7 +855,7 @@ public sealed class SimulationContext
 		var unitId = NewEntityId(msg.UnitType.ToString());
 		var spawnPosition = msg.Position;
 		var targetPosition = GetOccupiedOffsetPosition(spawnPosition);
-		UnitState newUnit = new UnitState(unitId, msg.PlayerId, spawnPosition, msg.MovementSpeed, msg.UnitType);
+		UnitState newUnit = CreateUnitState(unitId, msg.PlayerId, spawnPosition, msg.MovementSpeed, msg.UnitType);
 
 		player.AddEntity(newUnit);
 
@@ -863,6 +863,15 @@ public sealed class SimulationContext
 			newUnit.SetMoveOrder(targetPosition);
 
 		return true;
+	}
+
+	private static UnitState CreateUnitState(string entityId, string playerId, Vector2 position, float movementSpeed, UnitType unitType)
+	{
+		return unitType switch
+		{
+			UnitType.RESOURCE_COLLECTOR => new ResourceCollectorState(entityId, playerId, position, movementSpeed),
+			_ => new UnitState(entityId, playerId, position, movementSpeed, unitType)
+		};
 	}
 
 	private bool HandleDebugSpawnBuilding(DebugSpawnBuildingMessage msg)

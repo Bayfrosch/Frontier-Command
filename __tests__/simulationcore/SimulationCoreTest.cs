@@ -148,6 +148,24 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_DebugSpawnUnit_ResourceCollector_CreatesResourceCollectorState()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnUnitsMessage(
+			"player-1",
+			0,
+			UnitType.RESOURCE_COLLECTOR,
+			Vector2.Zero,
+			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR)
+		))).IsTrue();
+
+		AssertThat(player.Entities.Values.Single()).IsInstanceOf<ResourceCollectorState>();
+	}
+
+	[TestCase]
 	public void Push_DebugSpawnBuilding_CreatesCompletedBuildingAtPosition()
 	{
 		var context = new SimulationContext("match-1");
@@ -527,12 +545,11 @@ public class SimulationCoreTest
 		))).IsTrue();
 
 		var resource = context.get().Resources.Values.First();
-		var collector = new UnitState(
+		var collector = new ResourceCollectorState(
 			"collector-1",
 			"player-1",
 			resource.CurrentPosition,
-			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR),
-			UnitType.RESOURCE_COLLECTOR
+			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR)
 		);
 		player.AddEntity(collector);
 
@@ -572,12 +589,11 @@ public class SimulationCoreTest
 		))).IsTrue();
 
 		var spawner = neutral.Entities.Values.OfType<BuildingState>().Single();
-		var collector = new UnitState(
+		var collector = new ResourceCollectorState(
 			"collector-1",
 			"player-1",
 			Vector2.Zero,
-			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR),
-			UnitType.RESOURCE_COLLECTOR
+			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR)
 		);
 		player.AddEntity(collector);
 
