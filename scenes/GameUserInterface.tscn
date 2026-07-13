@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://rx502q8ojk4g"]
 
+[ext_resource type="Texture2D" uid="uid://bvuoiu5hdmr5e" path="res://assets/GUI_Prototype.png" id="1_1x0qv"]
 [ext_resource type="PackedScene" uid="uid://eyrsmdrj0gyx" path="res://scenes/UI/SelectedEntityUI.tscn" id="2_1x0qv"]
 
 [node name="GameUserInterface" type="Control" unique_id=1253293035]
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="MainLayout" type="MarginContainer" parent="." unique_id=775742478]
 layout_mode = 1
@@ -17,30 +19,93 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
+[node name="GUIGraphic" type="TextureRect" parent="MainLayout" unique_id=586338820]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("1_1x0qv")
+
 [node name="VBoxContainer" type="VBoxContainer" parent="MainLayout" unique_id=1573905669]
 layout_mode = 2
+mouse_filter = 2
 
 [node name="TopBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=1593961572]
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+size_flags_horizontal = 0
 size_flags_vertical = 0
+mouse_filter = 0
+theme_override_constants/separation = 12
+
+[node name="LeftPlace" type="Container" parent="MainLayout/VBoxContainer/TopBar" unique_id=1425338351]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1028604740]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+text = "NAME"
+
+[node name="MenuPlaceholder" type="Container" parent="MainLayout/VBoxContainer/TopBar" unique_id=978733894]
+custom_minimum_size = Vector2(190, 0)
+layout_mode = 2
+
+[node name="ButtonsPlaceholder" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1473169176]
+custom_minimum_size = Vector2(840, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Buttons"
+horizontal_alignment = 1
+
+[node name="MaterialCount" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=557165513]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Virelium: 0"
+
+[node name="Energy" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1015884839]
+layout_mode = 2
+text = "Energie: -"
 
 [node name="Spacer" type="Control" parent="MainLayout/VBoxContainer" unique_id=2002186177]
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 2
 
 [node name="BottomBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=885063121]
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+mouse_filter = 0
+
+[node name="MapPlaceholder" type="Label" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1903530103]
+custom_minimum_size = Vector2(300, 250)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "MAP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MapBarSpace" type="Container" parent="MainLayout/VBoxContainer/BottomBar" unique_id=339790986]
+custom_minimum_size = Vector2(45, 0)
 layout_mode = 2
 
-[node name="MinimapSpacer" type="Control" parent="MainLayout/VBoxContainer/BottomBar" unique_id=938854039]
-custom_minimum_size = Vector2(100, 0)
+[node name="VBoxContainer" type="VBoxContainer" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1200270572]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="BootomBarPlace" type="Container" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=2117156061]
+custom_minimum_size = Vector2(0, 115)
 layout_mode = 2
 
-[node name="SelectedEntityUi" parent="MainLayout/VBoxContainer/BottomBar" unique_id=320057448 instance=ExtResource("2_1x0qv")]
+[node name="SelectedEntityUi" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=320057448 instance=ExtResource("2_1x0qv")]
+custom_minimum_size = Vector2(1220, 135)
+layout_mode = 2
+
+[node name="Container" type="Container" parent="MainLayout/VBoxContainer" unique_id=1768679183]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2

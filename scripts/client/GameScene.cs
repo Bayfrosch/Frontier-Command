@@ -41,7 +41,12 @@ public partial class GameScene : Node2D
 		}
 		simulationCore.StateChanged += PruneDeletedSelectedEntities;
 
-		SelectedEntityUI selectedEntityUI = GetNode<SelectedEntityUI>("Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/SelectedEntityUi");
+		SelectedEntityUI selectedEntityUI = GetNodeOrNull<SelectedEntityUI>("Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/VBoxContainer/SelectedEntityUi");
+		if (selectedEntityUI is null)
+		{
+			GD.PushError("SelectedEntityUi node was not found or has the wrong script");
+			return;
+		}
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 
 
@@ -133,7 +138,7 @@ public partial class GameScene : Node2D
 	{
 		if (@event is InputEventMouseButton mouseEvent)
 		{
-			if (GetViewport().GuiGetHoveredControl() is BaseButton)
+			if (GetViewport().GuiGetHoveredControl() is not null)
 				return;
 
 			shiftHeld = Input.IsKeyPressed(Key.Shift);
