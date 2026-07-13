@@ -1,14 +1,11 @@
 using Godot;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 public partial class SelectedEntityUI : Control
 {
 	[Signal]
-	public delegate void AbilityPressedEventHandler(string abilityId);
+	public delegate void AbilityPressedEventHandler(string abilityId, bool requiresTarget);
 	private IReadOnlyCollection<string> SelectedEntityIds;
 	private IReadOnlyDictionary<string, EntityState> EntitiesById;
 
@@ -124,7 +121,7 @@ public partial class SelectedEntityUI : Control
 				
 				AbilityButton.Pressed += () =>
 				{
-					EmitSignal(SignalName.AbilityPressed, ability.Id);
+					EmitSignal(SignalName.AbilityPressed, ability.Id, ability.RequiresTarget);
 				};
 
 				row.AddChild(AbilityButton);

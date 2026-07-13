@@ -31,7 +31,6 @@ public sealed class SimulationContext
 		Register<BuildStructureMessage>(HandleBuildStructure);
 		Register<CancelConstructionMessage>(HandleCancelConstruction);
 		Register<RepairTargetMessage>(HandleRepairTarget);
-		Register<CaptureTargetMessage>(HandleCaptureTarget);
 		Register<UpgradeStructureMessage>(HandleUpgradeStructure);
 		Register<CancelStructureUpgradeMessage>(HandleCancelStructureUpgrade);
 
@@ -110,6 +109,7 @@ public sealed class SimulationContext
 					));
 				} else if (entity is UnitState unit)
 				{
+					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
 					HandleAdvanceAttack(unit);
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
 				}
@@ -309,11 +309,18 @@ public sealed class SimulationContext
 		}
 
 		unit.ClearMoveOrder();
+		if (unit.IsAttackCoolingDown)
+		{
+			unit.ResetAttackWindup();
+			return;
+		}
+
 		if (!unit.AdvanceAttackWindup(TimeTickSystem.TICK_DELTA))
 			return;
 
 		target.TakeDamage(unit.AttackDamage);
 		unit.ResetAttackWindup();
+		unit.StartAttackCooldown();
 
 		if (target.Health <= 0)
 			unit.ClearAttackOrder();
@@ -490,7 +497,7 @@ public sealed class SimulationContext
 		);
 	}
 	// TODO:
-	private bool HandleCaptureTarget(CaptureTargetMessage msg)
+	private bool HandleCaptureTarget(UseAbilityMessage msg)
 	{
 		return false;
 	}
@@ -565,7 +572,6 @@ public sealed class SimulationContext
 	{
 		return false;
 	}
-	// TODO:
 	private bool HandleAttackTarget(AttackTargetMessage msg)
 	{
 		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
@@ -610,18 +616,25 @@ public sealed class SimulationContext
 	{
 		return false;
 	}
-	// TODO:
 	private bool HandleUseAbility(UseAbilityMessage msg)
 	{
 		bool passed = false;
 		switch (msg.ability_id)
 		{
 			// Units
+			case "capture_building":
+				passed = HandleCaptureTarget(msg);
+				break;
+
+			// Buildings
 			case "spawn_infantry": 
 				passed = HandleSpawnUnit(msg, UnitType.BASIC_INFANTRY);
 				break;
-			
-			// Buildings
+
+			case "spawn_rocket_troops":
+				passed = HandleSpawnUnit(msg, UnitType.RPG_TROOPER);
+				break;
+
 			case "cancel_construction":
 				var cmsg = new CancelConstructionMessage (
 					msg.player_id,

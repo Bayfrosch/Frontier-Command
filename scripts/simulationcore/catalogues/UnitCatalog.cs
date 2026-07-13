@@ -9,6 +9,7 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 100,
+            UnitType.RPG_TROOPER => 120,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
         };
     }
@@ -18,8 +19,8 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 10,
+            UnitType.RPG_TROOPER => 30,
             UnitType.CONSTRUCTION_UNIT => 0,
-            UnitType.OVERLORD => 0,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -29,8 +30,8 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 120f,
+            UnitType.RPG_TROOPER => 120f,
             UnitType.CONSTRUCTION_UNIT => 0f,
-            UnitType.OVERLORD => 0f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -40,8 +41,19 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 0.4f,
+            UnitType.RPG_TROOPER => 1f,
             UnitType.CONSTRUCTION_UNIT => 0f,
-            UnitType.OVERLORD => 0f,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    public static float GetAttackCooldownTime(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => 0.4f,
+            UnitType.RPG_TROOPER => 1.5f,
+            UnitType.CONSTRUCTION_UNIT => 0f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -51,8 +63,8 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 100,
+            UnitType.RPG_TROOPER => 100,
             UnitType.CONSTRUCTION_UNIT => 150,
-            UnitType.OVERLORD => 1000,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -62,6 +74,7 @@ public static class UnitCatalog
         return type switch
         {
             UnitType.BASIC_INFANTRY => 100f,
+            UnitType.RPG_TROOPER => 80f,
             UnitType.CONSTRUCTION_UNIT => 100f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
         };
@@ -71,7 +84,6 @@ public static class UnitCatalog
     {
         return new List<UnitType>
         {
-            UnitType.OVERLORD,
         };
     }
 }

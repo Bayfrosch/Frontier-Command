@@ -9,6 +9,7 @@ public partial class GameScene : Node2D
 	public bool AbilityTargetSelection;
 	private Vector2? AbilityTargetPosition = null;
 	private string lastSelectedAbility = "";
+	private bool lastSelectedAbilityRequiresTarget = false;
 	private TimeTickSystem gameLoop = null;
 	private LocalSimulationNode simulationCore = null;
 	private readonly PackedScene ConstructionSitePreviewScene = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
@@ -84,11 +85,12 @@ public partial class GameScene : Node2D
 		EmitSignal(SignalName.UnitSelection);
 	}
 
-	private void OnAbilityPressed(string abilityId)
+	private void OnAbilityPressed(string abilityId, bool requiresTarget)
 	{
-		if (AbilityCatalog.RequiresTarget(abilityId) && AbilityTargetPosition is null)
+		if (requiresTarget && AbilityTargetPosition is null)
 		{
 			lastSelectedAbility = abilityId;
+			lastSelectedAbilityRequiresTarget = requiresTarget;
 			AbilityTargetSelection = true;
 			ShowConstructionPreview(abilityId);
 			return;
@@ -106,6 +108,7 @@ public partial class GameScene : Node2D
 		AbilityTargetPosition = null;
 		AbilityTargetSelection = false;
 		lastSelectedAbility = "";
+		lastSelectedAbilityRequiresTarget = false;
 		ClearConstructionPreview();
 
 		if (!simulationCore.Push(command))
@@ -238,6 +241,7 @@ public partial class GameScene : Node2D
 		AbilityTargetPosition = null;
 		AbilityTargetSelection = false;
 		lastSelectedAbility = "";
+		lastSelectedAbilityRequiresTarget = false;
 		ClearConstructionPreview();
 	}
 
@@ -273,7 +277,7 @@ public partial class GameScene : Node2D
 		if (AbilityTargetSelection)
 		{
 			AbilityTargetPosition = GetGlobalMousePosition();
-			OnAbilityPressed(lastSelectedAbility);
+			OnAbilityPressed(lastSelectedAbility, lastSelectedAbilityRequiresTarget);
 			return;
 		}
 

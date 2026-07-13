@@ -139,6 +139,7 @@ An ability has:
 * `Name`
 * `Unlocked`
 * `Cost`
+* `RequiresTarget`
 
 The UI reads abilities from the selected entity and creates buttons automatically.
 
@@ -205,6 +206,7 @@ Add the new unit to every relevant method:
 * `GetAttackDamage`
 * `GetAttackRange`
 * `GetAttackWindupTime`
+* `GetAttackCooldownTime`
 * `GetMaxHealth`
 * `GetMovementSpeed`
 * `GetCapitalUnits`, only if it is a capital unit
@@ -215,7 +217,7 @@ If the unit cannot attack, use:
 UnitType.NEW_UNIT => 0
 ```
 
-for attack damage/range/wind-up where appropriate.
+for attack damage/range/wind-up/cooldown where appropriate.
 
 Do not leave the unit out of a switch unless you intentionally want that unit to throw at runtime.
 
@@ -233,11 +235,13 @@ case UnitType.NEW_UNIT:
 		Name = "Visible Name",
 		Unlocked = true,
 		Cost = 0,
+		RequiresTarget = false,
 	});
 	break;
 ```
 
-If the ability requires a target position, also update `RequiresTarget`.
+If the ability requires a target position, set `RequiresTarget = true`.
+Do not add the ability to a separate target-requirement switch; the `Ability` object is the source of truth.
 
 ## 4. Add a Client Scene
 
@@ -293,7 +297,8 @@ abilities.Add(new Ability
 	Id = "spawn_new_unit",
 	Name = "New Unit",
 	Unlocked = true,
-	Cost = 20
+	Cost = 20,
+	RequiresTarget = false
 });
 ```
 
@@ -305,12 +310,6 @@ Add a case:
 case "spawn_new_unit":
 	passed = HandleSpawnUnit(msg, UnitType.NEW_UNIT);
 	break;
-```
-
-Also add the ability to `RequiresTarget`:
-
-```csharp
-"spawn_new_unit" => false,
 ```
 
 ## 7. Add Tests
@@ -385,10 +384,13 @@ case BuildingType.NEW_BUILDING:
 		Id = "sell_building",
 		Name = "Verkaufen",
 		Unlocked = true,
-		Cost = 0
+		Cost = 0,
+		RequiresTarget = false,
 	});
 	break;
 ```
+
+Set `RequiresTarget` on each building ability. Completed-building actions like selling or producing units usually use `false`; abilities that ask the player to choose a map position use `true`.
 
 Construction sites currently get:
 
@@ -413,14 +415,11 @@ abilities.Add(new Ability
 	Name = "New Building",
 	Unlocked = true,
 	Cost = 1000,
+	RequiresTarget = true,
 });
 ```
 
-Then add it to `RequiresTarget`:
-
-```csharp
-"spawn_new_building" => true,
-```
+Build abilities should set `RequiresTarget = true` because `GameScene` uses that field from the selected ability to enter target selection before sending `UseAbilityMessage`.
 
 ## 5. Route the Ability in SimulationContext
 
@@ -483,7 +482,7 @@ Construction preview is currently handled in `GameScene.cs`.
 
 For a new build ability:
 
-* Add it to `AbilityCatalog.RequiresTarget`.
+* Set `RequiresTarget = true` on the ability in `AbilityCatalog`.
 * Add preview handling in `GameScene.ShowConstructionPreview`.
 * Use the correct scene or footprint for the preview.
 
@@ -535,22 +534,23 @@ abilities.Add(new Ability
 	Id = "ability_id",
 	Name = "Button Text",
 	Unlocked = true,
-	Cost = 0
+	Cost = 0,
+	RequiresTarget = false
 });
 ```
 
 ## 2. Define Whether It Needs a Target
 
-Still in `AbilityCatalog.cs`, update `RequiresTarget`.
+Still in `AbilityCatalog.cs`, set `RequiresTarget` on the `Ability` object.
 
 Examples:
 
 ```csharp
-"spawn_infantry" => false,
-"spawn_barracks" => true,
+RequiresTarget = false,
+RequiresTarget = true,
 ```
 
-If this is missing, pressing the ability can throw because the catalog does not know the ability ID.
+If this is omitted, the default is `false`; targeted abilities should set it explicitly to `true`.
 
 ## 3. Implement the Effect
 

@@ -162,6 +162,7 @@ public class UnitState : EntityState
 		AttackDamage = UnitCatalog.GetAttackDamage(unitType);
 		AttackRange = UnitCatalog.GetAttackRange(unitType);
 		AttackWindupTime = UnitCatalog.GetAttackWindupTime(unitType);
+		AttackCooldownTime = UnitCatalog.GetAttackCooldownTime(unitType);
 		Abilities = AbilityCatalog.ForUnit(unitType);
 	}
 	public UnitType Type { get; private set; }
@@ -176,6 +177,9 @@ public class UnitState : EntityState
 	public float AttackRange { get; private set; }
 	public float AttackWindupTime { get; private set; }
 	public float AttackWindupProgress { get; private set; }
+	public float AttackCooldownTime { get; private set; }
+	public float AttackCooldownRemaining { get; private set; }
+	public bool IsAttackCoolingDown => AttackCooldownRemaining > 0f;
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
 
@@ -227,6 +231,16 @@ public class UnitState : EntityState
 		AttackWindupProgress += deltaSeconds;
 		return AttackWindupProgress >= AttackWindupTime;
 	}
+	internal void StartAttackCooldown()
+	{
+		AttackCooldownRemaining = AttackCooldownTime;
+	}
+	internal void AdvanceAttackCooldown(float deltaSeconds)
+	{
+		AttackCooldownRemaining = AttackCooldownRemaining <= deltaSeconds
+			? 0f
+			: AttackCooldownRemaining - deltaSeconds;
+	}
 	internal void AdvanceMovement(float deltaSeconds)
 	{
 		if (!HasMoveOrder)
@@ -255,9 +269,12 @@ public enum BuildingType
 
 public enum UnitType
 {
+	// Infantry
 	BASIC_INFANTRY,
+	RPG_TROOPER,
+	// Tanks
+	// Non Combat
 	CONSTRUCTION_UNIT,
-	OVERLORD,
 }
 
 public sealed class BuildingState : EntityState

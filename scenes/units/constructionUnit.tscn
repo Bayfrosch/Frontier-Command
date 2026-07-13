@@ -6,8 +6,19 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_s8v86"]
 shader = ExtResource("2_f8afd")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exrw7"]
+bg_color = Color(0.7058824, 0.03529412, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s8v86"]
 bg_color = Color(0.21854621, 0.7179883, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_exrw7"]
 radius = 20.0
@@ -46,6 +57,7 @@ offset_left = -20.0
 offset_top = 15.0
 offset_right = 20.0
 offset_bottom = 19.0
+theme_override_styles/background = SubResource("StyleBoxFlat_exrw7")
 theme_override_styles/fill = SubResource("StyleBoxFlat_s8v86")
 show_percentage = false
 

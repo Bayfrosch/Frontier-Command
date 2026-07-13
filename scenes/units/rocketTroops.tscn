@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://dj5mae380fhhe"]
+
+[ext_resource type="Script" uid="uid://0akvbqkf4ul3" path="res://scripts/client/units/RocketTroops.cs" id="1_eem55"]
+[ext_resource type="Shader" uid="uid://dir0o5xxjoi5i" path="res://scenes/units/unitCircle.gdshader" id="1_gyyjj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gyyjj"]
+shader = ExtResource("1_gyyjj")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eem55"]
+bg_color = Color(0.7074629, 0.03584842, 3.85046e-07, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2qlrm"]
+bg_color = Color(0.21854621, 0.7179883, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_jcpyr"]
+radius = 20.024984
+
+[node name="RocketTroops" type="Node2D" unique_id=2001016423]
+script = ExtResource("1_eem55")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=1461426686]
+material = SubResource("ShaderMaterial_gyyjj")
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.351631, 0.1390509, 0.13870162, 1)
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=873171020]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Rkt"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=508524547]
+offset_left = -20.0
+offset_top = 15.0
+offset_right = 20.0
+offset_bottom = 19.0
+theme_override_styles/background = SubResource("StyleBoxFlat_eem55")
+theme_override_styles/fill = SubResource("StyleBoxFlat_2qlrm")
+show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1263708172]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1097897908]
+shape = SubResource("CircleShape2D_jcpyr")

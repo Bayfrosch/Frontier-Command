@@ -148,7 +148,7 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
-	public void AdvanceTick_BasicInfantryKeepsAttackingTarget_AfterWindup_WhenEnemyIsInRange()
+	public void AdvanceTick_BasicInfantryWaitsForCooldown_AfterFiring_WhenEnemyIsInRange()
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
@@ -176,6 +176,10 @@ public class SimulationCoreTest
 		context.AdvanceTick();
 		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));
 		AssertThat(attacker.HasAttackOrder).IsTrue();
+		AssertThat(attacker.AttackCooldownRemaining).IsEqual(UnitCatalog.GetAttackCooldownTime(UnitType.BASIC_INFANTRY));
+
+		context.AdvanceTick();
+		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));
 
 		context.AdvanceTick();
 		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));

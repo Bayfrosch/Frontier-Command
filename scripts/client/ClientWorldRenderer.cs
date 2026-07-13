@@ -11,6 +11,7 @@ public partial class ClientWorldRenderer : Node
 
 	// Unit Scenes
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
+	public PackedScene RocketTroopsScene { get; } = GD.Load<PackedScene>("res://scenes/units/rocketTroops.tscn");
 	public PackedScene ConstructionUnitScene { get; } = GD.Load<PackedScene>("res://scenes/units/constructionUnit.tscn");
 
 	private static readonly Color DefaultUnitColor = new(0.7169325f, 0.3354848f, 0.33498362f, 1f);
@@ -126,6 +127,7 @@ public partial class ClientWorldRenderer : Node
 		return type switch
 		{
 			UnitType.BASIC_INFANTRY => BasicInfantryScene,
+			UnitType.RPG_TROOPER => RocketTroopsScene,
 			UnitType.CONSTRUCTION_UNIT => ConstructionUnitScene,
 			_ => BasicInfantryScene
 		};

@@ -1,23 +1,7 @@
-using System;
 using System.Collections.Generic;
-using Godot;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
+
 public static class AbilityCatalog
 {
-	public static bool RequiresTarget(string abilityId)
-	{
-		return abilityId switch
-		{
-			// Units
-			"spawn_infantry" => false,
-			
-			// Buildings
-			"spawn_barracks" => true,
-			"cancel_construction" => false,
-			"sell_building" => false,
-			_ => throw new ArgumentOutOfRangeException(abilityId, "abilityId not defined in Catalog")
-		};
-	}
 	public static HashSet<Ability> ForBuilding(BuildingType type)
 	{
 		var abilities = new HashSet<Ability>();
@@ -29,7 +13,8 @@ public static class AbilityCatalog
 					Id = "cancel_construction",
 					Name = "Abbrechen",
 					Unlocked = true,
-					Cost = 0
+					Cost = 0,
+					RequiresTarget = false
 				});
 				break;
 
@@ -39,28 +24,32 @@ public static class AbilityCatalog
 					Id = "sell_building",
 					Name = "Verkaufen",
 					Unlocked = true,
-					Cost = 0
+					Cost = 0,
+					RequiresTarget = false
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_infantry",
 					Name = "Infantry",
 					Unlocked = true,
-					Cost = 20
+					Cost = 20,
+					RequiresTarget = false
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_rocket_troops",
 					Name = "Rocket Troops",
 					Unlocked = true,
-					Cost = 20
+					Cost = 20,
+					RequiresTarget = false
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_sniper",
 					Name = "Sniper",
 					Unlocked = false,
-					Cost = 69
+					Cost = 69,
+					RequiresTarget = false
 				});
 				break;
 		}
@@ -79,6 +68,7 @@ public static class AbilityCatalog
 					Name = "Baracke",
 					Unlocked = true,
 					Cost = 1000,
+					RequiresTarget = true
 				});
 				break;
 
@@ -89,6 +79,7 @@ public static class AbilityCatalog
 					Name = "Einnehmen",
 					Unlocked = true,
 					Cost = 0,
+					RequiresTarget = false
 				});
 				break;
 		}
