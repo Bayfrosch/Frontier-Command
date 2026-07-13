@@ -119,6 +119,7 @@ public sealed class SimulationContext
 					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
 					HandleAdvanceAttack(unit);
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
+					HandleAdvanceGatherResources(unit);
 				}
 				
 				if (entity.Health <= 0)
@@ -693,7 +694,7 @@ public sealed class SimulationContext
 				passed = HandleCaptureTarget(msg);
 				break;
 
-			// Buildings
+			// Unit Spawns
 			case "spawn_infantry": 
 				passed = HandleSpawnUnit(msg, UnitType.BASIC_INFANTRY);
 				break;
@@ -702,6 +703,11 @@ public sealed class SimulationContext
 				passed = HandleSpawnUnit(msg, UnitType.RPG_TROOPER);
 				break;
 
+			case "spawn_resource_collector":
+				passed = HandleSpawnUnit(msg, UnitType.RESOURCE_COLLECTOR);
+				break;
+
+			// Buildings
 			case "cancel_construction":
 				var cmsg = new CancelConstructionMessage (
 					msg.player_id,
@@ -715,6 +721,7 @@ public sealed class SimulationContext
 				passed = HandleSellBuilding(msg);
 				break;
 
+			// Building Spawns
 			case "spawn_barracks":
 				passed = HandleSpawnBuilding(msg, BuildingType.BARRACKS);
 				break;
@@ -783,11 +790,60 @@ public sealed class SimulationContext
 		));
 	}
 
-	// TODO:
 	private bool HandleGatherResources(GatherResourcesMessage msg)
 	{
-		return false;
+		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
+			return false;
+
+		if (!_matchState.Resources.TryGetValue(msg.resource_field_entity_id, out var resource))
+			return false;
+
+		if (!string.IsNullOrEmpty(msg.refinery_entity_id)
+			&& (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.refinery_entity_id, out var refinery)
+				|| refinery is null
+				|| refinery.Type != BuildingType.RESOURCE_GATHERER))
+		{
+			return false;
+		}
+
+		var gatherOrderAssigned = false;
+		foreach (var collectorId in msg.harvester_entity_ids)
+		{
+			if (!TryGetPlayerEntity<UnitState>(msg.player_id, collectorId, out var collector)
+				|| collector is null
+				|| collector.Type != UnitType.RESOURCE_COLLECTOR)
+			{
+				continue;
+			}
+
+			collector.SetGatherOrder(resource.EntityId, msg.refinery_entity_id);
+			collector.SetMoveOrder(resource.CurrentPosition, preserveGatherOrder: true);
+			gatherOrderAssigned = true;
+		}
+
+		return gatherOrderAssigned;
 	}
+
+	private void HandleAdvanceGatherResources(UnitState unit)
+	{
+		if (!unit.HasGatherOrder || unit.HasMoveOrder)
+			return;
+
+		if (!_matchState.Resources.TryGetValue(unit.ResourceTargetId, out var resource))
+		{
+			unit.ClearGatherOrder();
+			return;
+		}
+
+		CollectResources(unit, resource, unit.ResourceDropoffBuildingId);
+		unit.ClearGatherOrder();
+	}
+
+	private void CollectResources(UnitState collector, ResourceState resource, string resourceGathererId)
+	{
+		GD.Print($"CollectResources placeholder: {collector.EntityId} reached {resource.EntityId}.");
+	}
+
 	private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
 	{
 		if (!TryGetPlayer(msg.PlayerId, out var player))

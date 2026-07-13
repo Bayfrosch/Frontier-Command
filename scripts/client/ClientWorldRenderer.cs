@@ -18,6 +18,7 @@ public partial class ClientWorldRenderer : Node
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
 	public PackedScene RocketTroopsScene { get; } = GD.Load<PackedScene>("res://scenes/units/rocketTroops.tscn");
 	public PackedScene ConstructionUnitScene { get; } = GD.Load<PackedScene>("res://scenes/units/constructionUnit.tscn");
+	public PackedScene ResourceCollectorScene { get; } = GD.Load<PackedScene>("res://scenes/units/ResourceCollector.tscn");
 
 	private static readonly Color DefaultUnitColor = new(0.7169325f, 0.3354848f, 0.33498362f, 1f);
 	private static readonly Color SelectedUnitColor = new(0.2f, 0.8f, 1f, 1f);
@@ -26,6 +27,30 @@ public partial class ClientWorldRenderer : Node
 	private readonly Dictionary<string, ClientBuilding> buildingsById = new();
 	private readonly Dictionary<string, ClientUnit> unitsById = new();
 	private readonly Dictionary<string, ClientResource> resourcesById = new();
+
+	private PackedScene GetBuildingScene(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.BARRACKS => BasicBarracksScene,
+			BuildingType.RESOURCE_SPAWNER => ResourceSpawnerScene,
+			BuildingType.RESOURCE_GATHERER => ResourceGathererScene,
+			BuildingType.CONSTRUCTION_SITE => ConstructionSiteScene,
+			_ => throw new Exception("BuildingScene does not exist")
+		};
+	}
+
+	private PackedScene GetUnitScene(UnitType type)
+	{
+		return type switch
+		{
+			UnitType.BASIC_INFANTRY => BasicInfantryScene,
+			UnitType.RPG_TROOPER => RocketTroopsScene,
+			UnitType.CONSTRUCTION_UNIT => ConstructionUnitScene,
+			UnitType.RESOURCE_COLLECTOR => ResourceCollectorScene,
+			_ => BasicInfantryScene
+		};
+	}
 
 	public override void _Ready()
 	{
@@ -55,6 +80,7 @@ public partial class ClientWorldRenderer : Node
 			UnitType.BASIC_INFANTRY => new Color(0.7169325f, 0.3354848f, 0.33498362f, 1f),
 			UnitType.RPG_TROOPER => new Color(0.353f, 0.137f, 0.137f),
 			UnitType.CONSTRUCTION_UNIT => new Color(0.2565697f, 0.41133666f, 0.9501857f, 1f),
+			UnitType.RESOURCE_COLLECTOR => new Color(0.0f, 0.502f, 0.459f),
 			_ => DefaultUnitColor
 		};
 	}
@@ -133,29 +159,6 @@ public partial class ClientWorldRenderer : Node
 				resourcesById.Remove(entityId);
 			}
 		}
-	}
-
-	private PackedScene GetBuildingScene(BuildingType type)
-	{
-		return type switch
-		{
-			BuildingType.BARRACKS => BasicBarracksScene,
-			BuildingType.RESOURCE_SPAWNER => ResourceSpawnerScene,
-			BuildingType.RESOURCE_GATHERER => ResourceGathererScene,
-			BuildingType.CONSTRUCTION_SITE => ConstructionSiteScene,
-			_ => throw new Exception("BuildingScene does not exist")
-		};
-	}
-
-	private PackedScene GetUnitScene(UnitType type)
-	{
-		return type switch
-		{
-			UnitType.BASIC_INFANTRY => BasicInfantryScene,
-			UnitType.RPG_TROOPER => RocketTroopsScene,
-			UnitType.CONSTRUCTION_UNIT => ConstructionUnitScene,
-			_ => BasicInfantryScene
-		};
 	}
 
 	private void SyncBuilding(BuildingState buildingState)

@@ -56,7 +56,7 @@ public static class AbilityCatalog
 				});
 				abilities.Add(new Ability
 				{
-					Id = "spawn_gatherer",
+					Id = "spawn_resource_collector",
 					Name = "Sammler",
 					Unlocked = true,
 					Cost = 150,

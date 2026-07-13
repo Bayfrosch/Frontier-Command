@@ -39,4 +39,19 @@ public abstract partial class ClientBuilding : Node2D, ClientEntity
         MaxHealth = state.MaxHealth;
         BuildProgression = state.BuildProgression;
     }
+
+    protected static void ApplyProductionProgress(ProgressBar productionProgressBar, BuildingState state)
+    {
+        if (state.ProductionQueue.Length <= 0)
+        {
+            productionProgressBar.Visible = false;
+            productionProgressBar.Value = 0;
+            productionProgressBar.MaxValue = 1;
+            return;
+        }
+
+        productionProgressBar.MaxValue = UnitCatalog.GetProductionTime(state.ProductionQueue[0]);
+        productionProgressBar.Value = state.ProductionProgress;
+        productionProgressBar.Visible = true;
+    }
 }

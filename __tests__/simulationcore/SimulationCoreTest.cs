@@ -511,6 +511,88 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_GatherResources_AssignsCollectorToResourceState()
+	{
+		var context = new SimulationContext("match-1");
+		var neutral = new PlayerState("neutral");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(neutral);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"neutral",
+			0,
+			BuildingType.RESOURCE_SPAWNER,
+			Vector2.Zero
+		))).IsTrue();
+
+		var resource = context.get().Resources.Values.First();
+		var collector = new UnitState(
+			"collector-1",
+			"player-1",
+			resource.CurrentPosition,
+			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR),
+			UnitType.RESOURCE_COLLECTOR
+		);
+		player.AddEntity(collector);
+
+		var msg = new GatherResourcesMessage(
+			"player-1",
+			0,
+			new[] { "collector-1" },
+			resource.EntityId
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(collector.HasGatherOrder).IsTrue();
+		AssertThat(collector.ResourceTargetId).IsEqual(resource.EntityId);
+		AssertThat(collector.HasMoveOrder).IsTrue();
+		AssertThat(collector.TargetPosition).IsEqual(resource.CurrentPosition);
+
+		context.AdvanceTick();
+
+		AssertThat(collector.HasGatherOrder).IsFalse();
+		AssertThat(collector.HasMoveOrder).IsFalse();
+	}
+
+	[TestCase]
+	public void Push_GatherResources_ReturnsFalse_WhenTargetIsResourceSpawnerBuilding()
+	{
+		var context = new SimulationContext("match-1");
+		var neutral = new PlayerState("neutral");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(neutral);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"neutral",
+			0,
+			BuildingType.RESOURCE_SPAWNER,
+			Vector2.Zero
+		))).IsTrue();
+
+		var spawner = neutral.Entities.Values.OfType<BuildingState>().Single();
+		var collector = new UnitState(
+			"collector-1",
+			"player-1",
+			Vector2.Zero,
+			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR),
+			UnitType.RESOURCE_COLLECTOR
+		);
+		player.AddEntity(collector);
+
+		var msg = new GatherResourcesMessage(
+			"player-1",
+			0,
+			new[] { "collector-1" },
+			spawner.EntityId
+		);
+
+		AssertThat(context.Push(msg)).IsFalse();
+		AssertThat(collector.HasGatherOrder).IsFalse();
+	}
+
+	[TestCase]
 	public void Push_UseAbilityMessage_SellBuilding_RemovesCompletedBuilding()
 	{
 		var context = new SimulationContext("match-1");

@@ -358,6 +358,19 @@ public partial class GameScene : Node2D
 				"rectangle"
 			);
 		}
+		else if (CurrentEntity is ClientResource)
+		{
+			if (SelectedEntityIds.Count <= 0)
+				return;
+
+			command = new GatherResourcesMessage(
+				"player_1",
+				gameLoop.CurrentTick,
+				SelectedEntityIds.ToArray(),
+				CurrentEntity.EntityId,
+				shiftHeld ? 1 : 0
+			);
+		}
 		else if (CurrentEntity.OwnerPlayerId != "player_1")
 		{
 			if (SelectedEntityIds.Count <= 0)
@@ -371,18 +384,21 @@ public partial class GameScene : Node2D
 				shiftHeld ? 1 : 0
 			);
 		}
-		else if (CurrentEntity is ClientBuilding { Type: BuildingType.CONSTRUCTION_SITE })
+		else if (CurrentEntity is ClientBuilding building)
 		{
-			if (SelectedEntityIds.Count <= 0)
-				return;
+			if (building is ConstructionSite)
+			{
+				if (SelectedEntityIds.Count <= 0)
+					return;
 
-			command = new RepairTargetMessage(
-				"player_1",
-				gameLoop.CurrentTick,
-				SelectedEntityIds.ToArray(),
-				CurrentEntity.EntityId,
-				shiftHeld ? 1 : 0
-			);
+				command = new RepairTargetMessage(
+					"player_1",
+					gameLoop.CurrentTick,
+					SelectedEntityIds.ToArray(),
+					CurrentEntity.EntityId,
+					shiftHeld ? 1 : 0
+				);
+			}
 		}
 
 		if (command is null)

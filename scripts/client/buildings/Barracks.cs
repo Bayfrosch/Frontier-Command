@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 /*
 Implementation of the render BuildingState
@@ -19,16 +18,6 @@ public partial class Barracks : ClientBuilding
 	public override void ApplyState(BuildingState state)
 	{
 		base.ApplyState(state);
-
-		if (state.ProductionProgress > 0)
-		{
-			ProductionProgressBar.Visible = true;
-			ProductionProgressBar.Value = state.ProductionProgress;
-		} else
-		{
-			ProductionProgressBar.Visible = false;
-			ProductionProgressBar.Value = 0;
-		}
+		ApplyProductionProgress(ProductionProgressBar, state);
 	}
-
 }
