@@ -545,6 +545,16 @@ public class SimulationCoreTest
 		))).IsTrue();
 
 		var resource = context.get().Resources.Values.First();
+		var gatherer = new BuildingState(
+			"gatherer-1",
+			"player-1",
+			resource.CurrentPosition + new Vector2(100, 0),
+			BuildingType.RESOURCE_GATHERER,
+			""
+		);
+		gatherer.AdvanceConstruction(100);
+		player.AddEntity(gatherer);
+
 		var collector = new ResourceCollectorState(
 			"collector-1",
 			"player-1",
@@ -563,13 +573,29 @@ public class SimulationCoreTest
 		AssertThat(context.Push(msg)).IsTrue();
 		AssertThat(collector.HasGatherOrder).IsTrue();
 		AssertThat(collector.ResourceTargetId).IsEqual(resource.EntityId);
+		AssertThat(collector.ResourceDropoffBuildingId).IsEqual(gatherer.EntityId);
+		AssertThat(collector.GatherPhase).IsEqual(ResourceCollectorGatherPhase.MovingToResource);
 		AssertThat(collector.HasMoveOrder).IsTrue();
 		AssertThat(collector.TargetPosition).IsEqual(resource.CurrentPosition);
 
 		context.AdvanceTick();
 
-		AssertThat(collector.HasGatherOrder).IsFalse();
-		AssertThat(collector.HasMoveOrder).IsFalse();
+		AssertThat(collector.HasGatherOrder).IsTrue();
+		AssertThat(collector.GatherPhase).IsEqual(ResourceCollectorGatherPhase.ReturningToDropoff);
+		AssertThat(collector.Carry).IsEqual(collector.MaxCapacity);
+		AssertThat(resource.CurrentAmount).IsEqual(ResourceCatalog.GetMaxAmount(ResourceType.MATERIALS) - collector.MaxCapacity);
+		AssertThat(collector.HasMoveOrder).IsTrue();
+		AssertThat(collector.TargetPosition).IsEqual(gatherer.CurrentPosition);
+
+		for (var i = 0; i < 5; i++)
+			context.AdvanceTick();
+
+		AssertThat(player.Materials).IsEqual(collector.MaxCapacity);
+		AssertThat(collector.Carry).IsEqual(0);
+		AssertThat(collector.HasGatherOrder).IsTrue();
+		AssertThat(collector.GatherPhase).IsEqual(ResourceCollectorGatherPhase.MovingToResource);
+		AssertThat(collector.HasMoveOrder).IsTrue();
+		AssertThat(collector.TargetPosition).IsEqual(resource.CurrentPosition);
 	}
 
 	[TestCase]

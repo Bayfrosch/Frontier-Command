@@ -148,6 +148,10 @@ public sealed class PlayerState
 	public int Materials { get; private set; }
 	public int EnergyProduced { get; private set; }
 	public int EnergyConsumed { get; private set; }
+	internal void AddMaterials(int amount)
+	{
+		Materials += Math.Max(0, amount);
+	}
 }
 
 public abstract class EntityState
@@ -294,8 +298,17 @@ public class UnitState : EntityState
 	}
 }
 
+public enum ResourceCollectorGatherPhase
+{
+	Idle,
+	MovingToResource,
+	ReturningToDropoff,
+}
+
 public sealed class ResourceCollectorState : UnitState
 {
+	private const int DEFAULT_MAX_CAPACITY = 100;
+
 	public ResourceCollectorState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed)
 		: base(entityId, ownerPlayerId, currentPos, movementSpeed, UnitType.RESOURCE_COLLECTOR)
 	{
@@ -304,6 +317,11 @@ public sealed class ResourceCollectorState : UnitState
 	public string ResourceTargetId { get; private set; } = "";
 	public string ResourceDropoffBuildingId { get; private set; } = "";
 	public bool HasGatherOrder { get; private set; }
+	public ResourceCollectorGatherPhase GatherPhase { get; private set; } = ResourceCollectorGatherPhase.Idle;
+	public int MaxCapacity { get; private set; } = DEFAULT_MAX_CAPACITY;
+	public int Carry { get; private set; }
+	public int RemainingCapacity => Math.Max(0, MaxCapacity - Carry);
+	public bool HasCargo => Carry > 0;
 
 	internal override void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
@@ -311,14 +329,41 @@ public sealed class ResourceCollectorState : UnitState
 		ClearGatherOrder();
 	}
 
+	internal int Collect(int amount)
+	{
+		var acceptedAmount = Math.Min(Math.Max(0, amount), RemainingCapacity);
+		Carry += acceptedAmount;
+		return acceptedAmount;
+	}
+
+	internal int DepositCargo()
+	{
+		var depositedAmount = Carry;
+		Carry = 0;
+		return depositedAmount;
+	}
+
 	internal void SetGatherOrder(string resourceTargetId, Vector2 resourcePosition, string resourceDropoffBuildingId = "")
 	{
 		ResourceTargetId = resourceTargetId;
 		ResourceDropoffBuildingId = resourceDropoffBuildingId;
 		HasGatherOrder = true;
+		GatherPhase = ResourceCollectorGatherPhase.MovingToResource;
 		ClearAttackOrder();
 		ClearConstructionOrder();
 		base.SetMoveOrder(resourcePosition);
+	}
+
+	internal void MoveToResource(Vector2 resourcePosition)
+	{
+		GatherPhase = ResourceCollectorGatherPhase.MovingToResource;
+		base.SetMoveOrder(resourcePosition);
+	}
+
+	internal void MoveToDropoff(Vector2 dropoffPosition)
+	{
+		GatherPhase = ResourceCollectorGatherPhase.ReturningToDropoff;
+		base.SetMoveOrder(dropoffPosition);
 	}
 
 	internal void ClearGatherOrder()
@@ -326,6 +371,7 @@ public sealed class ResourceCollectorState : UnitState
 		ResourceTargetId = "";
 		ResourceDropoffBuildingId = "";
 		HasGatherOrder = false;
+		GatherPhase = ResourceCollectorGatherPhase.Idle;
 	}
 }
 

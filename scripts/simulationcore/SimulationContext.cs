@@ -796,13 +796,12 @@ public sealed class SimulationContext
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
 			return false;
 
-		if (!_matchState.Resources.TryGetValue(msg.resource_field_entity_id, out var resource))
+		if (!_matchState.Resources.TryGetValue(msg.resource_field_entity_id, out var resource) || resource.IsDepleted)
 			return false;
 
+		BuildingState? requestedDropoff = null;
 		if (!string.IsNullOrEmpty(msg.refinery_entity_id)
-			&& (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.refinery_entity_id, out var refinery)
-				|| refinery is null
-				|| refinery.Type != BuildingType.RESOURCE_GATHERER))
+			&& !TryGetResourceGatherer(msg.player_id, msg.refinery_entity_id, out requestedDropoff))
 		{
 			return false;
 		}
@@ -817,7 +816,11 @@ public sealed class SimulationContext
 				continue;
 			}
 
-			collector.SetGatherOrder(resource.EntityId, resource.CurrentPosition, msg.refinery_entity_id);
+			var dropoff = requestedDropoff ?? FindNearestResourceGatherer(msg.player_id, collector.CurrentPosition);
+			if (dropoff is null)
+				continue;
+
+			collector.SetGatherOrder(resource.EntityId, resource.CurrentPosition, dropoff.EntityId);
 			gatherOrderAssigned = true;
 		}
 
@@ -829,19 +832,95 @@ public sealed class SimulationContext
 		if (!collector.HasGatherOrder || collector.HasMoveOrder)
 			return;
 
-		if (!_matchState.Resources.TryGetValue(collector.ResourceTargetId, out var resource))
+		switch (collector.GatherPhase)
+		{
+			case ResourceCollectorGatherPhase.MovingToResource:
+				HandleCollectorArrivedAtResource(collector);
+				break;
+
+			case ResourceCollectorGatherPhase.ReturningToDropoff:
+				HandleCollectorArrivedAtDropoff(collector);
+				break;
+		}
+	}
+
+	private void HandleCollectorArrivedAtResource(ResourceCollectorState collector)
+	{
+		if (!_matchState.Resources.TryGetValue(collector.ResourceTargetId, out var resource) || resource.IsDepleted)
 		{
 			collector.ClearGatherOrder();
 			return;
 		}
 
-		CollectResources(collector, resource, collector.ResourceDropoffBuildingId);
-		collector.ClearGatherOrder();
+		var collectedAmount = resource.Extract(collector.RemainingCapacity);
+		collector.Collect(collectedAmount);
+
+		if (!collector.HasCargo)
+		{
+			collector.ClearGatherOrder();
+			return;
+		}
+
+		if (!TryGetResourceGatherer(collector.OwnerPlayerId ?? "", collector.ResourceDropoffBuildingId, out var dropoff)
+			|| dropoff is null)
+		{
+			collector.ClearGatherOrder();
+			return;
+		}
+
+		collector.MoveToDropoff(dropoff.CurrentPosition);
 	}
 
-	private void CollectResources(ResourceCollectorState collector, ResourceState resource, string resourceGathererId)
+	private void HandleCollectorArrivedAtDropoff(ResourceCollectorState collector)
 	{
-		GD.Print($"CollectResources placeholder: {collector.EntityId} reached {resource.EntityId}.");
+		if (!TryGetPlayer(collector.OwnerPlayerId ?? "", out var player) || player is null)
+		{
+			collector.ClearGatherOrder();
+			return;
+		}
+
+		if (!TryGetResourceGatherer(player.PlayerId, collector.ResourceDropoffBuildingId, out var dropoff) || dropoff is null)
+		{
+			collector.ClearGatherOrder();
+			return;
+		}
+
+		player.AddMaterials(collector.DepositCargo());
+
+		if (!_matchState.Resources.TryGetValue(collector.ResourceTargetId, out var resource) || resource.IsDepleted)
+		{
+			collector.ClearGatherOrder();
+			return;
+		}
+
+		collector.MoveToResource(resource.CurrentPosition);
+	}
+
+	private bool TryGetResourceGatherer(string playerId, string buildingId, out BuildingState? resourceGatherer)
+	{
+		resourceGatherer = null;
+
+		if (!TryGetPlayerEntity<BuildingState>(playerId, buildingId, out var building)
+			|| building is null
+			|| building.Type != BuildingType.RESOURCE_GATHERER)
+		{
+			return false;
+		}
+
+		resourceGatherer = building;
+		return true;
+	}
+
+	private BuildingState? FindNearestResourceGatherer(string playerId, Vector2 position)
+	{
+		if (!TryGetPlayer(playerId, out var player) || player is null)
+			return null;
+
+		return player.Entities.Values
+			.OfType<BuildingState>()
+			.Where(building => building.Type == BuildingType.RESOURCE_GATHERER)
+			.OrderBy(building => building.CurrentPosition.DistanceSquaredTo(position))
+			.FirstOrDefault();
 	}
 
 	private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
