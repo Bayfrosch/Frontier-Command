@@ -170,22 +170,52 @@ public class SimulationCoreTest
 		AssertThat(context.Push(msg)).IsTrue();
 		AssertThat(target.Health).IsEqual(target.MaxHealth);
 
+		var attackDamage = ExpectedDamage(attacker, target);
+
 		context.AdvanceTick();
 		AssertThat(target.Health).IsEqual(target.MaxHealth);
 
 		context.AdvanceTick();
-		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));
+		AssertThat(target.Health).IsEqual(target.MaxHealth - attackDamage);
 		AssertThat(attacker.HasAttackOrder).IsTrue();
 		AssertThat(attacker.AttackCooldownRemaining).IsEqual(UnitCatalog.GetAttackCooldownTime(UnitType.BASIC_INFANTRY));
 
 		context.AdvanceTick();
-		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));
+		AssertThat(target.Health).IsEqual(target.MaxHealth - attackDamage);
 
 		context.AdvanceTick();
-		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY));
+		AssertThat(target.Health).IsEqual(target.MaxHealth - attackDamage);
 
 		context.AdvanceTick();
-		AssertThat(target.Health).IsEqual(target.MaxHealth - UnitCatalog.GetAttackDamage(UnitType.BASIC_INFANTRY) * 2);
+		AssertThat(target.Health).IsEqual(target.MaxHealth - attackDamage * 2);
+	}
+
+	[TestCase]
+	public void AdvanceTick_AppliesWeaponEffectiveness_ToAttackDamage()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var enemyPlayer = new PlayerState("player-2");
+		var attacker = new UnitState("attacker-1", "player-1", Vector2.Zero, 10f, UnitType.RPG_TROOPER);
+		var target = new UnitState("target-1", "player-2", new Vector2(50, 0), 10f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(attacker);
+		enemyPlayer.AddEntity(target);
+		context.AddPlayer(player);
+		context.AddPlayer(enemyPlayer);
+
+		var msg = new AttackTargetMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_unit_ids: new[] { "attacker-1" },
+			p_target_id: "target-1"
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+
+		for (var i = 0; i < 5; i++)
+			context.AdvanceTick();
+
+		AssertThat(target.Health).IsEqual(target.MaxHealth - ExpectedDamage(attacker, target));
 	}
 
 	[TestCase]
@@ -408,5 +438,14 @@ public class SimulationCoreTest
 			position,
 			UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
 		);
+	}
+
+	private static int ExpectedDamage(UnitState attacker, EntityState target)
+	{
+		var modifier = WeaponEffectivenessCatalog.GetModifier(attacker.WeaponClass, target.ArmorClass);
+		if (modifier <= 0f)
+			return 0;
+
+		return System.Math.Max(1, (int)System.Math.Round(attacker.AttackDamage * modifier, System.MidpointRounding.AwayFromZero));
 	}
 }

@@ -29,6 +29,7 @@ Important files:
 * `scripts/simulationcore/MatchState.cs`
 * `scripts/simulationcore/UnitCatalog.cs`
 * `scripts/simulationcore/BuildingCatalog.cs`
+* `scripts/simulationcore/catalogues/WeaponEffectivenessCatalog.cs`
 * `scripts/simulationcore/AbilityCatalog.cs`
 
 The Simulation Core decides things like:
@@ -204,6 +205,8 @@ Add the new unit to every relevant method:
 
 * `GetProductionTime`
 * `GetAttackDamage`
+* `GetWeaponClass`
+* `GetArmorClass`
 * `GetAttackRange`
 * `GetAttackWindupTime`
 * `GetAttackCooldownTime`

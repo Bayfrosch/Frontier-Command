@@ -21,6 +21,11 @@ public static class BuildingCatalog
 		};
 	}
 
+	public static ArmorClass GetArmorClass(BuildingType type)
+	{
+		return ArmorClass.STRUCTURE;
+	}
+
 	public static BuildingType GetFootprintType(BuildingState building)
 	{
 		return building.Type == BuildingType.CONSTRUCTION_SITE

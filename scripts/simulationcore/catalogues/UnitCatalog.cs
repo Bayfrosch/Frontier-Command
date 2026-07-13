@@ -25,6 +25,28 @@ public static class UnitCatalog
         };
     }
 
+    public static WeaponClass GetWeaponClass(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => WeaponClass.SMALL_ARMS,
+            UnitType.RPG_TROOPER => WeaponClass.ANTI_ARMOR,
+            UnitType.CONSTRUCTION_UNIT => WeaponClass.NON_COMBAT,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    public static ArmorClass GetArmorClass(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => ArmorClass.LIGHT,
+            UnitType.RPG_TROOPER => ArmorClass.LIGHT,
+            UnitType.CONSTRUCTION_UNIT => ArmorClass.MEDIUM,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
     public static float GetAttackRange(UnitType type)
     {
         return type switch

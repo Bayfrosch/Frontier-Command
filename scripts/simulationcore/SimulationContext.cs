@@ -84,7 +84,11 @@ public sealed class SimulationContext
 			
 			if (projectile.AdvanceMovement(target, TimeTickSystem.TICK_DELTA))
 			{
-				target.TakeDamage(projectile.WeaponDefinition.Damage);
+				target.TakeDamage(CalculateDamage(
+					projectile.WeaponDefinition.Damage,
+					projectile.WeaponDefinition.WeaponClass,
+					target
+				));
 				projectilesToRemove.Add(projectile.ProjectileId);
 			}
 		}
@@ -300,6 +304,13 @@ public sealed class SimulationContext
 			return;
 		}
 
+		if (!CanDamage(unit.WeaponClass, target))
+		{
+			unit.ClearAttackOrder();
+			unit.ClearMoveOrder();
+			return;
+		}
+
 		var attackRangeSquared = unit.AttackRange * unit.AttackRange;
 		if (unit.CurrentPosition.DistanceSquaredTo(target.CurrentPosition) > attackRangeSquared)
 		{
@@ -318,12 +329,26 @@ public sealed class SimulationContext
 		if (!unit.AdvanceAttackWindup(TimeTickSystem.TICK_DELTA))
 			return;
 
-		target.TakeDamage(unit.AttackDamage);
+		target.TakeDamage(CalculateDamage(unit.AttackDamage, unit.WeaponClass, target));
 		unit.ResetAttackWindup();
 		unit.StartAttackCooldown();
 
 		if (target.Health <= 0)
 			unit.ClearAttackOrder();
+	}
+
+	private static bool CanDamage(WeaponClass weaponClass, EntityState target)
+	{
+		return WeaponEffectivenessCatalog.GetModifier(weaponClass, target.ArmorClass) > 0f;
+	}
+
+	private static int CalculateDamage(int baseDamage, WeaponClass weaponClass, EntityState target)
+	{
+		var armorModifier = WeaponEffectivenessCatalog.GetModifier(weaponClass, target.ArmorClass);
+		if (armorModifier <= 0f)
+			return 0;
+
+		return Math.Max(1, (int)Math.Round(baseDamage * armorModifier, MidpointRounding.AwayFromZero));
 	}
 	/*
 	Message handlers for reacting to every pre defined message in Messages.cs
@@ -585,7 +610,9 @@ public sealed class SimulationContext
 
 		var attackOrderAssigned = false;
 		var attackers = units
-			.Where(unit => unit.AttackDamage > 0 && unit.AttackRange > 0f)
+			.Where(unit => unit.AttackDamage > 0
+				&& unit.AttackRange > 0f
+				&& CanDamage(unit.WeaponClass, target))
 			.ToArray();
 
 		for (var i = 0; i < attackers.Length; i++)

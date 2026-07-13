@@ -72,9 +72,28 @@ public enum WeaponDeliveryType
 	PROJECTILE
 }
 
+public enum WeaponClass
+{
+	SMALL_ARMS,
+	CANNON,
+	ANTI_ARMOR,
+	ANTI_AIR,
+	NON_COMBAT,
+}
+
+public enum ArmorClass
+{
+	LIGHT,
+	MEDIUM,
+	HEAVY,
+	STRUCTURE,
+	AIR,
+}
+
 public sealed class WeaponDefinition
 {
 	public string WeaponId { get; init; }
+	public WeaponClass WeaponClass { get; init; }
 	public int Damage { get; init; }
 	public float Range { get; init; }
 	public float Cooldown { get; init; }
@@ -123,11 +142,12 @@ public sealed class PlayerState
 
 public abstract class EntityState
 {
-	protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos, int maxHealth)
+	protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos, int maxHealth, ArmorClass armorClass)
 	{
 		EntityId = entityId;
 		OwnerPlayerId = ownerPlayerId;
 		CurrentPosition = currentPos;
+		ArmorClass = armorClass;
 		Abilities = new HashSet<Ability>();
 		MaxHealth = Math.Max(1, maxHealth);
 		Health = MaxHealth;
@@ -135,6 +155,7 @@ public abstract class EntityState
 	public string EntityId { get; private set; } = "";
 	public string? OwnerPlayerId { get; private set; }
 	public Vector2 CurrentPosition { get; protected set; }
+	public ArmorClass ArmorClass { get; private set; }
 	public int Health { get; private set; }
 	public int MaxHealth { get; private set; }
 	public bool GettingRepaired = false;
@@ -155,11 +176,12 @@ public abstract class EntityState
 public class UnitState : EntityState
 {
 	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType = UnitType.BASIC_INFANTRY)
-		: base(entityId, ownerPlayerId, currentPos, UnitCatalog.GetMaxHealth(unitType))
+		: base(entityId, ownerPlayerId, currentPos, UnitCatalog.GetMaxHealth(unitType), UnitCatalog.GetArmorClass(unitType))
 	{
 		Type = unitType;
 		MovementSpeed = movementSpeed;
 		AttackDamage = UnitCatalog.GetAttackDamage(unitType);
+		WeaponClass = UnitCatalog.GetWeaponClass(unitType);
 		AttackRange = UnitCatalog.GetAttackRange(unitType);
 		AttackWindupTime = UnitCatalog.GetAttackWindupTime(unitType);
 		AttackCooldownTime = UnitCatalog.GetAttackCooldownTime(unitType);
@@ -174,6 +196,7 @@ public class UnitState : EntityState
 	public string ConstructionTargetId { get; private set; } = "";
 	public bool HasConstructionOrder { get; private set; }
 	public int AttackDamage { get; private set; }
+	public WeaponClass WeaponClass { get; private set; }
 	public float AttackRange { get; private set; }
 	public float AttackWindupTime { get; private set; }
 	public float AttackWindupProgress { get; private set; }
@@ -280,7 +303,7 @@ public enum UnitType
 public sealed class BuildingState : EntityState
 {
 	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType pendingBuildingType, string constructionUnitId)
-		: base(entityId, ownerPlayerId, currentPos, BuildingCatalog.GetMaxHealth(BuildingType.CONSTRUCTION_SITE))
+		: base(entityId, ownerPlayerId, currentPos, BuildingCatalog.GetMaxHealth(BuildingType.CONSTRUCTION_SITE), BuildingCatalog.GetArmorClass(BuildingType.CONSTRUCTION_SITE))
 	{
 		Type = BuildingType.CONSTRUCTION_SITE;
 		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(pendingBuildingType) / 2f + new Vector2(20f, 20f);
@@ -348,7 +371,7 @@ public sealed class BuildingState : EntityState
 public sealed class OutpostState : EntityState
 {
 	public OutpostState(string entityId, string ownerPlayerId, Vector2 currentPos)
-		: base(entityId, ownerPlayerId, currentPos, 1)
+		: base(entityId, ownerPlayerId, currentPos, 1, ArmorClass.STRUCTURE)
 	{
 	}
 	public string OutpostSpecialization { get; private set; } = "";
@@ -357,7 +380,7 @@ public sealed class OutpostState : EntityState
 public sealed class ResourceFieldState : EntityState
 {
 	public ResourceFieldState(string entityId, string ownerPlayerId, Vector2 currentPos)
-		: base(entityId, ownerPlayerId, currentPos, 1)
+		: base(entityId, ownerPlayerId, currentPos, 1, ArmorClass.STRUCTURE)
 	{
 	}
 }
