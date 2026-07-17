@@ -46,15 +46,20 @@ theme_override_constants/separation = 12
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 
+[node name="MaterialCount" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=557165513]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Virelium: 0"
+
+[node name="MenuPlaceholder" type="Container" parent="MainLayout/VBoxContainer/TopBar" unique_id=978733894]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
 [node name="Label" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1028604740]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 text = "NAME"
-
-[node name="MenuPlaceholder" type="Container" parent="MainLayout/VBoxContainer/TopBar" unique_id=978733894]
-custom_minimum_size = Vector2(190, 0)
-layout_mode = 2
 
 [node name="ButtonsPlaceholder" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1473169176]
 custom_minimum_size = Vector2(840, 0)
@@ -62,11 +67,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Buttons"
 horizontal_alignment = 1
-
-[node name="MaterialCount" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=557165513]
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Virelium: 0"
 
 [node name="Energy" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1015884839]
 layout_mode = 2
