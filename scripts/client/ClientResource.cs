@@ -16,6 +16,8 @@ public partial class ClientResource : Node2D, ClientEntity
 
 	public override void _Ready()
 	{
+		ClientWorldInput.IgnoreGuiMouse(this);
+
 		AmountBar = GetNode<ProgressBar>("AmountBar");
 	}
 

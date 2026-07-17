@@ -6,6 +6,8 @@ public partial class ResourceGatherer : ClientBuilding
 
 	public override void _Ready()
 	{
+		base._Ready();
+
 		ProductionProgressBar = GetNode<ProgressBar>("BodyRender/ProductionProgressBar");
 		ProductionProgressBar.Visible = false;
 		ProductionProgressBar.Value = 0;

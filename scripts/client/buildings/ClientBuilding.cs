@@ -16,6 +16,11 @@ public abstract partial class ClientBuilding : Node2D, ClientEntity
     public HashSet<Ability> Abilities { get; protected set; }
     public bool GettingRepaired { get; protected set; } = true;
     public int BuildProgression { get; protected set; } = 0;
+
+    public override void _Ready()
+    {
+        ClientWorldInput.IgnoreGuiMouse(this);
+    }
     
     /*
     Called once on spawning Building

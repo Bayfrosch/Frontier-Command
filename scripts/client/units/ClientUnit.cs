@@ -20,6 +20,8 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
 
     public override void _Ready()
     {
+        ClientWorldInput.IgnoreGuiMouse(this);
+
         HealthBar = GetNode<ProgressBar>("HealthBar");
         BodyRender = GetNode<Control>("BodyRender");
 

@@ -9,6 +9,7 @@ public partial class Barracks : ClientBuilding
 
 	public override void _Ready()
 	{
+		base._Ready();
 
 		ProductionProgressBar = GetNode<ProgressBar>("BodyRender/ProductionProgressBar");
 		ProductionProgressBar.Visible = false;

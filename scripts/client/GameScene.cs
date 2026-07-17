@@ -249,6 +249,7 @@ public partial class GameScene : Node2D
 		ConfigureConstructionPreviewFootprint(constructionPreview, previewBuildingType);
 		constructionPreview.Modulate = new Color(1f, 1f, 1f, 0.45f);
 		constructionPreview.ZIndex = 100;
+		ClientWorldInput.IgnoreGuiMouse(constructionPreview);
 		DisablePreviewPicking(constructionPreview);
 		AddChild(constructionPreview);
 		constructionPreview.GlobalPosition = GetGlobalMousePosition();

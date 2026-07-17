@@ -8,6 +8,8 @@ public partial class ConstructionSite : ClientBuilding
 
     public override void _Ready()
     {
+		base._Ready();
+
 		BodyRender = GetNode<ColorRect>("BodyRender");
 		BuildProgressBar = GetNode<ProgressBar>("BodyRender/BuildProgressBar");
 		CollisionShape = GetNode<CollisionShape2D>("Area2D/CollisionShape2D");
