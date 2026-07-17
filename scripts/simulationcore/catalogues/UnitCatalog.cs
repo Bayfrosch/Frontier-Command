@@ -4,6 +4,9 @@ using Godot;
 
 public static class UnitCatalog
 {
+    /*
+    Production time is advanced by BuildingState each simulation tick.
+    */
     public static int GetProductionTime(UnitType type)
     {
         return type switch
@@ -16,6 +19,10 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Returns base weapon damage.
+    Non-combat units return 0 and cannot receive attack orders.
+    */
     public static int GetAttackDamage(UnitType type)
     {
         return type switch
@@ -26,6 +33,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Weapon class is combined with target armor to calculate final damage.
+    */
     public static WeaponClass GetWeaponClass(UnitType type)
     {
         return type switch
@@ -38,6 +48,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Armor class is used by WeaponEffectivenessCatalog for incoming damage.
+    */
     public static ArmorClass GetArmorClass(UnitType type)
     {
         return type switch
@@ -50,6 +63,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Attack range controls how close a unit must be before firing.
+    */
     public static float GetAttackRange(UnitType type)
     {
         return type switch
@@ -60,6 +76,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Windup is the delay between reaching attack range and applying damage.
+    */
     public static float GetAttackWindupTime(UnitType type)
     {
         return type switch
@@ -70,6 +89,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Cooldown is the delay after an attack before the unit can fire again.
+    */
     public static float GetAttackCooldownTime(UnitType type)
     {
         return type switch
@@ -80,6 +102,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Max health is assigned when UnitState is created.
+    */
     public static int GetMaxHealth(UnitType type)
     {
         return type switch
@@ -92,6 +117,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Movement speed is used by UnitState.AdvanceMovement.
+    */
     public static float GetMovementSpeed(UnitType type)
     {
         return type switch
@@ -104,6 +132,9 @@ public static class UnitCatalog
         };
     }
 
+    /*
+    Used by selection UI to pick the most important unit in a group.
+    */
     public static List<UnitType> GetCapitalUnits()
     {
         return new List<UnitType>

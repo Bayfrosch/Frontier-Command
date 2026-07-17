@@ -2,6 +2,9 @@ using System;
 
 public static class ResourceCatalog
 {
+	/*
+	Defines the total amount stored in one spawned resource node.
+	*/
 	public static int GetMaxAmount(ResourceType type)
 	{
 		return type switch
@@ -11,6 +14,9 @@ public static class ResourceCatalog
 		};
 	}
 
+	/*
+	Maps world spawner buildings to the resource type they create.
+	*/
 	public static ResourceType GetSpawnerResourceType(BuildingType type)
 	{
 		return type switch
@@ -20,6 +26,9 @@ public static class ResourceCatalog
 		};
 	}
 
+	/*
+	Controls how many separate resource nodes a spawner creates.
+	*/
 	public static int GetSpawnerResourceCount(BuildingType type)
 	{
 		return type switch
@@ -29,6 +38,9 @@ public static class ResourceCatalog
 		};
 	}
 
+	/*
+	Controls the radius used to place resource nodes around a spawner.
+	*/
 	public static float GetSpawnerResourceRadius(BuildingType type)
 	{
 		return type switch

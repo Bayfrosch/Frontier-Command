@@ -5,6 +5,9 @@ using Godot;
 
 public sealed class SimulationContext
 {
+	/*
+	Shared constants for simulation pacing and simple formation spacing.
+	*/
 	const float deltaSeconds = 1.0f / 5.0f;
 	private const int CONSTRUCTION_ADVANCE = 5;
 	private const int PRODUCTION_ADVANCE = 5;
@@ -57,6 +60,10 @@ public sealed class SimulationContext
 		Register<UseAbilityMessage>(HandleUseAbility);
 		Register<GatherResourcesMessage>(HandleGatherResources);
 	}
+	/*
+	Connects one message type to its handler.
+	Push uses this table to route incoming commands.
+	*/
 	private void Register<TMessage>(Func<TMessage, bool> handler)
 		where TMessage : MessageBase
 	{
@@ -238,6 +245,10 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Collects owned units for group commands.
+	If one id is invalid the whole command fails.
+	*/
 	private bool TryGetOwnedUnits(
 		string playerId,
 		string[] unitIds,
@@ -260,6 +271,10 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Gets a construction unit owned by the given player.
+	Used by building placement and construction assignment.
+	*/
 	private bool TryGetConstructionUnit(string playerId, string unitId, out UnitState? constructionUnit)
 	{
 		constructionUnit = null;
@@ -274,6 +289,10 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Finds any entity by id across neutral resources and all player-owned entities.
+	Combat can target entities outside the attacking player's dictionary.
+	*/
 	private bool TryGetEntityById(string entityId, out EntityState? entity)
 	{
 		entity = _matchState.Resources.Values
@@ -289,6 +308,10 @@ public sealed class SimulationContext
 		return entity is not null;
 	}
 
+	/*
+	Advances one unit's current attack order.
+	The unit moves into range, waits for windup and cooldown, then applies damage.
+	*/
 	private void HandleAdvanceAttack(UnitState unit)
 	{
 		if (!unit.HasAttackOrder)
@@ -348,11 +371,17 @@ public sealed class SimulationContext
 			unit.ClearAttackOrder();
 	}
 
+	/*
+	Returns true if a weapon can damage the target armor class.
+	*/
 	private static bool CanDamage(WeaponClass weaponClass, EntityState target)
 	{
 		return WeaponEffectivenessCatalog.GetModifier(weaponClass, target.ArmorClass) > 0f;
 	}
 
+	/*
+	Applies the armor modifier and clamps successful hits to at least 1 damage.
+	*/
 	private static int CalculateDamage(int baseDamage, WeaponClass weaponClass, EntityState target)
 	{
 		var armorModifier = WeaponEffectivenessCatalog.GetModifier(weaponClass, target.ArmorClass);
@@ -365,6 +394,9 @@ public sealed class SimulationContext
 	Message handlers for reacting to every pre defined message in Messages.cs
 	Message types get linked in the constructor to their coresponding handler
 	All handlers return true or false regarding wether the message was succesfully parsed
+	*/
+	/*
+	Orders selected units to move in a simple rectangular formation.
 	*/
 	private bool HandleMoveUnit(MoveUnitsMessage msg)
 	{
@@ -380,6 +412,9 @@ public sealed class SimulationContext
 
 		return true;
 	}
+	/*
+	Creates a construction site and assigns the construction unit that placed it.
+	*/
 	private bool HandleBuildStructure(BuildStructureMessage msg)
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
@@ -396,6 +431,9 @@ public sealed class SimulationContext
 
 		return true;
 	}
+	/*
+	Completed resource spawners create neutral resource nodes once.
+	*/
 	private void HandleAdvanceResourceSpawner(BuildingState building)
 	{
 		if (building.Type != BuildingType.RESOURCE_SPAWNER || building.HasSpawnedResources)
@@ -427,6 +465,9 @@ public sealed class SimulationContext
 
 		building.MarkResourcesSpawned();
 	}
+	/*
+	Finds a point just outside the building footprint for construction work.
+	*/
 	private Vector2 FindShortestPathToBuilding(Vector2 unitPosition, BuildingState building)
 	{
 		var buildingSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
@@ -445,6 +486,9 @@ public sealed class SimulationContext
 
 		return buildingCenter + direction * (distanceToBuildingEdge + GetConstructionRange(building.Type) / 2);
 	}
+	/*
+	Advances construction only when the assigned unit has arrived in range.
+	*/
 	private void HandleAdvanceConstruction(string playerId, BuildingState building)
 	{
 		if (!(building.Type == BuildingType.CONSTRUCTION_SITE))
@@ -468,6 +512,9 @@ public sealed class SimulationContext
 		if (building.Type != BuildingType.CONSTRUCTION_SITE)
 			constructionUnit.ClearConstructionOrder();
 	}
+	/*
+	Measures distance to the closest point on a building footprint.
+	*/
 	private static float DistanceSquaredToBuildingFootprint(Vector2 point, BuildingState building)
 	{
 		var size = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
@@ -487,10 +534,16 @@ public sealed class SimulationContext
 		
 		return point.DistanceSquaredTo(new Vector2(closestX, closestY));
 	}
+	/*
+	Construction range is currently shared by all construction sites.
+	*/
 	private static float GetConstructionRange(BuildingType type)
 	{
 		return 10f;
 	}
+	/*
+	Removes an unfinished construction site.
+	*/
 	private bool HandleCancelConstruction(CancelConstructionMessage msg)
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
@@ -504,6 +557,9 @@ public sealed class SimulationContext
 
 		return player.RemoveEntity(msg.construction_site_id);
 	}
+	/*
+	Repair commands currently assign construction units to sites or mark damaged entities for repair.
+	*/
 	private bool HandleRepairTarget(RepairTargetMessage msg)
 	{
 		if (!TryGetOwnedUnits(msg.player_id, msg.repair_unit_ids, out _))
@@ -521,6 +577,9 @@ public sealed class SimulationContext
 		return entity.GettingRepaired = true;
 	}
 
+	/*
+	Finds the first valid construction unit and assigns it to the site.
+	*/
 	private bool HandleAssignConstruction(string playerId, string[] constructionUnitIds, BuildingState constructionSite)
 	{
 		foreach (var unitId in constructionUnitIds)
@@ -535,6 +594,9 @@ public sealed class SimulationContext
 		return false;
 	}
 
+	/*
+	Reassigns builder and site state so only one unit owns the construction task.
+	*/
 	private void AssignConstructionUnitToSite(UnitState constructionUnit, BuildingState constructionSite)
 	{
 		if (constructionUnit.HasConstructionOrder
@@ -578,6 +640,9 @@ public sealed class SimulationContext
 	{
 		return false;
 	}
+	/*
+	Adds unit production requests to a building queue.
+	*/
 	private bool HandleTrainUnits(TrainUnitsMessage msg)
 	{
 		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building) || building is null)
@@ -588,6 +653,9 @@ public sealed class SimulationContext
 
 		return true;
 	}
+	/*
+	Removes a matching unit type from a building production queue.
+	*/
 	private bool HandleCancelProduction(CancelProductionMessage msg)
 	{
 		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building))
@@ -603,6 +671,9 @@ public sealed class SimulationContext
 		return true;
 	}
 	
+	/*
+	Updates where selected production buildings send finished units.
+	*/
 	private bool HandleSetRallyPoint(SetRallyPointMessage msg)
 	{
 		foreach (var entityId in msg.producer_entity_ids)
@@ -639,6 +710,10 @@ public sealed class SimulationContext
 	{
 		return false;
 	}
+	/*
+	Orders combat-capable units to attack one target.
+	Units that cannot damage the target are ignored.
+	*/
 	private bool HandleAttackTarget(AttackTargetMessage msg)
 	{
 		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
@@ -685,6 +760,9 @@ public sealed class SimulationContext
 	{
 		return false;
 	}
+	/*
+	Routes generic ability commands to the concrete simulation handler.
+	*/
 	private bool HandleUseAbility(UseAbilityMessage msg)
 	{
 		bool passed = false;
@@ -734,6 +812,9 @@ public sealed class SimulationContext
 		return passed;
 	}
 
+	/*
+	Sells completed buildings by removing them from the player's entity list.
+	*/
 	private bool HandleSellBuilding(UseAbilityMessage msg)
 	{
 		var soldBuilding = false;
@@ -754,6 +835,9 @@ public sealed class SimulationContext
 		return soldBuilding;
 	}
 
+	/*
+	Spends the producer building ability cost and queues the requested unit.
+	*/
 	private bool HandleSpawnUnit(UseAbilityMessage msg, UnitType unitType)
 	{
 		foreach(string entityId in msg.caster_entity_ids)
@@ -791,6 +875,9 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Spends the construction unit ability cost and creates a construction site.
+	*/
 	private bool HandleSpawnBuilding(UseAbilityMessage msg, BuildingType pendingBuilding)
 	{
 		if (msg.caster_entity_ids.Length > 1)
@@ -823,6 +910,9 @@ public sealed class SimulationContext
 		));
 	}
 
+	/*
+	Assigns resource collectors to a resource and a valid dropoff building.
+	*/
 	private bool HandleGatherResources(GatherResourcesMessage msg)
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
@@ -859,6 +949,9 @@ public sealed class SimulationContext
 		return gatherOrderAssigned;
 	}
 
+	/*
+	Continues the collector gather loop after movement has finished.
+	*/
 	private void HandleAdvanceGatherResources(ResourceCollectorState collector)
 	{
 		if (!collector.HasGatherOrder || collector.HasMoveOrder)
@@ -876,6 +969,9 @@ public sealed class SimulationContext
 		}
 	}
 
+	/*
+	Extracts cargo from the resource and sends the collector to the dropoff.
+	*/
 	private void HandleCollectorArrivedAtResource(ResourceCollectorState collector)
 	{
 		if (!_matchState.Resources.TryGetValue(collector.ResourceTargetId, out var resource) || resource.IsDepleted)
@@ -903,6 +999,9 @@ public sealed class SimulationContext
 		collector.MoveToDropoff(dropoff.CurrentPosition);
 	}
 
+	/*
+	Deposits cargo and sends the collector back if the resource still exists.
+	*/
 	private void HandleCollectorArrivedAtDropoff(ResourceCollectorState collector)
 	{
 		if (!TryGetPlayer(collector.OwnerPlayerId ?? "", out var player) || player is null)
@@ -928,6 +1027,9 @@ public sealed class SimulationContext
 		collector.MoveToResource(resource.CurrentPosition);
 	}
 
+	/*
+	Validates that a building is an owned resource dropoff.
+	*/
 	private bool TryGetResourceGatherer(string playerId, string buildingId, out BuildingState? resourceGatherer)
 	{
 		resourceGatherer = null;
@@ -943,6 +1045,9 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Finds the closest owned resource gatherer to use as an automatic dropoff.
+	*/
 	private BuildingState? FindNearestResourceGatherer(string playerId, Vector2 position)
 	{
 		if (!TryGetPlayer(playerId, out var player) || player is null)
@@ -955,6 +1060,9 @@ public sealed class SimulationContext
 			.FirstOrDefault();
 	}
 
+	/*
+	Debug command for spawning units directly into the simulation.
+	*/
 	private bool HandleDebugSpawnUnit(DebugSpawnUnitsMessage msg)
 	{
 		if (!TryGetPlayer(msg.PlayerId, out var player))
@@ -976,6 +1084,9 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Creates the correct UnitState subtype for a unit type.
+	*/
 	private static UnitState CreateUnitState(string entityId, string playerId, Vector2 position, float movementSpeed, UnitType unitType)
 	{
 		return unitType switch
@@ -985,6 +1096,9 @@ public sealed class SimulationContext
 		};
 	}
 
+	/*
+	Debug command for spawning buildings directly into the simulation.
+	*/
 	private bool HandleDebugSpawnBuilding(DebugSpawnBuildingMessage msg)
 	{
 		if (!TryGetPlayer(msg.PlayerId, out var player))
@@ -1013,6 +1127,9 @@ public sealed class SimulationContext
 		return true;
 	}
 
+	/*
+	Finds nearby free space so debug-spawned units do not stack exactly.
+	*/
 	private Vector2 GetOccupiedOffsetPosition(Vector2 requestedPosition)
 	{
 		if (!IsPositionOccupied(requestedPosition))
@@ -1031,6 +1148,9 @@ public sealed class SimulationContext
 		return requestedPosition + new Vector2(UNIT_SPACING * 9f, 0f);
 	}
 
+	/*
+	Directions used by GetOccupiedOffsetPosition to search outward in rings.
+	*/
 	private static IEnumerable<Vector2> GetSpawnDirectionsForRing(int ring)
 	{
 		yield return new Vector2(ring, 0);
@@ -1043,6 +1163,9 @@ public sealed class SimulationContext
 		yield return new Vector2(-ring, -ring);
 	}
 
+	/*
+	Returns a formation offset centered around the destination.
+	*/
 	private static Vector2 GetFormationOffset(int index, int count)
 	{
 		if (count <= 1)
@@ -1059,6 +1182,9 @@ public sealed class SimulationContext
 		return new Vector2(offsetX, offsetY);
 	}
 
+	/*
+	Checks current and target positions to avoid obvious spawn overlap.
+	*/
 	private bool IsPositionOccupied(Vector2 position)
 	{
 		var collisionDistanceSquared = COLLISION_RADIUS * COLLISION_RADIUS;
@@ -1071,6 +1197,9 @@ public sealed class SimulationContext
 				|| entity is UnitState unit && unit.HasMoveOrder && unit.TargetPosition.DistanceSquaredTo(position) <= collisionDistanceSquared);
 	}
 
+	/*
+	Creates unique entity ids with a readable type prefix.
+	*/
 	private static string NewEntityId(string prefix)
 	{
 		return $"{prefix}-{Guid.NewGuid():N}";
@@ -1087,6 +1216,9 @@ public sealed class SimulationContext
 
 public interface IMatchStateView
 {
+	/*
+	Read-only view exposed to client systems.
+	*/
 	int Tick { get; }
 	IReadOnlyDictionary<string, PlayerState> Players { get; }
 	IReadOnlyDictionary<string, ResourceState> Resources { get; }

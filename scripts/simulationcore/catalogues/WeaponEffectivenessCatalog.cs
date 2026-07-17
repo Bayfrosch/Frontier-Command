@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 public static class WeaponEffectivenessCatalog
 {
+	/*
+	Multipliers for each weapon and armor pairing.
+	A value of 0 means the weapon cannot damage that armor class.
+	*/
 	private static readonly IReadOnlyDictionary<(WeaponClass WeaponClass, ArmorClass ArmorClass), float> Modifiers =
 		new Dictionary<(WeaponClass, ArmorClass), float>
 		{
@@ -37,6 +41,10 @@ public static class WeaponEffectivenessCatalog
 			[(WeaponClass.ANTI_AIR, ArmorClass.AIR)] = 1.50f,
 		};
 
+	/*
+	Returns the damage multiplier used by combat resolution.
+	Missing pairs are treated as data errors.
+	*/
 	public static float GetModifier(WeaponClass weaponClass, ArmorClass armorClass)
 	{
 		if (Modifiers.TryGetValue((weaponClass, armorClass), out var modifier))

@@ -2,6 +2,10 @@ using System.Collections.Generic;
 
 public static class AbilityCatalog
 {
+	/*
+	Returns the actions available on a completed building or construction site.
+	Cost and RequiresTarget are read by both the simulation and client UI.
+	*/
 	public static HashSet<Ability> ForBuilding(BuildingType type)
 	{
 		var abilities = new HashSet<Ability>();
@@ -67,6 +71,10 @@ public static class AbilityCatalog
 		return abilities;
 	}
 
+	/*
+	Returns the actions available on units.
+	Construction units use target abilities to place new building sites.
+	*/
 	public static HashSet<Ability> ForUnit(UnitType type)
 	{
 		var abilities = new HashSet<Ability>();

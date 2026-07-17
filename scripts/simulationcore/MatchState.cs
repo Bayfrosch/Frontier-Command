@@ -3,9 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+
+/*
+Top-level match state owned by SimulationContext.
+It stores players, neutral resources, projectiles, and global match progress.
+*/
 public sealed class MatchState : IMatchStateView
 {
 	public int Tick { get; private set; }
+	/*
+	Advances the authoritative simulation tick counter.
+	*/
 	internal void IncrementTick()
 	{
 		Tick++;
@@ -21,14 +29,23 @@ public sealed class MatchState : IMatchStateView
 	public IReadOnlyDictionary<string, ResourceState> Resources => _resources;
 	public readonly Dictionary<string, ProjectileState> Projectiles = new();
 	public IReadOnlyDictionary<string, ProjectileState> ProjectilesView => Projectiles;
+	/*
+	Adds or replaces a player entry by player id.
+	*/
 	internal void AddPlayer(PlayerState player)
 	{
 		_players[player.PlayerId] = player;
 	}
+	/*
+	Adds a neutral resource node to the match.
+	*/
 	internal void AddResource(ResourceState resource)
 	{
 		_resources[resource.EntityId] = resource;
 	}
+	/*
+	Removes a neutral resource node from the match.
+	*/
 	internal bool RemoveResource(string id)
 	{
 		return _resources.Remove(id);
@@ -37,10 +54,16 @@ public sealed class MatchState : IMatchStateView
 
 public sealed class VictoryState
 {
+	/*
+	Stores the final winner once the match has ended.
+	*/
 	public string WinningPlayerId { get; private set; } = "";
 	public string VictoryReason { get; private set; } = "";
 }
 
+/*
+Runtime state for one projectile travelling toward an entity.
+*/
 public sealed class ProjectileState
 {
 	public string ProjectileId { get; private set; } = "";
@@ -102,6 +125,9 @@ public enum ArmorClass
 
 public sealed class WeaponDefinition
 {
+	/*
+	Static combat data used when a unit or projectile deals damage.
+	*/
 	public string WeaponId { get; init; }
 	public WeaponClass WeaponClass { get; init; }
 	public int Damage { get; init; }
@@ -116,6 +142,10 @@ public sealed class WeaponDefinition
 
 public sealed class PlayerState
 {
+	/*
+	Stores all state that belongs to one player.
+	Neutral is also represented as a player for neutral buildings.
+	*/
 	public PlayerState(string playerId, int startingVirelium = 2000)
 	{
 		PlayerId = playerId;
@@ -128,10 +158,16 @@ public sealed class PlayerState
 	*/
 	private readonly Dictionary<string, EntityState> _entities = new();
 	public IReadOnlyDictionary<string, EntityState> Entities => _entities;
+	/*
+	Adds a unit or building owned by this player.
+	*/
 	internal void AddEntity(EntityState entity)
 	{
 		_entities[entity.EntityId] = entity;
 	}
+	/*
+	Removes a unit or building owned by this player.
+	*/
 	internal bool RemoveEntity(string id)
 	{
 		return _entities.Remove(id);
@@ -142,6 +178,9 @@ public sealed class PlayerState
 	*/
 	private readonly Dictionary<string, bool> _research = new();
 	public IReadOnlyDictionary<string, bool> Research => _research;
+	/*
+	Marks research as unlocked for this player.
+	*/
 	internal void AddResearch(string research)
 	{
 		_research[research] = true;
@@ -149,10 +188,16 @@ public sealed class PlayerState
 	public int Virelium { get; private set; }
 	public int EnergyProduced { get; private set; }
 	public int EnergyConsumed { get; private set; }
+	/*
+	Adds gathered material to the player's stockpile.
+	*/
 	internal void AddMaterials(int amount)
 	{
 		Virelium += Math.Max(0, amount);
 	}
+	/*
+	Spends material without allowing the stockpile to go below zero.
+	*/
 	internal void RemoveMaterials(int amount)
 	{
 		Virelium = Math.Max(0, Virelium - amount);
@@ -161,6 +206,9 @@ public sealed class PlayerState
 
 public abstract class EntityState
 {
+	/*
+	Base state shared by units, buildings, outposts, and resource nodes.
+	*/
 	protected EntityState(string entityId, string? ownerPlayerId, Vector2 currentPos, int maxHealth, ArmorClass armorClass)
 	{
 		EntityId = entityId;
@@ -179,10 +227,16 @@ public abstract class EntityState
 	public int MaxHealth { get; private set; }
 	public bool GettingRepaired = false;
 	public HashSet<Ability> Abilities { get; set; }
+	/*
+	Applies damage and clamps health at zero.
+	*/
 	internal void TakeDamage(int damage)
 	{
 		Health = Math.Max(0, Health - damage);
 	}
+	/*
+	Changes max health when an entity transforms, optionally healing it.
+	*/
 	protected void SetMaxHealth(int maxHealth, bool healToFull)
 	{
 		MaxHealth = Math.Max(1, maxHealth);
@@ -194,6 +248,9 @@ public abstract class EntityState
 
 public class UnitState : EntityState
 {
+	/*
+	Stores movement, combat, construction, and ability state for units.
+	*/
 	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType = UnitType.BASIC_INFANTRY)
 		: base(entityId, ownerPlayerId, currentPos, UnitCatalog.GetMaxHealth(unitType), UnitCatalog.GetArmorClass(unitType))
 	{
@@ -225,6 +282,9 @@ public class UnitState : EntityState
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
 
+	/*
+	Sets a movement target and clears incompatible orders unless told to preserve them.
+	*/
 	internal virtual void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
 		TargetPosition = targetPosition;
@@ -234,11 +294,17 @@ public class UnitState : EntityState
 		if (!preserveConstructionOrder)
 			ClearConstructionOrder();
 	}
+	/*
+	Stops current movement.
+	*/
 	internal void ClearMoveOrder()
 	{
 		TargetPosition = Vector2.Zero;
 		HasMoveOrder = false;
 	}
+	/*
+	Targets an enemy entity and stores formation offset for group attacks.
+	*/
 	internal void SetAttackOrder(string targetEntityId, Vector2 formationOffset)
 	{
 		AttackTargetId = targetEntityId;
@@ -246,6 +312,9 @@ public class UnitState : EntityState
 		HasAttackOrder = true;
 		ResetAttackWindup();
 	}
+	/*
+	Clears attack targeting and resets the windup.
+	*/
 	internal void ClearAttackOrder()
 	{
 		AttackTargetId = "";
@@ -253,36 +322,57 @@ public class UnitState : EntityState
 		HasAttackOrder = false;
 		ResetAttackWindup();
 	}
+	/*
+	Assigns this unit to work on a construction site.
+	*/
 	internal void SetConstructionOrder(string targetEntityId)
 	{
 		ConstructionTargetId = targetEntityId;
 		HasConstructionOrder = true;
 		ClearAttackOrder();
 	}
+	/*
+	Clears any construction assignment.
+	*/
 	internal void ClearConstructionOrder()
 	{
 		ConstructionTargetId = "";
 		HasConstructionOrder = false;
 	}
+	/*
+	Returns attack windup to the start.
+	*/
 	internal void ResetAttackWindup()
 	{
 		AttackWindupProgress = 0f;
 	}
+	/*
+	Advances attack windup and returns true once the attack should fire.
+	*/
 	internal bool AdvanceAttackWindup(float deltaSeconds)
 	{
 		AttackWindupProgress += deltaSeconds;
 		return AttackWindupProgress >= AttackWindupTime;
 	}
+	/*
+	Starts the post-attack cooldown.
+	*/
 	internal void StartAttackCooldown()
 	{
 		AttackCooldownRemaining = AttackCooldownTime;
 	}
+	/*
+	Reduces attack cooldown over time.
+	*/
 	internal void AdvanceAttackCooldown(float deltaSeconds)
 	{
 		AttackCooldownRemaining = AttackCooldownRemaining <= deltaSeconds
 			? 0f
 			: AttackCooldownRemaining - deltaSeconds;
 	}
+	/*
+	Moves toward the target position and clears the order on arrival.
+	*/
 	internal void AdvanceMovement(float deltaSeconds)
 	{
 		if (!HasMoveOrder)
@@ -314,6 +404,9 @@ public sealed class ResourceCollectorState : UnitState
 {
 	private const int DEFAULT_MAX_CAPACITY = 100;
 
+	/*
+	Unit state for harvesters that can carry Virelium between resources and dropoffs.
+	*/
 	public ResourceCollectorState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed)
 		: base(entityId, ownerPlayerId, currentPos, movementSpeed, UnitType.RESOURCE_COLLECTOR)
 	{
@@ -328,12 +421,18 @@ public sealed class ResourceCollectorState : UnitState
 	public int RemainingCapacity => Math.Max(0, MaxCapacity - Carry);
 	public bool HasCargo => Carry > 0;
 
+	/*
+	Manual movement cancels gathering so the collector follows the latest player order.
+	*/
 	internal override void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
 		base.SetMoveOrder(targetPosition, preserveAttackOrder, preserveConstructionOrder);
 		ClearGatherOrder();
 	}
 
+	/*
+	Adds material to cargo up to MaxCapacity.
+	*/
 	internal int Collect(int amount)
 	{
 		var acceptedAmount = Math.Min(Math.Max(0, amount), RemainingCapacity);
@@ -341,6 +440,9 @@ public sealed class ResourceCollectorState : UnitState
 		return acceptedAmount;
 	}
 
+	/*
+	Empties cargo and returns the deposited amount.
+	*/
 	internal int DepositCargo()
 	{
 		var depositedAmount = Carry;
@@ -348,6 +450,9 @@ public sealed class ResourceCollectorState : UnitState
 		return depositedAmount;
 	}
 
+	/*
+	Starts a gather loop by moving toward the chosen resource node.
+	*/
 	internal void SetGatherOrder(string resourceTargetId, Vector2 resourcePosition, string resourceDropoffBuildingId = "")
 	{
 		ResourceTargetId = resourceTargetId;
@@ -359,18 +464,27 @@ public sealed class ResourceCollectorState : UnitState
 		base.SetMoveOrder(resourcePosition);
 	}
 
+	/*
+	Sends the collector back to the resource after depositing cargo.
+	*/
 	internal void MoveToResource(Vector2 resourcePosition)
 	{
 		GatherPhase = ResourceCollectorGatherPhase.MovingToResource;
 		base.SetMoveOrder(resourcePosition);
 	}
 
+	/*
+	Sends the collector to the dropoff after taking resources.
+	*/
 	internal void MoveToDropoff(Vector2 dropoffPosition)
 	{
 		GatherPhase = ResourceCollectorGatherPhase.ReturningToDropoff;
 		base.SetMoveOrder(dropoffPosition);
 	}
 
+	/*
+	Clears all gather targets and returns to idle phase.
+	*/
 	internal void ClearGatherOrder()
 	{
 		ResourceTargetId = "";
@@ -406,6 +520,9 @@ public enum UnitType
 
 public sealed class BuildingState : EntityState
 {
+	/*
+	New buildings start as construction sites and transform when construction completes.
+	*/
 	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType pendingBuildingType, string constructionUnitId)
 		: base(entityId, ownerPlayerId, currentPos, BuildingCatalog.GetMaxHealth(BuildingType.CONSTRUCTION_SITE), BuildingCatalog.GetArmorClass(BuildingType.CONSTRUCTION_SITE))
 	{
@@ -416,6 +533,9 @@ public sealed class BuildingState : EntityState
 		pendingBuilding = pendingBuildingType;
 	}
 	public int BuildProgression { get; private set; } = 0;
+	/*
+	Advances construction and swaps the site into its final building type at 100%.
+	*/
 	internal void AdvanceConstruction(int amount)
 	{
 		BuildProgression = Math.Min(100, BuildProgression + amount);
@@ -427,6 +547,9 @@ public sealed class BuildingState : EntityState
 			Abilities = AbilityCatalog.ForBuilding(pendingBuilding);
 		}
 	}
+	/*
+	Advances the first production queue item and returns the finished unit type.
+	*/
 	internal UnitType? AdvanceProduction(int amount)
 	{
 		if (ProductionQueue.Length <= 0)
@@ -453,30 +576,51 @@ public sealed class BuildingState : EntityState
 	private readonly List<string> _resourceEntityIds = new();
 	public IReadOnlyList<string> ResourceEntityIds => _resourceEntityIds;
 	public bool HasSpawnedResources { get; private set; }
+	/*
+	Stores which construction unit is assigned to this site.
+	*/
 	internal void AssignConstructionUnit(string constructionUnitId)
 	{
 		ConstructionUnitId = constructionUnitId;
 	}
+	/*
+	Removes the current construction unit assignment.
+	*/
 	internal void ClearConstructionUnit()
 	{
 		ConstructionUnitId = "";
 	}
+	/*
+	Sets where produced units should spawn and move.
+	*/
 	internal void SetRallyPoint(Vector2 newPos)
 	{
 		RallyPoint = newPos;
 	}
+	/*
+	Removes matching unit types from the production queue.
+	*/
 	internal void CancelProduction(UnitType entityId)
 	{
 		ProductionQueue = ProductionQueue.Where(x => !x.Equals(entityId)).ToArray();
 	}
+	/*
+	Adds a unit type to the end of the production queue.
+	*/
 	internal void QueueProduction(UnitType unitType)
 	{
 		ProductionQueue = ProductionQueue.Append(unitType).ToArray();
 	}
+	/*
+	Tracks resources spawned by this building.
+	*/
 	internal void RegisterSpawnedResource(string resourceEntityId)
 	{
 		_resourceEntityIds.Add(resourceEntityId);
 	}
+	/*
+	Prevents a resource spawner from creating duplicate resource nodes.
+	*/
 	internal void MarkResourcesSpawned()
 	{
 		HasSpawnedResources = true;
@@ -485,6 +629,9 @@ public sealed class BuildingState : EntityState
 
 public sealed class OutpostState : EntityState
 {
+	/*
+	Placeholder state for future outpost specialization logic.
+	*/
 	public OutpostState(string entityId, string ownerPlayerId, Vector2 currentPos)
 		: base(entityId, ownerPlayerId, currentPos, 1, ArmorClass.STRUCTURE)
 	{
@@ -494,6 +641,9 @@ public sealed class OutpostState : EntityState
 
 public sealed class ResourceState : EntityState
 {
+	/*
+	Neutral map resource that collectors can extract from.
+	*/
 	public ResourceState(
 		string entityId,
 		ResourceType resourceType,
@@ -514,6 +664,9 @@ public sealed class ResourceState : EntityState
 	public int CurrentAmount { get; private set; }
 	public bool IsDepleted => CurrentAmount <= 0;
 
+	/*
+	Removes up to the requested amount and returns what was actually taken.
+	*/
 	internal int Extract(int requestedAmount)
 	{
 		var extractedAmount = Math.Min(Math.Max(0, requestedAmount), CurrentAmount);

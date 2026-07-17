@@ -2,6 +2,10 @@ using System;
 using Godot;
 public static class BuildingCatalog
 {
+	/*
+	Central place for building footprint sizes.
+	Client previews and placement-adjacent logic use the same values.
+	*/
 	public static Vector2 GetFoodprintSize(BuildingType type)
 	{
 		return type switch
@@ -13,6 +17,10 @@ public static class BuildingCatalog
 		};
 	}
 
+	/*
+	Max health is defined per final building type.
+	Construction sites use their own temporary health until completed.
+	*/
 	public static int GetMaxHealth(BuildingType type)
 	{
 		return type switch
@@ -25,11 +33,19 @@ public static class BuildingCatalog
 		};
 	}
 
+	/*
+	All current buildings use structure armor.
+	Keep this method so later building types can diverge in one place.
+	*/
 	public static ArmorClass GetArmorClass(BuildingType type)
 	{
 		return ArmorClass.STRUCTURE;
 	}
 
+	/*
+	Construction sites reserve the footprint of the building they will become.
+	Completed buildings use their own type directly.
+	*/
 	public static BuildingType GetFootprintType(BuildingState building)
 	{
 		return building.Type == BuildingType.CONSTRUCTION_SITE
