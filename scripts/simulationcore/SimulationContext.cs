@@ -516,8 +516,12 @@ public sealed class SimulationContext
 			return;
 
 		building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
-		if (building.Type != BuildingType.CONSTRUCTION_SITE)
+		if (building.Type != BuildingType.CONSTRUCTION_SITE) {
+			if (!TryGetPlayer(playerId, out var player))
+				return;
+			player.AddCompletedBuilding(building.Type);
 			constructionUnit.ClearConstructionOrder();
+		}
 	}
 	/*
 	Measures distance to the closest point on a building footprint.
@@ -564,7 +568,9 @@ public sealed class SimulationContext
 
 		var removed = player.RemoveEntity(msg.construction_site_id);
 		if (removed)
+		{
 			player.AddMaterials(building.ConstructionCost);
+		}
 
 		return removed;
 	}
@@ -776,6 +782,12 @@ public sealed class SimulationContext
 	*/
 	private bool HandleUseAbility(UseAbilityMessage msg)
 	{
+		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
+			return false;
+
+		if (!player.HasUnlockedAbility(msg.ability_id))
+			return false;
+
 		bool passed = false;
 		switch (msg.ability_id)
 		{
@@ -842,7 +854,10 @@ public sealed class SimulationContext
 
 			soldBuilding |= player.RemoveEntity(building.EntityId);
 			if (soldBuilding)
+			{
+				player.RemoveCompletedBuilding(building.Type);
 				player.AddMaterials(building.ConstructionCost / 2);
+			}
 		}
 
 		return soldBuilding;

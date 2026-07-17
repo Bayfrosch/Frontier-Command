@@ -695,6 +695,44 @@ public class SimulationCoreTest
 		AssertThat(player.Virelium).IsEqual(startingVirelium);
 	}
 
+	[TestCase]
+	public void Push_UseAbilityMessage_ReturnsFalse_WhenAbilityIsLockedForPlayer()
+	{
+		var context = new SimulationContext("match-1");
+		var startingVirelium = 2000;
+		var player = new PlayerState("player-1", startingVirelium);
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		AssertThat(AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT)
+			.First(ability => ability.Id == "spawn_resource_gatherer")
+			.UnlockedFromStart).IsFalse();
+		AssertThat(player.UnlockedAbilities.Contains("spawn_resource_gatherer")).IsFalse();
+		AssertThat(player.AbilityUnlockRevision).IsEqual(0);
+
+		var msg = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_resource_gatherer",
+			p_target_position: Vector2.Zero
+		);
+
+		AssertThat(context.Push(msg)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(startingVirelium);
+		AssertThat(player.Entities.Values.OfType<BuildingState>().Any()).IsFalse();
+
+		player.UnlockAbility("spawn_resource_gatherer");
+
+		AssertThat(player.AbilityUnlockRevision).IsEqual(1);
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(player.Virelium).IsEqual(startingVirelium - 1500);
+
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(site.pendingBuilding).IsEqual(BuildingType.RESOURCE_GATHERER);
+	}
+
 	private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
 	{
 		return new MoveUnitsMessage(

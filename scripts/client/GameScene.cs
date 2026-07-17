@@ -111,6 +111,12 @@ public partial class GameScene : Node2D
 
 	private void OnAbilityPressed(string abilityId, bool requiresTarget)
 	{
+		if (!IsAbilityUnlockedForLocalPlayer(abilityId))
+		{
+			ClearAbilityTargetSelection();
+			return;
+		}
+
 		if (requiresTarget && AbilityTargetPosition is null)
 		{
 			lastSelectedAbility = abilityId;
@@ -248,6 +254,9 @@ public partial class GameScene : Node2D
 	private void ShowConstructionPreview(string abilityId)
 	{
 		ClearConstructionPreview();
+
+		if (!IsAbilityUnlockedForLocalPlayer(abilityId))
+			return;
 
 		if (!ConstructionPreviewTypes.TryGetValue(abilityId, out var previewBuildingType))
 			return;
@@ -466,6 +475,14 @@ public partial class GameScene : Node2D
 			return;
 
 		materialCount.Text = $"Virelium: {player.Virelium}";
+	}
+
+	private bool IsAbilityUnlockedForLocalPlayer(string abilityId)
+	{
+		if (!simulationCore.GetState().Players.TryGetValue("player_1", out var player))
+			return false;
+
+		return player.UnlockedAbilities.Contains(abilityId);
 	}
 
 	private ClientEntity? ExtractClientEntity(Godot.Collections.Dictionary result)

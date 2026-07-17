@@ -1,7 +1,39 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public static class AbilityCatalog
 {
+	/*
+	Returns ability ids that each player starts with unlocked.
+	Research and progression can add more ids to the player's set.
+	*/
+	public static HashSet<string> GetDefaultUnlockedAbilityIds()
+	{
+		return GetAllAbilities()
+			.Where(ability => ability.UnlockedFromStart)
+			.Select(ability => ability.Id)
+			.ToHashSet();
+	}
+
+	/*
+	Iterates every ability currently defined in the catalog.
+	*/
+	public static IEnumerable<Ability> GetAllAbilities()
+	{
+		foreach (var buildingType in Enum.GetValues<BuildingType>())
+		{
+			foreach (var ability in ForBuilding(buildingType))
+				yield return ability;
+		}
+
+		foreach (var unitType in Enum.GetValues<UnitType>())
+		{
+			foreach (var ability in ForUnit(unitType))
+				yield return ability;
+		}
+	}
+
 	/*
 	Returns the actions available on a completed building or construction site.
 	Cost and RequiresTarget are read by both the simulation and client UI.
@@ -16,9 +48,9 @@ public static class AbilityCatalog
 				{
 					Id = "cancel_construction",
 					Name = "Abbrechen",
-					Unlocked = true,
 					Cost = 0,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				break;
 
@@ -27,25 +59,25 @@ public static class AbilityCatalog
 				{
 					Id = "sell_building",
 					Name = "Verkaufen",
-					Unlocked = true,
 					Cost = 0,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_infantry",
 					Name = "Infantry",
-					Unlocked = true,
 					Cost = 120,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_rocket_troops",
 					Name = "Rocket Troops",
-					Unlocked = true,
 					Cost = 120,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				break;
 
@@ -54,17 +86,17 @@ public static class AbilityCatalog
 				{
 					Id = "sell_building",
 					Name = "Verkaufen",
-					Unlocked = true,
 					Cost = 0,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_resource_collector",
 					Name = "Sammler",
-					Unlocked = true,
 					Cost = 150,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				break;
 		}
@@ -85,17 +117,17 @@ public static class AbilityCatalog
 				{
 					Id = "spawn_barracks",
 					Name = "Baracke",
-					Unlocked = true,
 					Cost = 1000,
-					RequiresTarget = true
+					RequiresTarget = true,
+					UnlockedFromStart = true
 				});
 				abilities.Add(new Ability
 				{
 					Id = "spawn_resource_gatherer",
 					Name = "Nachschub",
-					Unlocked = true,
-					Cost = 1501,
-					RequiresTarget = true
+					Cost = 1500,
+					RequiresTarget = true,
+					UnlockedFromStart = false
 				});
 				break;
 
@@ -104,9 +136,9 @@ public static class AbilityCatalog
 				{
 					Id = "capture_building",
 					Name = "Einnehmen",
-					Unlocked = true,
 					Cost = 0,
-					RequiresTarget = false
+					RequiresTarget = false,
+					UnlockedFromStart = true
 				});
 				break;
 		}

@@ -10,7 +10,7 @@ public class Ability
     public string Name;
     public int Cost;
     public bool RequiresTarget;
+    public bool UnlockedFromStart;
     public Image? Preview;
-    public bool Unlocked;
     public Vector2? TargetPosition;
 }

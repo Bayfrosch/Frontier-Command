@@ -8,6 +8,8 @@ public partial class SelectedEntityUI : Control
 	public delegate void AbilityPressedEventHandler(string abilityId, bool requiresTarget);
 	private IReadOnlyCollection<string> SelectedEntityIds;
 	private IReadOnlyDictionary<string, EntityState> EntitiesById;
+	private PlayerState LocalPlayer;
+	private int lastAbilityUnlockRevision = -1;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -31,7 +33,10 @@ public partial class SelectedEntityUI : Control
 		if (!simulationNode.Context.get().Players.TryGetValue("player_1", out var player))
 			return;
 
+		LocalPlayer = player;
 		EntitiesById = player.Entities;
+		lastAbilityUnlockRevision = player.AbilityUnlockRevision;
+		simulationNode.StateChanged += HandleStateChanged;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -39,8 +44,22 @@ public partial class SelectedEntityUI : Control
 	{
 	}
 
+	private void HandleStateChanged()
+	{
+		if (LocalPlayer is null)
+			return;
+
+		if (lastAbilityUnlockRevision == LocalPlayer.AbilityUnlockRevision)
+			return;
+
+		HandleUnitSelection();
+	}
+
 	private void HandleUnitSelection()
 	{
+		if (LocalPlayer is not null)
+			lastAbilityUnlockRevision = LocalPlayer.AbilityUnlockRevision;
+
 		var row = GetNode<HBoxContainer>("VBoxContainer/Row1");
 		row.AddThemeConstantOverride("separation", 16);
 
@@ -88,43 +107,43 @@ public partial class SelectedEntityUI : Control
 			return;
 		}
 
-			foreach (Ability ability in priorizedEntity.Abilities)
+		foreach (Ability ability in priorizedEntity.Abilities)
+		{
+			var isUnlocked = LocalPlayer.UnlockedAbilities.Contains(ability.Id);
+			/*
+			Rendering of each Ability in bottom Row
+			Generates a Button for each Ability
+			*/
+			var AbilityButton = new Button
 			{
-				/*
-				Rendering of each Ability in bottom Row
-				Generates a Button for each Ability
-				*/
-				var AbilityButton = new Button
-				{
-					Text = ability.Name,
-					CustomMinimumSize = new Vector2(140, 60),
-				};
+				Text = ability.Name,
+				CustomMinimumSize = new Vector2(140, 60),
+			};
+			var normalStyle = new StyleBoxFlat
+			{
+				BgColor = isUnlocked ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.2f, 0.2f, 0.2f),
+				CornerRadiusBottomLeft = 8,
+				CornerRadiusBottomRight = 8,
+				CornerRadiusTopLeft = 8,
+				CornerRadiusTopRight = 8,
+			};
 
-				var normalStyle = new StyleBoxFlat
-				{
-					BgColor = new Color(0.5f, 0.5f, 0.5f),
-					CornerRadiusBottomLeft = 8,
-					CornerRadiusBottomRight = 8,
-					CornerRadiusTopLeft = 8,
-					CornerRadiusTopRight = 8,
-				};
+			var hoverStyle = (StyleBoxFlat)normalStyle.Duplicate();
+			hoverStyle.BgColor = isUnlocked ? new Color(0.3f, 0.3f, 0.3f) : new Color(0.2f, 0.2f, 0.2f);
 
-				var hoverStyle = (StyleBoxFlat)normalStyle.Duplicate();
-				hoverStyle.BgColor = new Color(0.3f,0.3f,0.3f);
-				
-				var pressedStyle = (StyleBoxFlat)normalStyle.Duplicate();
-				pressedStyle.BgColor = new Color(0.1f,0.1f,0.1f);
+			var pressedStyle = (StyleBoxFlat)normalStyle.Duplicate();
+			pressedStyle.BgColor = isUnlocked ? new Color(0.1f, 0.1f, 0.1f) : new Color(0.2f, 0.2f, 0.2f);
 
-				AbilityButton.AddThemeStyleboxOverride("normal", normalStyle);
-				AbilityButton.AddThemeStyleboxOverride("hover", hoverStyle);
-				AbilityButton.AddThemeStyleboxOverride("pressed", pressedStyle);
-				
-				AbilityButton.Pressed += () =>
-				{
-					EmitSignal(SignalName.AbilityPressed, ability.Id, ability.RequiresTarget);
-				};
+			AbilityButton.AddThemeStyleboxOverride("normal", normalStyle);
+			AbilityButton.AddThemeStyleboxOverride("hover", hoverStyle);
+			AbilityButton.AddThemeStyleboxOverride("pressed", pressedStyle);
 
-				row.AddChild(AbilityButton);
-			}
+			AbilityButton.Pressed += () =>
+			{
+				EmitSignal(SignalName.AbilityPressed, ability.Id, ability.RequiresTarget);
+			};
+
+			row.AddChild(AbilityButton);
+		}
 	}
 }
