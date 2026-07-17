@@ -761,6 +761,25 @@ public sealed class SimulationContext
 			if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var building))
 				return false;
 
+			if (!TryGetPlayer(msg.player_id, out var player))
+				return false;
+			
+			var abilities = AbilityCatalog.ForBuilding(building.Type);
+			var ability = abilities.FirstOrDefault(a => a.Id == msg.ability_id);
+			if (ability is null)
+			{
+				GD.Print("Ability not found");
+				return false;
+			}
+			
+			if (player.Virelium < ability.Cost)
+			{
+				GD.Print("Not enougth Virelium");
+				return false;
+			}
+			
+			player.RemoveMaterials(ability.Cost);
+
 			HandleTrainUnits(new TrainUnitsMessage(
 				unitType,
 				msg.player_id,
@@ -781,6 +800,19 @@ public sealed class SimulationContext
 
 		if (msg.target_position is null)
 			return false;
+
+		if (!TryGetPlayer(msg.player_id, out var player))
+			return false;
+		
+		var abilities = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT);
+		var ability = abilities.FirstOrDefault(a => a.Id == msg.ability_id);
+		if (ability is null)
+			return false;
+		
+		if (player.Virelium < ability.Cost)
+			return false;
+		
+		player.RemoveMaterials(ability.Cost);
 
 		return HandleBuildStructure(new BuildStructureMessage(
 			pendingBuilding,

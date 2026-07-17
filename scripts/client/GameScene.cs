@@ -13,6 +13,7 @@ public partial class GameScene : Node2D
 	private TimeTickSystem gameLoop = null;
 	private LocalSimulationNode simulationCore = null;
 	private readonly PackedScene ConstructionSitePreviewScene = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
+	private Label materialCount = null;
 	private static readonly Dictionary<string, BuildingType> ConstructionPreviewTypes = new()
 	{
 		["spawn_barracks"] = BuildingType.BARRACKS,
@@ -49,6 +50,12 @@ public partial class GameScene : Node2D
 		}
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 
+		materialCount = GetNode<Label>(
+			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/MaterialCount"
+		);
+
+		simulationCore.StateChanged += UpdateResourceUi;
+		UpdateResourceUi();
 
 		// Debuging 
 		// Spawn units in order to test the game
@@ -451,6 +458,14 @@ public partial class GameScene : Node2D
 			return 3;
 
 		return 4;
+	}
+
+	private void UpdateResourceUi()
+	{
+		if (!simulationCore.GetState().Players.TryGetValue("player_1", out var player))
+			return;
+
+		materialCount.Text = $"Virelium: {player.Virelium}";
 	}
 
 	private ClientEntity? ExtractClientEntity(Godot.Collections.Dictionary result)

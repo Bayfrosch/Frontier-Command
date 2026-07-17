@@ -32,7 +32,7 @@ public static class AbilityCatalog
 					Id = "spawn_infantry",
 					Name = "Infantry",
 					Unlocked = true,
-					Cost = 20,
+					Cost = 120,
 					RequiresTarget = false
 				});
 				abilities.Add(new Ability
@@ -40,7 +40,7 @@ public static class AbilityCatalog
 					Id = "spawn_rocket_troops",
 					Name = "Rocket Troops",
 					Unlocked = true,
-					Cost = 20,
+					Cost = 120,
 					RequiresTarget = false
 				});
 				break;

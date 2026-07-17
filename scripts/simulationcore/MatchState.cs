@@ -116,9 +116,10 @@ public sealed class WeaponDefinition
 
 public sealed class PlayerState
 {
-	public PlayerState(string playerId)
+	public PlayerState(string playerId, int startingVirelium = 2000)
 	{
 		PlayerId = playerId;
+		Virelium = startingVirelium;
 	}
 	public string PlayerId { get; private set; } = "";
 	/*
@@ -151,6 +152,10 @@ public sealed class PlayerState
 	internal void AddMaterials(int amount)
 	{
 		Virelium += Math.Max(0, amount);
+	}
+	internal void RemoveMaterials(int amount)
+	{
+		Virelium = Math.Max(0, Virelium - amount);
 	}
 }
 
