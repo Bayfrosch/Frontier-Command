@@ -32,7 +32,7 @@ public sealed class SimulationContext
 		Register<DebugSpawnBuildingMessage>(HandleDebugSpawnBuilding);
 
 		// construction
-		Register<BuildStructureMessage>(HandleBuildStructure);
+		Register<BuildStructureMessage>(msg => HandleBuildStructure(msg));
 		Register<CancelConstructionMessage>(HandleCancelConstruction);
 		Register<RepairTargetMessage>(HandleRepairTarget);
 		Register<UpgradeStructureMessage>(HandleUpgradeStructure);
@@ -415,7 +415,7 @@ public sealed class SimulationContext
 	/*
 	Creates a construction site and assigns the construction unit that placed it.
 	*/
-	private bool HandleBuildStructure(BuildStructureMessage msg)
+	private bool HandleBuildStructure(BuildStructureMessage msg, int constructionCost = 0)
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
 			return false;
@@ -424,7 +424,14 @@ public sealed class SimulationContext
 			return false;
 
 		var id = NewEntityId(msg.building_type.ToString());
-		BuildingState building = new BuildingState(id, msg.player_id, msg.position, msg.building_type, msg.construction_unit_id);
+		BuildingState building = new BuildingState(
+			id,
+			msg.player_id,
+			msg.position,
+			msg.building_type,
+			msg.construction_unit_id,
+			constructionCost
+		);
 
 		player.AddEntity(building);
 		AssignConstructionUnitToSite(unit, building);
@@ -555,7 +562,11 @@ public sealed class SimulationContext
 		if (building.BuildProgression >= 100)
 			return false;
 
-		return player.RemoveEntity(msg.construction_site_id);
+		var removed = player.RemoveEntity(msg.construction_site_id);
+		if (removed)
+			player.AddMaterials(building.ConstructionCost);
+
+		return removed;
 	}
 	/*
 	Repair commands currently assign construction units to sites or mark damaged entities for repair.
@@ -793,7 +804,7 @@ public sealed class SimulationContext
 					msg.issued_at_tick,
 					msg.caster_entity_ids[0]
 				);
-				HandleCancelConstruction(cmsg);
+				passed = HandleCancelConstruction(cmsg);
 				break;
 
 			case "sell_building":
@@ -830,6 +841,8 @@ public sealed class SimulationContext
 				continue;
 
 			soldBuilding |= player.RemoveEntity(building.EntityId);
+			if (soldBuilding)
+				player.AddMaterials(building.ConstructionCost / 2);
 		}
 
 		return soldBuilding;
@@ -901,13 +914,19 @@ public sealed class SimulationContext
 		
 		player.RemoveMaterials(ability.Cost);
 
-		return HandleBuildStructure(new BuildStructureMessage(
+		var buildStructureMessage = new BuildStructureMessage(
 			pendingBuilding,
 			msg.player_id,
 			_matchState.Tick,
 			entityId,
 			msg.target_position.Value
-		));
+		);
+
+		if (HandleBuildStructure(buildStructureMessage, ability.Cost))
+			return true;
+
+		player.AddMaterials(ability.Cost);
+		return false;
 	}
 
 	/*

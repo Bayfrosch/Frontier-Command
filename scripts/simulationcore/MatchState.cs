@@ -523,13 +523,14 @@ public sealed class BuildingState : EntityState
 	/*
 	New buildings start as construction sites and transform when construction completes.
 	*/
-	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType pendingBuildingType, string constructionUnitId)
+	public BuildingState(string entityId, string ownerPlayerId, Vector2 currentPos, BuildingType pendingBuildingType, string constructionUnitId, int constructionCost = 0)
 		: base(entityId, ownerPlayerId, currentPos, BuildingCatalog.GetMaxHealth(BuildingType.CONSTRUCTION_SITE), BuildingCatalog.GetArmorClass(BuildingType.CONSTRUCTION_SITE))
 	{
 		Type = BuildingType.CONSTRUCTION_SITE;
 		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(pendingBuildingType) / 2f + new Vector2(20f, 20f);
 		Abilities = AbilityCatalog.ForBuilding(BuildingType.CONSTRUCTION_SITE);
 		ConstructionUnitId = constructionUnitId;
+		ConstructionCost = Math.Max(0, constructionCost);
 		pendingBuilding = pendingBuildingType;
 	}
 	public int BuildProgression { get; private set; } = 0;
@@ -572,6 +573,7 @@ public sealed class BuildingState : EntityState
 	public int ProductionProgress { get; private set; }
 	public Vector2 RallyPoint { get; private set; }
 	public string ConstructionUnitId { get; private set; }
+	public int ConstructionCost { get; private set; }
 	public BuildingType pendingBuilding { get; private set; }
 	private readonly List<string> _resourceEntityIds = new();
 	public IReadOnlyList<string> ResourceEntityIds => _resourceEntityIds;

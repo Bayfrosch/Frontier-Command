@@ -655,6 +655,46 @@ public class SimulationCoreTest
 		AssertThat(player.Entities.ContainsKey("building-1")).IsFalse();
 	}
 
+	[TestCase]
+	public void Push_UseAbilityMessage_CancelConstruction_RefundsSpentBuildingCost()
+	{
+		var context = new SimulationContext("match-1");
+		var startingVirelium = 2000;
+		var player = new PlayerState("player-1", startingVirelium);
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		var buildCost = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT)
+			.First(ability => ability.Id == "spawn_barracks")
+			.Cost;
+
+		var buildMessage = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_barracks",
+			p_target_position: Vector2.Zero
+		);
+
+		AssertThat(context.Push(buildMessage)).IsTrue();
+		AssertThat(player.Virelium).IsEqual(startingVirelium - buildCost);
+
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(site.ConstructionCost).IsEqual(buildCost);
+
+		var cancelMessage = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { site.EntityId },
+			p_ability_id: "cancel_construction"
+		);
+
+		AssertThat(context.Push(cancelMessage)).IsTrue();
+		AssertThat(player.Entities.ContainsKey(site.EntityId)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(startingVirelium);
+	}
+
 	private static MoveUnitsMessage CreateMoveMessage(string playerId, string unitId, Vector2 destination)
 	{
 		return new MoveUnitsMessage(

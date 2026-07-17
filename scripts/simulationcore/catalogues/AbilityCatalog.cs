@@ -94,7 +94,7 @@ public static class AbilityCatalog
 					Id = "spawn_resource_gatherer",
 					Name = "Nachschub",
 					Unlocked = true,
-					Cost = 1500,
+					Cost = 1501,
 					RequiresTarget = true
 				});
 				break;
