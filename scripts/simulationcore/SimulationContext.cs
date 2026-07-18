@@ -938,6 +938,9 @@ public sealed class SimulationContext
 
 		if (!TryGetPlayer(msg.player_id, out var player))
 			return false;
+
+		if (!IsBuildingPlacementValid(pendingBuilding, msg.target_position.Value))
+			return false;
 		
 		var abilities = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT);
 		var ability = abilities.FirstOrDefault(a => a.Id == msg.ability_id);
@@ -962,6 +965,22 @@ public sealed class SimulationContext
 
 		player.AddMaterials(ability.Cost);
 		return false;
+	}
+
+	/*
+	Prevents buildings and construction sites from occupying the same footprint.
+	*/
+	private bool IsBuildingPlacementValid(BuildingType buildingType, Vector2 position)
+	{
+		return !_matchState.Players.Values
+			.SelectMany(player => player.Entities.Values)
+			.OfType<BuildingState>()
+			.Where(building => building.Health > 0)
+			.Any(building => BuildingCatalog.FootprintsOverlap(
+				buildingType,
+				position,
+				BuildingCatalog.GetFootprintType(building),
+				building.CurrentPosition));
 	}
 
 	/*

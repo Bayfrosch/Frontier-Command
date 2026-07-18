@@ -82,4 +82,21 @@ public static class BuildingCatalog
 			? building.pendingBuilding
 			: building.Type;
 	}
+
+	/*
+	Returns true when two centered building footprints overlap.
+	Touching edges are allowed so buildings can be placed directly beside each other.
+	*/
+	public static bool FootprintsOverlap(
+		BuildingType firstType,
+		Vector2 firstPosition,
+		BuildingType secondType,
+		Vector2 secondPosition)
+	{
+		var combinedHalfSize = (GetFoodprintSize(firstType) + GetFoodprintSize(secondType)) / 2f;
+		var centerDistance = (firstPosition - secondPosition).Abs();
+
+		return centerDistance.X < combinedHalfSize.X
+			&& centerDistance.Y < combinedHalfSize.Y;
+	}
 }

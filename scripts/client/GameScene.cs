@@ -22,7 +22,10 @@ public partial class GameScene : Node2D
 		["spawn_resource_gatherer"] = BuildingType.RESOURCE_GATHERER,
 		["spawn_war_factory"] = BuildingType.WAR_FACTORY
 	};
+	private static readonly Color ValidConstructionPreviewColor = new(1f, 1f, 1f, 0.45f);
+	private static readonly Color InvalidConstructionPreviewColor = new(1f, 0.15f, 0.15f, 0.65f);
 	private Node2D constructionPreview = null;
+	private BuildingType? constructionPreviewBuildingType = null;
 	private HashSet<string> EntitySelectionIds = new();
 	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
 	private bool shiftHeld = false;
@@ -102,8 +105,11 @@ public partial class GameScene : Node2D
 
 	public override void _Process(double delta)
 	{
-		if (constructionPreview is not null)
-			constructionPreview.GlobalPosition = GetGlobalMousePosition();
+		if (constructionPreview is null || constructionPreviewBuildingType is null)
+			return;
+
+		constructionPreview.GlobalPosition = GetGlobalMousePosition();
+		UpdateConstructionPreviewAppearance();
 	}
 
 	private void PruneDeletedSelectedEntities()
@@ -315,13 +321,40 @@ public partial class GameScene : Node2D
 			return;
 
 		constructionPreview = ConstructionSitePreviewScene.Instantiate<Node2D>();
+		constructionPreviewBuildingType = previewBuildingType;
 		ConfigureConstructionPreviewFootprint(constructionPreview, previewBuildingType);
-		constructionPreview.Modulate = new Color(1f, 1f, 1f, 0.45f);
 		constructionPreview.ZIndex = 100;
 		ClientWorldInput.IgnoreGuiMouse(constructionPreview);
 		DisablePreviewPicking(constructionPreview);
 		AddChild(constructionPreview);
 		constructionPreview.GlobalPosition = GetGlobalMousePosition();
+		UpdateConstructionPreviewAppearance();
+	}
+
+	private void UpdateConstructionPreviewAppearance()
+	{
+		if (constructionPreview is null || constructionPreviewBuildingType is null)
+			return;
+
+		constructionPreview.Modulate = IsConstructionPlacementValid(
+			constructionPreviewBuildingType.Value,
+			constructionPreview.GlobalPosition)
+			? ValidConstructionPreviewColor
+			: InvalidConstructionPreviewColor;
+	}
+
+	private bool IsConstructionPlacementValid(BuildingType buildingType, Vector2 position)
+	{
+		return !simulationCore.GetState()
+			.Players.Values
+			.SelectMany(player => player.Entities.Values)
+			.OfType<BuildingState>()
+			.Where(building => building.Health > 0)
+			.Any(building => BuildingCatalog.FootprintsOverlap(
+				buildingType,
+				position,
+				BuildingCatalog.GetFootprintType(building),
+				building.CurrentPosition));
 	}
 
 	private static void ConfigureConstructionPreviewFootprint(Node2D preview, BuildingType buildingType)
@@ -359,6 +392,8 @@ public partial class GameScene : Node2D
 
 	private void ClearConstructionPreview()
 	{
+		constructionPreviewBuildingType = null;
+
 		if (constructionPreview is null)
 			return;
 
@@ -388,7 +423,15 @@ public partial class GameScene : Node2D
 	{
 		if (AbilityTargetSelection)
 		{
-			AbilityTargetPosition = GetGlobalMousePosition();
+			var targetPosition = GetGlobalMousePosition();
+			if (constructionPreviewBuildingType is BuildingType buildingType
+				&& !IsConstructionPlacementValid(buildingType, targetPosition))
+			{
+				ClearAbilityTargetSelection();
+				return;
+			}
+
+			AbilityTargetPosition = targetPosition;
 			OnAbilityPressed(lastSelectedAbility, lastSelectedAbilityRequiresTarget);
 			return;
 		}

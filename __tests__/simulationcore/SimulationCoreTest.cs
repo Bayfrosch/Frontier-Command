@@ -801,6 +801,64 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_UseAbilityMessage_SpawnBuildingRejectsOverlappingBuilding()
+	{
+		var context = new SimulationContext("match-1");
+		var startingVirelium = 2000;
+		var player = new PlayerState("player-1", startingVirelium);
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.COMMAND_CENTER,
+			new Vector2(100, 100)
+		))).IsTrue();
+
+		var msg = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_barracks",
+			p_target_position: new Vector2(100, 100)
+		);
+
+		AssertThat(context.Push(msg)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(startingVirelium);
+		AssertThat(player.Entities.Values.OfType<BuildingState>().Count()).IsEqual(1);
+	}
+
+	[TestCase]
+	public void Push_UseAbilityMessage_SpawnBuildingAllowsTouchingFootprintEdges()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1", 2000);
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.BARRACKS,
+			Vector2.Zero
+		))).IsTrue();
+
+		var msg = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_barracks",
+			p_target_position: new Vector2(120, 0)
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(player.Entities.Values.OfType<BuildingState>().Count()).IsEqual(2);
+	}
+
+	[TestCase]
 	public void Push_DebugSpawnBuilding_PowerPlant_AddsTenProducedEnergy()
 	{
 		var context = new SimulationContext("match-1");
