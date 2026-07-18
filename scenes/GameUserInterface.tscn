@@ -71,11 +71,12 @@ mouse_filter = 2
 [node name="BottomBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=885063121]
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
-mouse_filter = 0
+mouse_filter = 2
 
 [node name="MapPlaceholder" type="Label" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1903530103]
 custom_minimum_size = Vector2(300, 250)
 layout_mode = 2
+mouse_filter = 0
 theme_override_font_sizes/font_size = 32
 text = "MAP"
 horizontal_alignment = 1
@@ -84,14 +85,13 @@ vertical_alignment = 1
 [node name="MapBarSpace" type="Container" parent="MainLayout/VBoxContainer/BottomBar" unique_id=339790986]
 custom_minimum_size = Vector2(45, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1200270572]
 layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
 theme_override_constants/separation = 0
-
-[node name="BootomBarPlace" type="Container" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=2117156061]
-custom_minimum_size = Vector2(0, 115)
-layout_mode = 2
 
 [node name="SelectedEntityUi" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=320057448 instance=ExtResource("2_1x0qv")]
 custom_minimum_size = Vector2(1220, 135)

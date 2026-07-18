@@ -160,46 +160,26 @@ public partial class GameScene : Node2D
 	{
 		if (@event is InputEventMouseButton mouseEvent)
 		{
-			if (GetViewport().GuiGetHoveredControl() is not null)
-				return;
-
-			shiftHeld = Input.IsKeyPressed(Key.Shift);
-
-			if (mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed)
-			{
-				SelectionStartPos = GetGlobalMousePosition();
-				SelectionEndPos = GetGlobalMousePosition();
-				IsPotentialSelectionDrag = true;
-				IsDraggingSelection = false;
-			}
-
 			if (mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
 			{
+				if (!IsPotentialSelectionDrag && !IsDraggingSelection)
+					return;
+
 				SelectionEndPos = GetGlobalMousePosition();
 
 				if (IsDraggingSelection)
 				{
 					HandleSelectionBox(SelectionStartPos, SelectionEndPos);
-				}
-				else
-				{
-					HandleLeftMouseButton(shiftHeld);
-				}
-
-				IsPotentialSelectionDrag = false;
-				IsDraggingSelection = false;
-				QueueRedraw();
-			}
-
-			if (mouseEvent.ButtonIndex == MouseButton.Right)
-			{
-				if (AbilityTargetSelection)
-				{
-					ClearAbilityTargetSelection();
+					ClearSelectionDragState();
+					GetViewport().SetInputAsHandled();
 					return;
 				}
 
-				HandleRightMouseButton(shiftHeld);
+				if (GetViewport().GuiGetHoveredControl() is not null)
+				{
+					ClearSelectionDragState();
+					return;
+				}
 			}
 		}
 
@@ -214,6 +194,65 @@ public partial class GameScene : Node2D
 				QueueRedraw();
 			}
 		}
+	}
+
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (@event is not InputEventMouseButton mouseEvent)
+			return;
+
+		shiftHeld = Input.IsKeyPressed(Key.Shift);
+
+		if (mouseEvent.ButtonIndex == MouseButton.Left && mouseEvent.Pressed)
+		{
+			SelectionStartPos = GetGlobalMousePosition();
+			SelectionEndPos = GetGlobalMousePosition();
+			IsPotentialSelectionDrag = true;
+			IsDraggingSelection = false;
+			GetViewport().SetInputAsHandled();
+			return;
+		}
+
+		if (mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
+		{
+			if (!IsPotentialSelectionDrag)
+				return;
+
+			SelectionEndPos = GetGlobalMousePosition();
+
+			if (IsDraggingSelection)
+			{
+				HandleSelectionBox(SelectionStartPos, SelectionEndPos);
+			}
+			else
+			{
+				HandleLeftMouseButton(shiftHeld);
+			}
+
+			ClearSelectionDragState();
+			GetViewport().SetInputAsHandled();
+			return;
+		}
+
+		if (mouseEvent.ButtonIndex == MouseButton.Right && mouseEvent.Pressed)
+		{
+			if (AbilityTargetSelection)
+			{
+				ClearAbilityTargetSelection();
+				GetViewport().SetInputAsHandled();
+				return;
+			}
+
+			HandleRightMouseButton(shiftHeld);
+			GetViewport().SetInputAsHandled();
+		}
+	}
+
+	private void ClearSelectionDragState()
+	{
+		IsPotentialSelectionDrag = false;
+		IsDraggingSelection = false;
+		QueueRedraw();
 	}
 
 	public override void _Draw()
