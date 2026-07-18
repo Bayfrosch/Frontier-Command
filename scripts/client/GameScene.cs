@@ -14,6 +14,7 @@ public partial class GameScene : Node2D
 	private LocalSimulationNode simulationCore = null;
 	private readonly PackedScene ConstructionSitePreviewScene = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
 	private Label materialCount = null;
+	private EnergyBar energyBar = null;
 	private static readonly Dictionary<string, BuildingType> ConstructionPreviewTypes = new()
 	{
 		["spawn_barracks"] = BuildingType.BARRACKS,
@@ -53,6 +54,9 @@ public partial class GameScene : Node2D
 
 		materialCount = GetNode<Label>(
 			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/MaterialCount"
+		);
+		energyBar = GetNode<EnergyBar>(
+			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/EnergyBar"
 		);
 
 		simulationCore.StateChanged += UpdateResourceUi;
@@ -523,6 +527,7 @@ public partial class GameScene : Node2D
 			return;
 
 		materialCount.Text = $"Virelium: {player.Virelium}";
+		energyBar.ApplyEnergy(player.EnergyProduced, player.EnergyConsumed);
 	}
 
 	private bool IsAbilityUnlockedForLocalPlayer(string abilityId)

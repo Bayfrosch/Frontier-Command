@@ -1,7 +1,8 @@
-[gd_scene format=3 uid="uid://rx502q8ojk4g"]
+[gd_scene load_steps=4 format=3 uid="uid://rx502q8ojk4g"]
 
 [ext_resource type="Texture2D" uid="uid://bvuoiu5hdmr5e" path="res://assets/GUI_Prototype.png" id="1_1x0qv"]
 [ext_resource type="PackedScene" uid="uid://eyrsmdrj0gyx" path="res://scenes/UI/SelectedEntityUI.tscn" id="2_1x0qv"]
+[ext_resource type="Script" uid="uid://bn7hvosxf7hxu" path="res://scripts/client/EnergyBar.cs" id="3_a6ken"]
 
 [node name="GameUserInterface" type="Control" unique_id=1253293035]
 layout_mode = 3
@@ -61,7 +62,14 @@ horizontal_alignment = 1
 
 [node name="Energy" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1015884839]
 layout_mode = 2
-text = "Energie: -"
+text = "Energie:"
+
+[node name="EnergyBar" type="ProgressBar" parent="MainLayout/VBoxContainer/TopBar" unique_id=1775897820]
+custom_minimum_size = Vector2(260, 25)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+script = ExtResource("3_a6ken")
 
 [node name="Spacer" type="Control" parent="MainLayout/VBoxContainer" unique_id=2002186177]
 layout_mode = 2
