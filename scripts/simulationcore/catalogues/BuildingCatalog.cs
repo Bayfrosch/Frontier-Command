@@ -15,6 +15,7 @@ public static class BuildingCatalog
 			BuildingType.RESOURCE_GATHERER => new Vector2(90, 70),
 			BuildingType.COMMAND_CENTER => new Vector2(180, 180),
 			BuildingType.POWER_PLANT => new Vector2(100, 60),
+			BuildingType.WAR_FACTORY => new Vector2(140, 90),
 			_ => new Vector2(0, 0)
 		};
 	}
@@ -33,6 +34,7 @@ public static class BuildingCatalog
 			BuildingType.RESOURCE_GATHERER => 800,
 			BuildingType.COMMAND_CENTER => 2000,
 			BuildingType.POWER_PLANT => 400,
+			BuildingType.WAR_FACTORY => 650,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}
@@ -54,6 +56,18 @@ public static class BuildingCatalog
 		return type switch
 		{
 			BuildingType.POWER_PLANT => 10,
+			_ => 0
+		};
+	}
+
+	/*
+	Power consumed by each completed building.
+	*/
+	public static int GetPowerConsumption(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.WAR_FACTORY => 2,
 			_ => 0
 		};
 	}

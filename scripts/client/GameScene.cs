@@ -19,7 +19,8 @@ public partial class GameScene : Node2D
 	{
 		["spawn_barracks"] = BuildingType.BARRACKS,
 		["spawn_power_plant"] = BuildingType.POWER_PLANT,
-		["spawn_resource_gatherer"] = BuildingType.RESOURCE_GATHERER
+		["spawn_resource_gatherer"] = BuildingType.RESOURCE_GATHERER,
+		["spawn_war_factory"] = BuildingType.WAR_FACTORY
 	};
 	private Node2D constructionPreview = null;
 	private HashSet<string> EntitySelectionIds = new();

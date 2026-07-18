@@ -362,6 +362,7 @@ Add the building to:
 * `GetFoodprintSize`
 * `GetMaxHealth`
 * `GetPowerProduction`, only if the building provides Energy
+* `GetPowerConsumption`, only if the building drains Energy
 
 Example:
 
@@ -382,6 +383,14 @@ BuildingType.NEW_BUILDING => 10
 ```
 
 Buildings that do not provide Energy should use the default `0`.
+
+Energy-consuming buildings should return their drained amount from `GetPowerConsumption`:
+
+```csharp
+BuildingType.NEW_BUILDING => 2
+```
+
+Buildings that do not consume Energy should use the default `0`.
 
 `GetFootprintType` usually does not need changes unless construction-site behavior changes.
 
@@ -471,6 +480,7 @@ Current examples:
 * `scenes/buildings/ConstructionSite.tscn`
 * `scenes/buildings/Barracks.tscn`
 * `scenes/buildings/PowerPlant.tscn`
+* `scenes/buildings/WarFactory.tscn`
 
 The scene should have a script derived from `ClientBuilding`.
 
@@ -547,6 +557,7 @@ Useful tests:
 * Sell removes completed building.
 * Completed buildings automatically receive `sell_building`; construction sites do not.
 * Energy-producing buildings update `PlayerState.EnergyProduced`.
+* Energy-consuming buildings update `PlayerState.EnergyConsumed`.
 * Cancel removes construction site.
 
 ---

@@ -768,6 +768,39 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_UseAbilityMessage_SpawnWarFactory_CreatesWarFactoryConstructionSite()
+	{
+		var context = new SimulationContext("match-1");
+		var startingVirelium = 2000;
+		var player = new PlayerState("player-1", startingVirelium);
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		var buildCost = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT)
+			.First(ability => ability.Id == "spawn_war_factory")
+			.Cost;
+
+		var msg = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_war_factory",
+			p_target_position: new Vector2(100, 50)
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(player.Virelium).IsEqual(startingVirelium - buildCost);
+
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(site.Type).IsEqual(BuildingType.CONSTRUCTION_SITE);
+		AssertThat(site.pendingBuilding).IsEqual(BuildingType.WAR_FACTORY);
+		AssertThat(site.ConstructionCost).IsEqual(buildCost);
+		AssertThat(builder.HasConstructionOrder).IsTrue();
+		AssertThat(builder.ConstructionTargetId).IsEqual(site.EntityId);
+	}
+
+	[TestCase]
 	public void Push_DebugSpawnBuilding_PowerPlant_AddsTenProducedEnergy()
 	{
 		var context = new SimulationContext("match-1");
@@ -834,6 +867,51 @@ public class SimulationCoreTest
 		))).IsTrue();
 
 		AssertThat(player.EnergyProduced).IsEqual(0);
+	}
+
+	[TestCase]
+	public void Push_DebugSpawnBuilding_WarFactory_AddsTwoConsumedEnergy()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.WAR_FACTORY,
+			Vector2.Zero
+		))).IsTrue();
+
+		var building = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(player.EnergyConsumed).IsEqual(2);
+		AssertThat(building.Abilities.Count).IsEqual(1);
+		AssertThat(building.Abilities.Any(ability => ability.Id == "sell_building")).IsTrue();
+	}
+
+	[TestCase]
+	public void Push_UseAbilityMessage_SellWarFactory_RemovesConsumedEnergy()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.WAR_FACTORY,
+			Vector2.Zero
+		))).IsTrue();
+		var building = player.Entities.Values.OfType<BuildingState>().Single();
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { building.EntityId },
+			p_ability_id: "sell_building"
+		))).IsTrue();
+
+		AssertThat(player.EnergyConsumed).IsEqual(0);
 	}
 
 	[TestCase]

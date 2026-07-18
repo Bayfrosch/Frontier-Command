@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://b8fbad8s4hhby"]
+
+[ext_resource type="Script" uid="uid://bhnr6n5n6w1sh" path="res://scripts/client/buildings/SimpleBuilding.cs" id="1_qq3ig"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s2vpm"]
+size = Vector2(140, 90)
+
+[node name="WarFactory" type="Node2D" unique_id=1412170836]
+script = ExtResource("1_qq3ig")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=1468966907]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.0
+offset_top = -45.0
+offset_right = 70.0
+offset_bottom = 45.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.52, 0.48, 0.43, 1)
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=295266733]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -11.5
+offset_right = 32.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "War
+Factory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1667502411]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1254698119]
+shape = SubResource("RectangleShape2D_s2vpm")

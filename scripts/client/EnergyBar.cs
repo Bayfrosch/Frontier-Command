@@ -22,6 +22,7 @@ public partial class EnergyBar : ProgressBar
 
     private static readonly Color AvailableEnergyColor = new(0.148f, 0.583f, 0.144f);
     private static readonly Color DrainedEnergyColor = new(0.061f, 0.263f, 0.058f);
+    private static readonly Color MissingEnergyColor = new(0.72f, 0.1f, 0.08f);
     private static readonly Color NoEnergyBackgroundColor = new(0.194f, 0.194f, 0.194f);
 
     public override void _Ready()
@@ -35,10 +36,22 @@ public partial class EnergyBar : ProgressBar
     public void ApplyEnergy(int produced, int consumed)
     {
         var clampedProduced = Mathf.Max(0, produced);
-        var clampedConsumed = Mathf.Clamp(consumed, 0, clampedProduced);
+        var clampedConsumed = Mathf.Max(0, consumed);
+        var missingEnergy = Mathf.Max(0, clampedConsumed - clampedProduced);
 
-        MaxValue = Mathf.Max(1, clampedProduced);
-        Value = clampedConsumed;
+        if (missingEnergy > 0)
+        {
+            MaxValue = Mathf.Max(1, clampedConsumed);
+            Value = missingEnergy;
+            fill.BgColor = MissingEnergyColor;
+        }
+        else
+        {
+            MaxValue = Mathf.Max(1, clampedProduced);
+            Value = clampedConsumed;
+            fill.BgColor = DrainedEnergyColor;
+        }
+
         background.BgColor = clampedProduced > 0 ? AvailableEnergyColor : NoEnergyBackgroundColor;
     }
 }

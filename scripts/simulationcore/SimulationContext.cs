@@ -847,6 +847,10 @@ public sealed class SimulationContext
 			case "spawn_power_plant":
 				passed = HandleSpawnBuilding(msg, BuildingType.POWER_PLANT);
 				break;
+
+			case "spawn_war_factory":
+				passed = HandleSpawnBuilding(msg, BuildingType.WAR_FACTORY);
+				break;
 		}
 		return passed;
 	}

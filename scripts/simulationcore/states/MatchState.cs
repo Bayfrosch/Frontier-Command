@@ -155,6 +155,7 @@ public enum BuildingType
 	RESOURCE_SPAWNER,
 	COMMAND_CENTER,
 	POWER_PLANT,
+	WAR_FACTORY,
 }
 
 public enum ResourceType

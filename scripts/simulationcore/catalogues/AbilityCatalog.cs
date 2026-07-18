@@ -148,6 +148,14 @@ public static class AbilityCatalog
 					RequiresTarget = true,
 					UnlockedFromStart = true
 				});
+				abilities.Add(new Ability
+				{
+					Id = "spawn_war_factory",
+					Name = "War Factory",
+					Cost = 1400,
+					RequiresTarget = true,
+					UnlockedFromStart = true
+				});
 				break;
 
 			case UnitType.BASIC_INFANTRY:
