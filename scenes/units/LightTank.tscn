@@ -17,7 +17,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_light_tank"]
-size = Vector2(70, 40)
+size = Vector2(90, 50)
 
 [node name="LightTank" type="Node2D" unique_id=456193165]
 script = ExtResource("1_light_tank")
@@ -28,10 +28,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -35.0
-offset_top = -20.0
-offset_right = 35.0
-offset_bottom = 20.0
+offset_left = -45.0
+offset_top = -25.0
+offset_right = 45.0
+offset_bottom = 25.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.298, 0.376, 0.267, 1)
@@ -55,10 +55,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=63809320]
-offset_left = -33.0
-offset_top = 14.0
-offset_right = 33.0
-offset_bottom = 18.0
+offset_left = -27.0
+offset_top = 27.0
+offset_right = 27.0
+offset_bottom = 31.0
 theme_override_styles/background = SubResource("StyleBoxFlat_health_background")
 theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
 show_percentage = false

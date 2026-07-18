@@ -76,7 +76,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 120f,
             UnitType.RPG_TROOPER => 120f,
-            UnitType.LIGHT_TANK => 150f,
+            UnitType.LIGHT_TANK => 250f,
             _ => 0f // All not listed are non combat units (0 range)
         };
     }

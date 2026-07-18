@@ -624,7 +624,9 @@ public class SimulationCoreTest
 		AssertThat(collector.Carry).IsEqual(collector.MaxCapacity);
 		AssertThat(resource.CurrentAmount).IsEqual(ResourceCatalog.GetMaxAmount(ResourceType.VIRELIUM) - collector.MaxCapacity);
 		AssertThat(collector.HasMoveOrder).IsTrue();
-		AssertThat(collector.TargetPosition).IsEqual(gatherer.CurrentPosition);
+		var gathererHalfWidth = BuildingCatalog.GetFoodprintSize(BuildingType.RESOURCE_GATHERER).X / 2f;
+		AssertThat(collector.TargetPosition).IsEqual(
+			gatherer.CurrentPosition + Vector2.Left * (gathererHalfWidth + 10f));
 
 		for (var i = 0; i < 5; i++)
 			context.AdvanceTick();

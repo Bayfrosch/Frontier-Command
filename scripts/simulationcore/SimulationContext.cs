@@ -1088,7 +1088,62 @@ public sealed class SimulationContext
 			return;
 		}
 
-		collector.MoveToDropoff(dropoff.CurrentPosition);
+		collector.MoveToDropoff(GetBuildingApproachPosition(
+			collector.CurrentPosition,
+			dropoff,
+			COLLISION_RADIUS));
+	}
+
+	/*
+	Finds the closest point just outside a building footprint from the approaching side.
+	*/
+	private static Vector2 GetBuildingApproachPosition(
+		Vector2 approachPosition,
+		BuildingState building,
+		float clearance)
+	{
+		var halfSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building)) / 2f;
+		var localPosition = approachPosition - building.CurrentPosition;
+		var borderPosition = new Vector2(
+			Math.Clamp(localPosition.X, -halfSize.X, halfSize.X),
+			Math.Clamp(localPosition.Y, -halfSize.Y, halfSize.Y));
+		var outwardDirection = localPosition - borderPosition;
+
+		if (outwardDirection.LengthSquared() <= 0.001f)
+		{
+			var distanceToLeft = localPosition.X + halfSize.X;
+			var distanceToRight = halfSize.X - localPosition.X;
+			var distanceToTop = localPosition.Y + halfSize.Y;
+			var distanceToBottom = halfSize.Y - localPosition.Y;
+			var nearestEdgeDistance = Math.Min(
+				Math.Min(distanceToLeft, distanceToRight),
+				Math.Min(distanceToTop, distanceToBottom));
+
+			if (nearestEdgeDistance == distanceToLeft)
+			{
+				borderPosition.X = -halfSize.X;
+				outwardDirection = Vector2.Left;
+			}
+			else if (nearestEdgeDistance == distanceToRight)
+			{
+				borderPosition.X = halfSize.X;
+				outwardDirection = Vector2.Right;
+			}
+			else if (nearestEdgeDistance == distanceToTop)
+			{
+				borderPosition.Y = -halfSize.Y;
+				outwardDirection = Vector2.Up;
+			}
+			else
+			{
+				borderPosition.Y = halfSize.Y;
+				outwardDirection = Vector2.Down;
+			}
+		}
+
+		return building.CurrentPosition
+			+ borderPosition
+			+ outwardDirection.Normalized() * Math.Max(0f, clearance);
 	}
 
 	/*
