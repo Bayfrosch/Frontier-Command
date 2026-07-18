@@ -13,6 +13,8 @@ public sealed class SimulationContext
 	private const int PRODUCTION_ADVANCE = 5;
 	private const float UNIT_SPACING = 50f;
 	private const float COLLISION_RADIUS = 10f;
+	private const float PATH_GRID_SIZE = 30f;
+	private const float PATH_SEARCH_MARGIN = 240f;
 	public string MatchId { get; }
 	/*
 	The saved state of the match for each lobby
@@ -125,6 +127,7 @@ public sealed class SimulationContext
 				{
 					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
 					HandleAdvanceAttack(unit);
+					UpdateMovePathAroundBuildings(unit);
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
 					if (unit is ResourceCollectorState collector)
 						HandleAdvanceGatherResources(collector);
@@ -1230,6 +1233,272 @@ public sealed class SimulationContext
 		float offsetY = (row - (rows - 1) / 2f) * UNIT_SPACING;
 
 		return new Vector2(offsetX, offsetY);
+	}
+
+	/*
+	Adds simple deterministic waypoints around blocking building footprints.
+	*/
+	private void UpdateMovePathAroundBuildings(UnitState unit)
+	{
+		if (!unit.HasMoveOrder)
+			return;
+
+		if (!PathSegmentBlocked(unit.CurrentPosition, unit.CurrentMoveTarget))
+			return;
+
+		var path = FindPathAroundBuildings(unit.CurrentPosition, unit.TargetPosition);
+		unit.SetMovePath(path);
+	}
+
+	private IReadOnlyList<Vector2> FindPathAroundBuildings(Vector2 start, Vector2 destination)
+	{
+		if (!PathSegmentBlocked(start, destination))
+			return new[] { destination };
+
+		var blockingRects = GetPathBlockingRects().ToArray();
+		var startCell = CellFromPoint(start);
+		var destinationCell = CellFromPoint(destination);
+		var bounds = GetPathSearchBounds(start, destination, blockingRects);
+		var pathCells = FindGridPath(startCell, destinationCell, bounds, blockingRects);
+
+		if (pathCells.Count <= 0)
+			return new[] { destination };
+
+		var waypoints = pathCells
+			.Skip(1)
+			.Select(CellCenter)
+			.ToList();
+		waypoints.Add(destination);
+		return SimplifyPath(start, waypoints, blockingRects);
+	}
+
+	private bool PathSegmentBlocked(Vector2 start, Vector2 destination)
+	{
+		return GetPathBlockingRects()
+			.Any(rect => SegmentIntersectsRect(start, destination, rect));
+	}
+
+	private IEnumerable<Rect2> GetPathBlockingRects()
+	{
+		return _matchState.Players.Values
+			.SelectMany(player => player.Entities.Values)
+			.OfType<BuildingState>()
+			.Where(building => building.Health > 0)
+			.Select(GetPathBlockingRect);
+	}
+
+	private static List<Vector2> SimplifyPath(Vector2 start, IReadOnlyList<Vector2> waypoints, IReadOnlyList<Rect2> blockingRects)
+	{
+		if (waypoints.Count <= 1)
+			return waypoints.ToList();
+
+		var simplified = new List<Vector2>();
+		var anchor = start;
+		var index = 0;
+
+		while (index < waypoints.Count)
+		{
+			var furthest = index;
+			for (var candidate = waypoints.Count - 1; candidate >= index; candidate--)
+			{
+				if (SegmentClear(anchor, waypoints[candidate], blockingRects))
+				{
+					furthest = candidate;
+					break;
+				}
+			}
+
+			simplified.Add(waypoints[furthest]);
+			anchor = waypoints[furthest];
+			index = furthest + 1;
+		}
+
+		return simplified;
+	}
+
+	private static bool SegmentClear(Vector2 start, Vector2 destination, IReadOnlyList<Rect2> blockingRects)
+	{
+		return blockingRects.All(rect => !SegmentIntersectsRect(start, destination, rect));
+	}
+
+	private List<(int X, int Y)> FindGridPath(
+		(int X, int Y) start,
+		(int X, int Y) destination,
+		Rect2I bounds,
+		IReadOnlyList<Rect2> blockingRects)
+	{
+		var frontier = new PriorityQueue<(int X, int Y), float>();
+		var cameFrom = new Dictionary<(int X, int Y), (int X, int Y)>();
+		var costSoFar = new Dictionary<(int X, int Y), float>
+		{
+			[start] = 0f
+		};
+
+		frontier.Enqueue(start, 0f);
+
+		while (frontier.Count > 0)
+		{
+			var current = frontier.Dequeue();
+			if (current == destination)
+				return ReconstructPath(start, destination, cameFrom);
+
+			foreach (var next in GetPathNeighbors(current))
+			{
+				if (!bounds.HasPoint(new Vector2I(next.X, next.Y)))
+					continue;
+
+				if (next != destination && CellBlocked(next, blockingRects))
+					continue;
+
+				if (!SegmentClear(CellCenter(current), CellCenter(next), blockingRects))
+					continue;
+
+				var movementCost = current.X == next.X || current.Y == next.Y
+					? 1f
+					: 1.414f;
+				var newCost = costSoFar[current] + movementCost;
+				if (costSoFar.TryGetValue(next, out var existingCost) && newCost >= existingCost)
+					continue;
+
+				costSoFar[next] = newCost;
+				var priority = newCost + GridDistance(next, destination);
+				frontier.Enqueue(next, priority);
+				cameFrom[next] = current;
+			}
+		}
+
+		return new List<(int X, int Y)>();
+	}
+
+	private static List<(int X, int Y)> ReconstructPath(
+		(int X, int Y) start,
+		(int X, int Y) destination,
+		IReadOnlyDictionary<(int X, int Y), (int X, int Y)> cameFrom)
+	{
+		var current = destination;
+		var path = new List<(int X, int Y)> { current };
+
+		while (current != start)
+		{
+			if (!cameFrom.TryGetValue(current, out current))
+				return new List<(int X, int Y)>();
+
+			path.Add(current);
+		}
+
+		path.Reverse();
+		return path;
+	}
+
+	private static IEnumerable<(int X, int Y)> GetPathNeighbors((int X, int Y) cell)
+	{
+		for (var x = -1; x <= 1; x++)
+		{
+			for (var y = -1; y <= 1; y++)
+			{
+				if (x == 0 && y == 0)
+					continue;
+
+				yield return (cell.X + x, cell.Y + y);
+			}
+		}
+	}
+
+	private static float GridDistance((int X, int Y) from, (int X, int Y) to)
+	{
+		var dx = Math.Abs(from.X - to.X);
+		var dy = Math.Abs(from.Y - to.Y);
+		return Math.Max(dx, dy);
+	}
+
+	private static bool CellBlocked((int X, int Y) cell, IReadOnlyList<Rect2> blockingRects)
+	{
+		var center = CellCenter(cell);
+		return blockingRects.Any(rect => rect.HasPoint(center));
+	}
+
+	private static (int X, int Y) CellFromPoint(Vector2 point)
+	{
+		return (
+			(int)Math.Round(point.X / PATH_GRID_SIZE),
+			(int)Math.Round(point.Y / PATH_GRID_SIZE)
+		);
+	}
+
+	private static Vector2 CellCenter((int X, int Y) cell)
+	{
+		return new Vector2(cell.X * PATH_GRID_SIZE, cell.Y * PATH_GRID_SIZE);
+	}
+
+	private static Rect2I GetPathSearchBounds(Vector2 start, Vector2 destination, IReadOnlyList<Rect2> blockingRects)
+	{
+		var minX = Math.Min(start.X, destination.X);
+		var minY = Math.Min(start.Y, destination.Y);
+		var maxX = Math.Max(start.X, destination.X);
+		var maxY = Math.Max(start.Y, destination.Y);
+
+		foreach (var rect in blockingRects)
+		{
+			minX = Math.Min(minX, rect.Position.X);
+			minY = Math.Min(minY, rect.Position.Y);
+			maxX = Math.Max(maxX, rect.Position.X + rect.Size.X);
+			maxY = Math.Max(maxY, rect.Position.Y + rect.Size.Y);
+		}
+
+		minX -= PATH_SEARCH_MARGIN;
+		minY -= PATH_SEARCH_MARGIN;
+		maxX += PATH_SEARCH_MARGIN;
+		maxY += PATH_SEARCH_MARGIN;
+
+		var minCell = CellFromPoint(new Vector2(minX, minY));
+		var maxCell = CellFromPoint(new Vector2(maxX, maxY));
+		return new Rect2I(
+			minCell.X,
+			minCell.Y,
+			maxCell.X - minCell.X + 1,
+			maxCell.Y - minCell.Y + 1
+		);
+	}
+
+	private static Rect2 GetPathBlockingRect(BuildingState building)
+	{
+		var footprintSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
+		return new Rect2(
+			building.CurrentPosition - footprintSize / 2f,
+			footprintSize
+		);
+	}
+
+	private static bool SegmentIntersectsRect(Vector2 start, Vector2 end, Rect2 rect)
+	{
+		if (rect.HasPoint(start))
+			return false;
+
+		if (rect.HasPoint(end))
+			return true;
+
+		var direction = end - start;
+		var tMin = 0f;
+		var tMax = 1f;
+
+		return ClipSegmentAxis(start.X, direction.X, rect.Position.X, rect.Position.X + rect.Size.X, ref tMin, ref tMax)
+			&& ClipSegmentAxis(start.Y, direction.Y, rect.Position.Y, rect.Position.Y + rect.Size.Y, ref tMin, ref tMax);
+	}
+
+	private static bool ClipSegmentAxis(float start, float direction, float min, float max, ref float tMin, ref float tMax)
+	{
+		if (Math.Abs(direction) < 0.001f)
+			return start < min || start > max ? false : true;
+
+		var t1 = (min - start) / direction;
+		var t2 = (max - start) / direction;
+
+		if (t1 > t2)
+			(t1, t2) = (t2, t1);
+
+		tMin = Math.Max(tMin, t1);
+		tMax = Math.Min(tMax, t2);
+		return tMin <= tMax;
 	}
 
 	/*

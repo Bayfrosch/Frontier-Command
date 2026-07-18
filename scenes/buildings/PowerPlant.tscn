@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://5y786nj0d8pw"]
+[gd_scene format=3 uid="uid://5y786nj0d8pw"]
 
 [ext_resource type="Script" uid="uid://bhnr6n5n6w1sh" path="res://scripts/client/buildings/SimpleBuilding.cs" id="1_jr5sr"]
 

@@ -127,6 +127,30 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromLeftToRight()
+	{
+		AssertMoveRoutesAroundBuilding(Vector2.Zero, new Vector2(200, 0), movedOffAxis: point => System.Math.Abs(point.Y) > 1f);
+	}
+
+	[TestCase]
+	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromRightToLeft()
+	{
+		AssertMoveRoutesAroundBuilding(new Vector2(200, 0), Vector2.Zero, movedOffAxis: point => System.Math.Abs(point.Y) > 1f);
+	}
+
+	[TestCase]
+	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromTopToBottom()
+	{
+		AssertMoveRoutesAroundBuilding(new Vector2(100, -100), new Vector2(100, 100), movedOffAxis: point => System.Math.Abs(point.X - 100f) > 1f);
+	}
+
+	[TestCase]
+	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromBottomToTop()
+	{
+		AssertMoveRoutesAroundBuilding(new Vector2(100, 100), new Vector2(100, -100), movedOffAxis: point => System.Math.Abs(point.X - 100f) > 1f);
+	}
+
+	[TestCase]
 	public void Push_DebugSpawnUnit_AssignsDistinctMoveTargets_WhenSpawnPositionIsOccupied()
 	{
 		var context = new SimulationContext("match-1");
@@ -863,5 +887,41 @@ public class SimulationCoreTest
 			return 0;
 
 		return System.Math.Max(1, (int)System.Math.Round(attacker.AttackDamage * modifier, System.MidpointRounding.AwayFromZero));
+	}
+
+	private static bool IsInsideBuildingFootprint(Vector2 point, BuildingState building)
+	{
+		var footprintSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
+		var halfSize = footprintSize / 2f;
+		return point.X >= building.CurrentPosition.X - halfSize.X
+			&& point.X <= building.CurrentPosition.X + halfSize.X
+			&& point.Y >= building.CurrentPosition.Y - halfSize.Y
+			&& point.Y <= building.CurrentPosition.Y + halfSize.Y;
+	}
+
+	private static void AssertMoveRoutesAroundBuilding(Vector2 start, Vector2 destination, System.Func<Vector2, bool> movedOffAxis)
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var unit = new UnitState("unit-1", "player-1", start, 100f);
+		var building = new BuildingState("building-1", "player-1", new Vector2(100, 0), BuildingType.BARRACKS, "");
+		building.AdvanceConstruction(100);
+		player.AddEntity(unit);
+		player.AddEntity(building);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(CreateMoveMessage("player-1", "unit-1", destination))).IsTrue();
+
+		var movedOffDirectLine = false;
+		for (var i = 0; i < 30 && unit.HasMoveOrder; i++)
+		{
+			context.AdvanceTick();
+			movedOffDirectLine |= movedOffAxis(unit.CurrentPosition);
+			AssertThat(IsInsideBuildingFootprint(unit.CurrentPosition, building)).IsFalse();
+		}
+
+		AssertThat(movedOffDirectLine).IsTrue();
+		AssertThat(unit.HasMoveOrder).IsFalse();
+		AssertThat(unit.CurrentPosition).IsEqual(destination);
 	}
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 public class UnitState : EntityState
 {
@@ -18,6 +20,7 @@ public class UnitState : EntityState
 	}
 	public UnitType Type { get; private set; }
 	public Vector2 TargetPosition { get; private set; }
+	public Vector2 CurrentMoveTarget { get; private set; }
 	public bool HasMoveOrder { get; private set; }
 	public string AttackTargetId { get; private set; } = "";
 	public bool HasAttackOrder { get; private set; }
@@ -41,11 +44,28 @@ public class UnitState : EntityState
 	internal virtual void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
 		TargetPosition = targetPosition;
+		CurrentMoveTarget = targetPosition;
+		_moveWaypoints.Clear();
 		HasMoveOrder = true;
 		if (!preserveAttackOrder)
 			ClearAttackOrder();
 		if (!preserveConstructionOrder)
 			ClearConstructionOrder();
+	}
+	private readonly Queue<Vector2> _moveWaypoints = new();
+	/*
+	Replaces the immediate path while preserving the final requested target position.
+	*/
+	internal void SetMovePath(IEnumerable<Vector2> waypoints)
+	{
+		_moveWaypoints.Clear();
+
+		foreach (var waypoint in waypoints.Where(waypoint => waypoint.DistanceSquaredTo(CurrentPosition) > 1f))
+			_moveWaypoints.Enqueue(waypoint);
+
+		CurrentMoveTarget = _moveWaypoints.Count > 0
+			? _moveWaypoints.Dequeue()
+			: TargetPosition;
 	}
 	/*
 	Stops current movement.
@@ -53,6 +73,8 @@ public class UnitState : EntityState
 	internal void ClearMoveOrder()
 	{
 		TargetPosition = Vector2.Zero;
+		CurrentMoveTarget = Vector2.Zero;
+		_moveWaypoints.Clear();
 		HasMoveOrder = false;
 	}
 	/*
@@ -131,14 +153,21 @@ public class UnitState : EntityState
 		if (!HasMoveOrder)
 			return;
 
-		var direction = TargetPosition - CurrentPosition;
+		var direction = CurrentMoveTarget - CurrentPosition;
 		var distance = direction.Length();
 		var travelDistance = MovementSpeed * deltaSeconds;
 
 		if (distance <= travelDistance || distance <= 2.0f)
 		{
-			CurrentPosition = TargetPosition;
-			ClearMoveOrder();
+			CurrentPosition = CurrentMoveTarget;
+			if (_moveWaypoints.Count > 0)
+			{
+				CurrentMoveTarget = _moveWaypoints.Dequeue();
+				return;
+			}
+
+			if (CurrentPosition.DistanceSquaredTo(TargetPosition) <= 4f)
+				ClearMoveOrder();
 			return;
 		}
 

@@ -10,7 +10,7 @@ public static class BuildingCatalog
 	{
 		return type switch
 		{
-			BuildingType.BARRACKS => new Vector2(80, 60),
+			BuildingType.BARRACKS => new Vector2(120, 80),
 			BuildingType.RESOURCE_SPAWNER => new Vector2(80, 80),
 			BuildingType.RESOURCE_GATHERER => new Vector2(90, 70),
 			BuildingType.COMMAND_CENTER => new Vector2(180, 180),
