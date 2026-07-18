@@ -57,14 +57,6 @@ public static class AbilityCatalog
 			case BuildingType.BARRACKS:
 				abilities.Add(new Ability
 				{
-					Id = "sell_building",
-					Name = "Verkaufen",
-					Cost = 0,
-					RequiresTarget = false,
-					UnlockedFromStart = true
-				});
-				abilities.Add(new Ability
-				{
 					Id = "spawn_infantry",
 					Name = "Infantry",
 					Cost = 120,
@@ -84,14 +76,6 @@ public static class AbilityCatalog
 			case BuildingType.RESOURCE_GATHERER:
 				abilities.Add(new Ability
 				{
-					Id = "sell_building",
-					Name = "Verkaufen",
-					Cost = 0,
-					RequiresTarget = false,
-					UnlockedFromStart = true
-				});
-				abilities.Add(new Ability
-				{
 					Id = "spawn_resource_collector",
 					Name = "Sammler",
 					Cost = 150,
@@ -103,14 +87,6 @@ public static class AbilityCatalog
 			case BuildingType.COMMAND_CENTER:
 				abilities.Add(new Ability
 				{
-					Id = "sell_building",
-					Name = "Verkaufen",
-					Cost = 0,
-					RequiresTarget = false,
-					UnlockedFromStart = true
-				});
-				abilities.Add(new Ability
-				{
 					Id = "spawn_construction_unit",
 					Name = "Bulldozer",
 					Cost = 250,
@@ -118,19 +94,24 @@ public static class AbilityCatalog
 					UnlockedFromStart = true
 				});
 				break;
-
-			case BuildingType.POWER_PLANT:
-				abilities.Add(new Ability
-				{
-					Id = "sell_building",
-					Name = "Verkaufen",
-					Cost = 0,
-					RequiresTarget = false,
-					UnlockedFromStart = true
-				});
-				break;
 		}
+
+		if (type != BuildingType.CONSTRUCTION_SITE)
+			abilities.Add(CreateSellBuildingAbility());
+
 		return abilities;
+	}
+
+	private static Ability CreateSellBuildingAbility()
+	{
+		return new Ability
+		{
+			Id = "sell_building",
+			Name = "Verkaufen",
+			Cost = 0,
+			RequiresTarget = false,
+			UnlockedFromStart = true
+		};
 	}
 
 	/*

@@ -237,6 +237,21 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void AbilityCatalog_ForBuilding_AddsSellToCompletedBuildingsOnly()
+	{
+		var completedBuildingTypes = System.Enum.GetValues<BuildingType>()
+			.Where(type => type != BuildingType.CONSTRUCTION_SITE);
+
+		foreach (var buildingType in completedBuildingTypes)
+		{
+			AssertThat(AbilityCatalog.ForBuilding(buildingType).Any(ability => ability.Id == "sell_building")).IsTrue();
+		}
+
+		AssertThat(AbilityCatalog.ForBuilding(BuildingType.CONSTRUCTION_SITE)
+			.Any(ability => ability.Id == "sell_building")).IsFalse();
+	}
+
+	[TestCase]
 	public void Push_DebugSpawnBuilding_ResourceSpawner_CreatesTrackedResourcesImmediately()
 	{
 		var context = new SimulationContext("match-1");

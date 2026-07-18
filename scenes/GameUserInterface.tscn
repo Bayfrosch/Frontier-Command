@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://rx502q8ojk4g"]
+[gd_scene format=3 uid="uid://rx502q8ojk4g"]
 
 [ext_resource type="Texture2D" uid="uid://bvuoiu5hdmr5e" path="res://assets/GUI_Prototype.png" id="1_1x0qv"]
 [ext_resource type="PackedScene" uid="uid://eyrsmdrj0gyx" path="res://scenes/UI/SelectedEntityUI.tscn" id="2_1x0qv"]
@@ -102,7 +102,7 @@ mouse_filter = 2
 theme_override_constants/separation = 0
 
 [node name="SelectedEntityUi" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=320057448 instance=ExtResource("2_1x0qv")]
-custom_minimum_size = Vector2(1220, 135)
+custom_minimum_size = Vector2(1200, 135)
 layout_mode = 2
 
 [node name="Container" type="Container" parent="MainLayout/VBoxContainer" unique_id=1768679183]

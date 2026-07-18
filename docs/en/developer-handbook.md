@@ -361,6 +361,7 @@ Add the building to:
 
 * `GetFoodprintSize`
 * `GetMaxHealth`
+* `GetPowerProduction`, only if the building provides Energy
 
 Example:
 
@@ -374,13 +375,21 @@ and:
 BuildingType.NEW_BUILDING => 700
 ```
 
+Energy-producing buildings should return their produced capacity from `GetPowerProduction`:
+
+```csharp
+BuildingType.NEW_BUILDING => 10
+```
+
+Buildings that do not provide Energy should use the default `0`.
+
 `GetFootprintType` usually does not need changes unless construction-site behavior changes.
 
 ## 3. Add Building Abilities
 
 Edit `scripts/simulationcore/AbilityCatalog.cs`.
 
-Add completed-building abilities in `ForBuilding`.
+Add only building-specific completed-building abilities in `ForBuilding`.
 
 Example:
 
@@ -388,10 +397,10 @@ Example:
 case BuildingType.NEW_BUILDING:
 	abilities.Add(new Ability
 	{
-		Id = "sell_building",
-		Name = "Verkaufen",
-		Unlocked = true,
-		Cost = 0,
+		Id = "spawn_new_unit",
+		Name = "New Unit",
+		UnlockedFromStart = true,
+		Cost = 100,
 		RequiresTarget = false,
 	});
 	break;
@@ -403,9 +412,14 @@ Construction sites currently get:
 
 * `cancel_construction`
 
-Completed buildings can get:
+Completed buildings automatically get:
 
 * `sell_building`
+
+Do not add `sell_building` manually to each completed building case. `AbilityCatalog.ForBuilding` adds it once for every building type except `CONSTRUCTION_SITE`.
+
+Completed buildings can also get:
+
 * production abilities
 * future research/upgrade abilities
 
@@ -456,6 +470,7 @@ Current examples:
 
 * `scenes/buildings/ConstructionSite.tscn`
 * `scenes/buildings/Barracks.tscn`
+* `scenes/buildings/PowerPlant.tscn`
 
 The scene should have a script derived from `ClientBuilding`.
 
@@ -463,7 +478,22 @@ Current scripts live under:
 
 * `scripts/client/buildings`
 
-If the building has production or construction UI, add the relevant progress bar and update it in the client script.
+Use the existing client building scripts when possible:
+
+* `SimpleBuilding` for buildings with no special client-side UI.
+* `ProductionBuilding` for buildings with `BodyRender/ProductionProgressBar`.
+* `ConstructionSite` for construction-site rendering.
+* A custom `ClientBuilding` subclass only when the scene needs unique client rendering behavior.
+
+If the building has production or construction UI, add the relevant progress bar and update it in the client script. Production buildings should expose:
+
+* `BodyRender`
+* `BodyRender/ProductionProgressBar`
+
+Every selectable building scene should expose:
+
+* `Area2D`
+* `Area2D/CollisionShape2D`
 
 ## 7. Register the Scene in the Renderer
 
@@ -490,14 +520,17 @@ Construction preview is currently handled in `GameScene.cs`.
 For a new build ability:
 
 * Set `RequiresTarget = true` on the ability in `AbilityCatalog`.
-* Add preview handling in `GameScene.ShowConstructionPreview`.
-* Use the correct scene or footprint for the preview.
+* Add the ability id to `GameScene.ConstructionPreviewTypes`.
+* Map the ability id to the completed `BuildingType`.
+* Make sure `BuildingCatalog.GetFoodprintSize` has the correct footprint.
 
-Current preview support is specific to:
+Example:
 
-* `spawn_barracks`
+```csharp
+["spawn_new_building"] = BuildingType.NEW_BUILDING
+```
 
-If more buildings are added, this should become data-driven.
+The preview uses `ConstructionSite.tscn` and resizes its body/collision footprint from `BuildingCatalog`.
 
 ## 9. Add Tests
 
@@ -512,6 +545,8 @@ Useful tests:
 * Assigned construction unit builds only that site.
 * Completed building receives completed-building abilities.
 * Sell removes completed building.
+* Completed buildings automatically receive `sell_building`; construction sites do not.
+* Energy-producing buildings update `PlayerState.EnergyProduced`.
 * Cancel removes construction site.
 
 ---

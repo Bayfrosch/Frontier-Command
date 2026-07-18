@@ -4,6 +4,7 @@ using System.Linq;
 
 public partial class SelectedEntityUI : Control
 {
+	private const string SellBuildingAbilityId = "sell_building";
 	[Signal]
 	public delegate void AbilityPressedEventHandler(string abilityId, bool requiresTarget);
 	private IReadOnlyCollection<string> SelectedEntityIds;
@@ -60,13 +61,13 @@ public partial class SelectedEntityUI : Control
 		if (LocalPlayer is not null)
 			lastAbilityUnlockRevision = LocalPlayer.AbilityUnlockRevision;
 
-		var row = GetNode<HBoxContainer>("VBoxContainer/Row1");
-		row.AddThemeConstantOverride("separation", 16);
+		var row1 = GetNode<HBoxContainer>("VBoxContainer/Row1");
+		var row2 = GetNode<HBoxContainer>("VBoxContainer/Row2");
+		row1.AddThemeConstantOverride("separation", 16);
+		row2.AddThemeConstantOverride("separation", 16);
 
-		foreach (var child in row.GetChildren())
-		{
-			child.QueueFree();
-		}
+		ClearRow(row1);
+		ClearRow(row2);
 
 		if (SelectedEntityIds.Count <= 0)
 		{
@@ -107,43 +108,61 @@ public partial class SelectedEntityUI : Control
 			return;
 		}
 
-		foreach (Ability ability in priorizedEntity.Abilities)
+		foreach (Ability ability in priorizedEntity.Abilities.Where(ability => ability.Id != SellBuildingAbilityId))
 		{
-			var isUnlocked = LocalPlayer.UnlockedAbilities.Contains(ability.Id);
-			/*
-			Rendering of each Ability in bottom Row
-			Generates a Button for each Ability
-			*/
-			var AbilityButton = new Button
-			{
-				Text = ability.Name,
-				CustomMinimumSize = new Vector2(140, 60),
-			};
-			var normalStyle = new StyleBoxFlat
-			{
-				BgColor = isUnlocked ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.2f, 0.2f, 0.2f),
-				CornerRadiusBottomLeft = 8,
-				CornerRadiusBottomRight = 8,
-				CornerRadiusTopLeft = 8,
-				CornerRadiusTopRight = 8,
-			};
-
-			var hoverStyle = (StyleBoxFlat)normalStyle.Duplicate();
-			hoverStyle.BgColor = isUnlocked ? new Color(0.3f, 0.3f, 0.3f) : new Color(0.2f, 0.2f, 0.2f);
-
-			var pressedStyle = (StyleBoxFlat)normalStyle.Duplicate();
-			pressedStyle.BgColor = isUnlocked ? new Color(0.1f, 0.1f, 0.1f) : new Color(0.2f, 0.2f, 0.2f);
-
-			AbilityButton.AddThemeStyleboxOverride("normal", normalStyle);
-			AbilityButton.AddThemeStyleboxOverride("hover", hoverStyle);
-			AbilityButton.AddThemeStyleboxOverride("pressed", pressedStyle);
-
-			AbilityButton.Pressed += () =>
-			{
-				EmitSignal(SignalName.AbilityPressed, ability.Id, ability.RequiresTarget);
-			};
-
-			row.AddChild(AbilityButton);
+			row1.AddChild(CreateAbilityButton(ability));
 		}
+
+		var sellAbility = priorizedEntity.Abilities.FirstOrDefault(ability => ability.Id == SellBuildingAbilityId);
+		if (sellAbility is not null)
+		{
+			row2.AddChild(new Control
+			{
+				SizeFlagsHorizontal = SizeFlags.ExpandFill,
+				MouseFilter = MouseFilterEnum.Ignore
+			});
+			row2.AddChild(CreateAbilityButton(sellAbility));
+		}
+	}
+
+	private static void ClearRow(HBoxContainer row)
+	{
+		foreach (var child in row.GetChildren())
+			child.QueueFree();
+	}
+
+	private Button CreateAbilityButton(Ability ability)
+	{
+		var isUnlocked = LocalPlayer.UnlockedAbilities.Contains(ability.Id);
+		var abilityButton = new Button
+		{
+			Text = ability.Name,
+			CustomMinimumSize = new Vector2(140, 60),
+		};
+		var normalStyle = new StyleBoxFlat
+		{
+			BgColor = isUnlocked ? new Color(0.5f, 0.5f, 0.5f) : new Color(0.2f, 0.2f, 0.2f),
+			CornerRadiusBottomLeft = 8,
+			CornerRadiusBottomRight = 8,
+			CornerRadiusTopLeft = 8,
+			CornerRadiusTopRight = 8,
+		};
+
+		var hoverStyle = (StyleBoxFlat)normalStyle.Duplicate();
+		hoverStyle.BgColor = isUnlocked ? new Color(0.3f, 0.3f, 0.3f) : new Color(0.2f, 0.2f, 0.2f);
+
+		var pressedStyle = (StyleBoxFlat)normalStyle.Duplicate();
+		pressedStyle.BgColor = isUnlocked ? new Color(0.1f, 0.1f, 0.1f) : new Color(0.2f, 0.2f, 0.2f);
+
+		abilityButton.AddThemeStyleboxOverride("normal", normalStyle);
+		abilityButton.AddThemeStyleboxOverride("hover", hoverStyle);
+		abilityButton.AddThemeStyleboxOverride("pressed", pressedStyle);
+
+		abilityButton.Pressed += () =>
+		{
+			EmitSignal(SignalName.AbilityPressed, ability.Id, ability.RequiresTarget);
+		};
+
+		return abilityButton;
 	}
 }
