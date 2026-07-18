@@ -13,6 +13,7 @@ public static class BuildingCatalog
 			BuildingType.BARRACKS => new Vector2(80, 60),
 			BuildingType.RESOURCE_SPAWNER => new Vector2(80, 80),
 			BuildingType.RESOURCE_GATHERER => new Vector2(90, 70),
+			BuildingType.COMMAND_CENTER => new Vector2(180, 180),
 			_ => new Vector2(0, 0)
 		};
 	}
@@ -29,6 +30,7 @@ public static class BuildingCatalog
 			BuildingType.BARRACKS => 500,
 			BuildingType.RESOURCE_SPAWNER => 1,
 			BuildingType.RESOURCE_GATHERER => 800,
+			BuildingType.COMMAND_CENTER => 2000,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}

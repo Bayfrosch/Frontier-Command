@@ -809,6 +809,10 @@ public sealed class SimulationContext
 				passed = HandleSpawnUnit(msg, UnitType.RESOURCE_COLLECTOR);
 				break;
 
+			case "spawn_construction_unit":
+				passed = HandleSpawnUnit(msg, UnitType.CONSTRUCTION_UNIT);
+				break;
+
 			// Buildings
 			case "cancel_construction":
 				var cmsg = new CancelConstructionMessage (

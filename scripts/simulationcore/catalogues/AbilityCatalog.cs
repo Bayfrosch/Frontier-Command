@@ -99,6 +99,25 @@ public static class AbilityCatalog
 					UnlockedFromStart = true
 				});
 				break;
+			
+			case BuildingType.COMMAND_CENTER:
+				abilities.Add(new Ability
+				{
+					Id = "sell_building",
+					Name = "Verkaufen",
+					Cost = 0,
+					RequiresTarget = false,
+					UnlockedFromStart = true
+				});
+				abilities.Add(new Ability
+				{
+					Id = "spawn_construction_unit",
+					Name = "Bulldozer",
+					Cost = 250,
+					RequiresTarget = false,
+					UnlockedFromStart = true
+				});
+				break;
 		}
 		return abilities;
 	}

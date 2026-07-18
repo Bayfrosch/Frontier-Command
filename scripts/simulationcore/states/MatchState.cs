@@ -153,6 +153,7 @@ public enum BuildingType
 	BARRACKS,
 	RESOURCE_GATHERER,
 	RESOURCE_SPAWNER,
+	COMMAND_CENTER,
 }
 
 public enum ResourceType

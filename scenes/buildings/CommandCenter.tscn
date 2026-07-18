@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://dm8oecq2crkph"]
+
+[ext_resource type="Script" uid="uid://cxl1u640k8unh" path="res://scripts/client/buildings/ProductionBuilding.cs" id="1_ryskb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qkax1"]
+bg_color = Color(0, 0.6732143, 0.77275443, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0wyj8"]
+size = Vector2(180, 180)
+
+[node name="CommandCenter" type="Node2D" unique_id=682827733]
+script = ExtResource("1_ryskb")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=1085609919]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -90.0
+offset_right = 90.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.122656904, 0.5509306, 0.99999994, 1)
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=1282570625]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Com"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ProductionProgressBar" type="ProgressBar" parent="BodyRender" unique_id=908075874]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -87.0
+offset_top = -8.0
+offset_right = -17.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2.4799995, 1)
+theme_override_styles/fill = SubResource("StyleBoxFlat_qkax1")
+show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=2077934504]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1598415808]
+shape = SubResource("RectangleShape2D_0wyj8")

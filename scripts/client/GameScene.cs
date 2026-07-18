@@ -58,12 +58,20 @@ public partial class GameScene : Node2D
 		UpdateResourceUi();
 
 		// Debuging 
+		// Spawn Command Center
+		simulationCore.Push(new DebugSpawnBuildingMessage(
+			"player_1",
+			gameLoop.CurrentTick,
+			BuildingType.COMMAND_CENTER,
+			new Vector2(100, 100)
+		));
+
 		// Spawn units in order to test the game
 		simulationCore.Push(new DebugSpawnUnitsMessage(
 			"player_1",
 			gameLoop.CurrentTick,
 			UnitType.CONSTRUCTION_UNIT,
-			new Vector2(100, 50),
+			new Vector2(100, 250),
 			UnitCatalog.GetMovementSpeed(UnitType.CONSTRUCTION_UNIT)
 		));
 

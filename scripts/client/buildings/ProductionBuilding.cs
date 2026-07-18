@@ -1,6 +1,9 @@
 using Godot;
 
-public partial class ResourceGatherer : ClientBuilding
+/*
+Client renderer for buildings that expose unit production progress.
+*/
+public partial class ProductionBuilding : ClientBuilding
 {
 	private ProgressBar ProductionProgressBar = null;
 

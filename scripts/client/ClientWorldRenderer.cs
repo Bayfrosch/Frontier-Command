@@ -7,6 +7,7 @@ public partial class ClientWorldRenderer : Node
 {
 	// Building Scenes
 	public PackedScene BasicBarracksScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/Barracks.tscn");
+	public PackedScene CommandCenterScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/CommandCenter.tscn");
 	public PackedScene ConstructionSiteScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ConstructionSite.tscn");
 	public PackedScene ResourceSpawnerScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ResourceSpawner.tscn");
 	public PackedScene ResourceGathererScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/Resource_Gatherer.tscn");
@@ -33,6 +34,7 @@ public partial class ClientWorldRenderer : Node
 		return type switch
 		{
 			BuildingType.BARRACKS => BasicBarracksScene,
+			BuildingType.COMMAND_CENTER => CommandCenterScene,
 			BuildingType.RESOURCE_SPAWNER => ResourceSpawnerScene,
 			BuildingType.RESOURCE_GATHERER => ResourceGathererScene,
 			BuildingType.CONSTRUCTION_SITE => ConstructionSiteScene,
