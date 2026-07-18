@@ -13,6 +13,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 100,
             UnitType.RPG_TROOPER => 120,
+            UnitType.LIGHT_TANK => 200,
             UnitType.CONSTRUCTION_UNIT => 100,
             UnitType.RESOURCE_COLLECTOR => 150,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
@@ -29,6 +30,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 10,
             UnitType.RPG_TROOPER => 30,
+            UnitType.LIGHT_TANK => 45,
             _ => 0 // All not listed are non combat units (0 damage)
         };
     }
@@ -42,6 +44,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => WeaponClass.SMALL_ARMS,
             UnitType.RPG_TROOPER => WeaponClass.ANTI_ARMOR,
+            UnitType.LIGHT_TANK => WeaponClass.CANNON,
             UnitType.CONSTRUCTION_UNIT => WeaponClass.NON_COMBAT,
             UnitType.RESOURCE_COLLECTOR => WeaponClass.NON_COMBAT,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
@@ -57,6 +60,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => ArmorClass.LIGHT,
             UnitType.RPG_TROOPER => ArmorClass.LIGHT,
+            UnitType.LIGHT_TANK => ArmorClass.MEDIUM,
             UnitType.CONSTRUCTION_UNIT => ArmorClass.MEDIUM,
             UnitType.RESOURCE_COLLECTOR => ArmorClass.MEDIUM,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
@@ -72,6 +76,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 120f,
             UnitType.RPG_TROOPER => 120f,
+            UnitType.LIGHT_TANK => 150f,
             _ => 0f // All not listed are non combat units (0 range)
         };
     }
@@ -85,6 +90,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 0.4f,
             UnitType.RPG_TROOPER => 1f,
+            UnitType.LIGHT_TANK => 0.8f,
             _ => 0f // All not listed are non combat units (0 wind up)
         };
     }
@@ -98,6 +104,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 0.4f,
             UnitType.RPG_TROOPER => 1.5f,
+            UnitType.LIGHT_TANK => 1.6f,
             _ => 0f // All not listed are non combat units (0 cooldown) 
         };
     }
@@ -111,6 +118,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 100,
             UnitType.RPG_TROOPER => 100,
+            UnitType.LIGHT_TANK => 450,
             UnitType.CONSTRUCTION_UNIT => 250,
             UnitType.RESOURCE_COLLECTOR => 150,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
@@ -126,6 +134,7 @@ public static class UnitCatalog
         {
             UnitType.BASIC_INFANTRY => 100f,
             UnitType.RPG_TROOPER => 80f,
+            UnitType.LIGHT_TANK => 70f,
             UnitType.CONSTRUCTION_UNIT => 100f,
             UnitType.RESOURCE_COLLECTOR => 100f,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)  
@@ -140,5 +149,13 @@ public static class UnitCatalog
         return new List<UnitType>
         {
         };
+    }
+
+    /*
+    Power-dependent units pause at their current production progress during a power deficit.
+    */
+    public static bool RequiresEnergyForProduction(UnitType type)
+    {
+        return type == UnitType.LIGHT_TANK;
     }
 }

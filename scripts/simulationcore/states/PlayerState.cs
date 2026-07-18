@@ -45,11 +45,18 @@ public sealed class PlayerState
 	}
 	private void UpdateAbilityUnlocks()
 	{
-		if (GetCompleteBuildingCount(BuildingType.BARRACKS) > 0)
+		if (GetCompleteBuildingCount(BuildingType.POWER_PLANT) > 0)
 		{
 			UnlockAbility("spawn_resource_gatherer");
 		} else {
 			LockAbility("spawn_resource_gatherer");
+		}
+
+		if (GetCompleteBuildingCount(BuildingType.RESOURCE_GATHERER) > 0)
+		{
+			UnlockAbility("spawn_war_factory");
+		} else {
+			LockAbility("spawn_war_factory");
 		}
 	}
 	/*

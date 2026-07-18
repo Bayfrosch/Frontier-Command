@@ -789,15 +789,59 @@ public class SimulationCoreTest
 			p_target_position: new Vector2(100, 50)
 		);
 
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsFalse();
+		AssertThat(context.Push(msg)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(startingVirelium);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.RESOURCE_GATHERER,
+			new Vector2(-200, 0)
+		))).IsTrue();
+
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
 		AssertThat(context.Push(msg)).IsTrue();
 		AssertThat(player.Virelium).IsEqual(startingVirelium - buildCost);
 
-		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		var site = player.Entities.Values
+			.OfType<BuildingState>()
+			.Single(building => building.Type == BuildingType.CONSTRUCTION_SITE);
 		AssertThat(site.Type).IsEqual(BuildingType.CONSTRUCTION_SITE);
 		AssertThat(site.pendingBuilding).IsEqual(BuildingType.WAR_FACTORY);
 		AssertThat(site.ConstructionCost).IsEqual(buildCost);
 		AssertThat(builder.HasConstructionOrder).IsTrue();
 		AssertThat(builder.ConstructionTargetId).IsEqual(site.EntityId);
+	}
+
+	[TestCase]
+	public void Push_UseAbilityMessage_SellLastSupplyCenterLocksWarFactory()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.RESOURCE_GATHERER,
+			Vector2.Zero
+		))).IsTrue();
+
+		var supplyCenter = player.Entities.Values
+			.OfType<BuildingState>()
+			.Single(building => building.Type == BuildingType.RESOURCE_GATHERER);
+
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { supplyCenter.EntityId },
+			p_ability_id: "sell_building"
+		))).IsTrue();
+
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsFalse();
 	}
 
 	[TestCase]
@@ -970,6 +1014,124 @@ public class SimulationCoreTest
 		))).IsTrue();
 
 		AssertThat(player.EnergyConsumed).IsEqual(0);
+	}
+
+	[TestCase]
+	public void AdvanceTick_LightTankProductionPausesDuringPowerDeficitAndResumes()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1", 2000);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.WAR_FACTORY,
+			Vector2.Zero
+		))).IsTrue();
+
+		var warFactory = player.Entities.Values
+			.OfType<BuildingState>()
+			.Single(building => building.Type == BuildingType.WAR_FACTORY);
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { warFactory.EntityId },
+			p_ability_id: "spawn_light_tank"
+		))).IsTrue();
+
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+		AssertThat(player.EnergyProduced).IsEqual(0);
+		AssertThat(player.EnergyConsumed).IsEqual(2);
+
+		context.AdvanceTick();
+
+		AssertThat(warFactory.ProductionProgress).IsEqual(0);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			1,
+			BuildingType.POWER_PLANT,
+			new Vector2(200, 0)
+		))).IsTrue();
+
+		context.AdvanceTick();
+
+		AssertThat(warFactory.ProductionProgress).IsEqual(5);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+
+		var powerPlant = player.Entities.Values
+			.OfType<BuildingState>()
+			.Single(building => building.Type == BuildingType.POWER_PLANT);
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 2,
+			p_caster_entity_ids: new[] { powerPlant.EntityId },
+			p_ability_id: "sell_building"
+		))).IsTrue();
+
+		context.AdvanceTick();
+
+		AssertThat(warFactory.ProductionProgress).IsEqual(5);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			3,
+			BuildingType.POWER_PLANT,
+			new Vector2(200, 0)
+		))).IsTrue();
+
+		context.AdvanceTick();
+
+		AssertThat(warFactory.ProductionProgress).IsEqual(10);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+	}
+
+	[TestCase]
+	public void AdvanceTick_LightTankCompletesWhenPlayerHasSufficientEnergy()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1", 2000);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.WAR_FACTORY,
+			Vector2.Zero
+		))).IsTrue();
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.POWER_PLANT,
+			new Vector2(200, 0)
+		))).IsTrue();
+
+		var warFactory = player.Entities.Values
+			.OfType<BuildingState>()
+			.Single(building => building.Type == BuildingType.WAR_FACTORY);
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { warFactory.EntityId },
+			p_ability_id: "spawn_light_tank"
+		))).IsTrue();
+
+		for (var i = 0; i < UnitCatalog.GetProductionTime(UnitType.LIGHT_TANK) / 5; i++)
+			context.AdvanceTick();
+
+		var lightTank = player.Entities.Values
+			.OfType<UnitState>()
+			.Single(unit => unit.Type == UnitType.LIGHT_TANK);
+
+		AssertThat(warFactory.ProductionQueue).IsEmpty();
+		AssertThat(lightTank.MaxHealth).IsEqual(450);
+		AssertThat(lightTank.WeaponClass).IsEqual(WeaponClass.CANNON);
 	}
 
 	[TestCase]

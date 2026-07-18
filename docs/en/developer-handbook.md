@@ -216,6 +216,7 @@ Add the new unit to every relevant method:
 * `GetAttackCooldownTime`
 * `GetMaxHealth`
 * `GetMovementSpeed`
+* `RequiresEnergyForProduction`, if production should pause during a power deficit
 * `GetCapitalUnits`, only if it is a capital unit
 
 If the unit cannot attack, use:
@@ -227,6 +228,10 @@ UnitType.NEW_UNIT => 0
 for attack damage/range/wind-up/cooldown where appropriate.
 
 Do not leave the unit out of a switch unless you intentionally want that unit to throw at runtime.
+
+Energy-dependent units remain in their building queue at their current progress while
+`PlayerState.EnergyProduced < PlayerState.EnergyConsumed`. Production resumes automatically
+when the player's power balance is no longer negative.
 
 ## 3. Add Unit Abilities
 
@@ -426,6 +431,10 @@ Completed buildings automatically get:
 * `sell_building`
 
 Do not add `sell_building` manually to each completed building case. `AbilityCatalog.ForBuilding` adds it once for every building type except `CONSTRUCTION_SITE`.
+
+For construction abilities with building prerequisites, set `UnlockedFromStart = false` and
+update `PlayerState.UpdateAbilityUnlocks`. For example, `spawn_war_factory` is unlocked while
+the player has at least one completed `RESOURCE_GATHERER` (Supply Center).
 
 Completed buildings can also get:
 

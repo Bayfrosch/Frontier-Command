@@ -169,6 +169,7 @@ public enum UnitType
 	BASIC_INFANTRY,
 	RPG_TROOPER,
 	// Tanks
+	LIGHT_TANK,
 	// Non Combat
 	CONSTRUCTION_UNIT,
 	RESOURCE_COLLECTOR,

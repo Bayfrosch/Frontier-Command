@@ -20,6 +20,7 @@ public partial class ClientWorldRenderer : Node
 	// Unit Scenes
 	public PackedScene BasicInfantryScene { get; } = GD.Load<PackedScene>("res://scenes/units/basicInfantry.tscn");
 	public PackedScene RocketTroopsScene { get; } = GD.Load<PackedScene>("res://scenes/units/rocketTroops.tscn");
+	public PackedScene LightTankScene { get; } = GD.Load<PackedScene>("res://scenes/units/LightTank.tscn");
 	public PackedScene ConstructionUnitScene { get; } = GD.Load<PackedScene>("res://scenes/units/constructionUnit.tscn");
 	public PackedScene ResourceCollectorScene { get; } = GD.Load<PackedScene>("res://scenes/units/ResourceCollector.tscn");
 
@@ -52,6 +53,7 @@ public partial class ClientWorldRenderer : Node
 		{
 			UnitType.BASIC_INFANTRY => BasicInfantryScene,
 			UnitType.RPG_TROOPER => RocketTroopsScene,
+			UnitType.LIGHT_TANK => LightTankScene,
 			UnitType.CONSTRUCTION_UNIT => ConstructionUnitScene,
 			UnitType.RESOURCE_COLLECTOR => ResourceCollectorScene,
 			_ => BasicInfantryScene
@@ -85,6 +87,7 @@ public partial class ClientWorldRenderer : Node
 		{
 			UnitType.BASIC_INFANTRY => new Color(0.7169325f, 0.3354848f, 0.33498362f, 1f),
 			UnitType.RPG_TROOPER => new Color(0.353f, 0.137f, 0.137f),
+			UnitType.LIGHT_TANK => new Color(0.298f, 0.376f, 0.267f),
 			UnitType.CONSTRUCTION_UNIT => new Color(0.2565697f, 0.41133666f, 0.9501857f, 1f),
 			UnitType.RESOURCE_COLLECTOR => new Color(0.0f, 0.502f, 0.459f),
 			_ => DefaultUnitColor

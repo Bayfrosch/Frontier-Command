@@ -12,7 +12,7 @@ public static class BuildingCatalog
 		{
 			BuildingType.BARRACKS => new Vector2(120, 80),
 			BuildingType.RESOURCE_SPAWNER => new Vector2(80, 80),
-			BuildingType.RESOURCE_GATHERER => new Vector2(90, 70),
+			BuildingType.RESOURCE_GATHERER => new Vector2(130, 90),
 			BuildingType.COMMAND_CENTER => new Vector2(180, 180),
 			BuildingType.POWER_PLANT => new Vector2(100, 60),
 			BuildingType.WAR_FACTORY => new Vector2(140, 90),

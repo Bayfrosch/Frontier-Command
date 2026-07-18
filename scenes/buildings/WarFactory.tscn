@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://b8fbad8s4hhby"]
 
-[ext_resource type="Script" uid="uid://bhnr6n5n6w1sh" path="res://scripts/client/buildings/SimpleBuilding.cs" id="1_qq3ig"]
+[ext_resource type="Script" uid="uid://cxl1u640k8unh" path="res://scripts/client/buildings/ProductionBuilding.cs" id="1_qq3ig"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_production"]
+bg_color = Color(0, 0.6732143, 0.77275443, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_s2vpm"]
 size = Vector2(140, 90)
@@ -40,6 +43,22 @@ text = "War
 Factory"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ProductionProgressBar" type="ProgressBar" parent="BodyRender"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -55.0
+offset_top = -8.0
+offset_right = 55.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_production")
+show_percentage = false
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1667502411]
 

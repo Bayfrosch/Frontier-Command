@@ -94,6 +94,17 @@ public static class AbilityCatalog
 					UnlockedFromStart = true
 				});
 				break;
+
+			case BuildingType.WAR_FACTORY:
+				abilities.Add(new Ability
+				{
+					Id = "spawn_light_tank",
+					Name = "Light Tank",
+					Cost = 500,
+					RequiresTarget = false,
+					UnlockedFromStart = true
+				});
+				break;
 		}
 
 		if (type != BuildingType.CONSTRUCTION_SITE)
@@ -154,7 +165,7 @@ public static class AbilityCatalog
 					Name = "War Factory",
 					Cost = 1400,
 					RequiresTarget = true,
-					UnlockedFromStart = true
+					UnlockedFromStart = false
 				});
 				break;
 

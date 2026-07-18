@@ -112,7 +112,9 @@ public sealed class SimulationContext
 					HandleAdvanceConstruction(player.PlayerId, building);
 					HandleAdvanceResourceSpawner(building);
 
-					var unit = building.AdvanceProduction(PRODUCTION_ADVANCE);
+					var unit = CanAdvanceProduction(player, building)
+						? building.AdvanceProduction(PRODUCTION_ADVANCE)
+						: null;
 					if (unit is null)
 						continue;
 
@@ -813,6 +815,10 @@ public sealed class SimulationContext
 				passed = HandleSpawnUnit(msg, UnitType.RPG_TROOPER);
 				break;
 
+			case "spawn_light_tank":
+				passed = HandleSpawnUnit(msg, UnitType.LIGHT_TANK);
+				break;
+
 			case "spawn_resource_collector":
 				passed = HandleSpawnUnit(msg, UnitType.RESOURCE_COLLECTOR);
 				break;
@@ -921,6 +927,19 @@ public sealed class SimulationContext
 			));
 		}
 		return true;
+	}
+
+	/*
+	Energy-dependent production pauses without modifying the queue or its progress.
+	*/
+	private static bool CanAdvanceProduction(PlayerState player, BuildingState building)
+	{
+		if (building.ProductionQueue.Length <= 0)
+			return true;
+
+		var unitType = building.ProductionQueue[0];
+		return !UnitCatalog.RequiresEnergyForProduction(unitType)
+			|| player.EnergyProduced >= player.EnergyConsumed;
 	}
 
 	/*
