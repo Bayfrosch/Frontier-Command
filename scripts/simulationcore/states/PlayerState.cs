@@ -28,11 +28,13 @@ public sealed class PlayerState
 	internal void AddCompletedBuilding(BuildingType type)
 	{
 		_completeBuildingCount[type] = GetCompleteBuildingCount(type) + 1;
+		EnergyProduced += BuildingCatalog.GetPowerProduction(type);
 		UpdateAbilityUnlocks();
 	}
 	internal void RemoveCompletedBuilding(BuildingType type)
 	{
 		_completeBuildingCount[type] = Math.Max(0, GetCompleteBuildingCount(type) - 1);
+		EnergyProduced = Math.Max(0, EnergyProduced - BuildingCatalog.GetPowerProduction(type));
 		UpdateAbilityUnlocks();
 	}
 	private int GetCompleteBuildingCount(BuildingType type)

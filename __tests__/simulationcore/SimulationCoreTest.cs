@@ -696,6 +696,108 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_UseAbilityMessage_SpawnPowerPlant_CreatesPowerPlantConstructionSite()
+	{
+		var context = new SimulationContext("match-1");
+		var startingVirelium = 2000;
+		var player = new PlayerState("player-1", startingVirelium);
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		var buildCost = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT)
+			.First(ability => ability.Id == "spawn_power_plant")
+			.Cost;
+
+		var msg = new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_power_plant",
+			p_target_position: new Vector2(100, 50)
+		);
+
+		AssertThat(context.Push(msg)).IsTrue();
+		AssertThat(player.Virelium).IsEqual(startingVirelium - buildCost);
+
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(site.Type).IsEqual(BuildingType.CONSTRUCTION_SITE);
+		AssertThat(site.pendingBuilding).IsEqual(BuildingType.POWER_PLANT);
+		AssertThat(site.ConstructionCost).IsEqual(buildCost);
+		AssertThat(builder.HasConstructionOrder).IsTrue();
+		AssertThat(builder.ConstructionTargetId).IsEqual(site.EntityId);
+	}
+
+	[TestCase]
+	public void Push_DebugSpawnBuilding_PowerPlant_AddsTenProducedEnergy()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.POWER_PLANT,
+			Vector2.Zero
+		))).IsTrue();
+
+		AssertThat(player.EnergyProduced).IsEqual(10);
+	}
+
+	[TestCase]
+	public void AdvanceTick_CompletedPowerPlant_AddsTenProducedEnergy()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var builder = new UnitState("builder-1", "player-1", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { "builder-1" },
+			p_ability_id: "spawn_power_plant",
+			p_target_position: Vector2.Zero
+		))).IsTrue();
+
+		var site = player.Entities.Values.OfType<BuildingState>().Single();
+		site.AdvanceConstruction(95);
+		builder.ClearMoveOrder();
+
+		context.AdvanceTick();
+
+		AssertThat(site.Type).IsEqual(BuildingType.POWER_PLANT);
+		AssertThat(player.EnergyProduced).IsEqual(10);
+	}
+
+	[TestCase]
+	public void Push_UseAbilityMessage_SellPowerPlant_RemovesProducedEnergy()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(
+			"player-1",
+			0,
+			BuildingType.POWER_PLANT,
+			Vector2.Zero
+		))).IsTrue();
+		var building = player.Entities.Values.OfType<BuildingState>().Single();
+
+		AssertThat(context.Push(new UseAbilityMessage(
+			p_player_id: "player-1",
+			p_issued_at_tick: 0,
+			p_caster_entity_ids: new[] { building.EntityId },
+			p_ability_id: "sell_building"
+		))).IsTrue();
+
+		AssertThat(player.EnergyProduced).IsEqual(0);
+	}
+
+	[TestCase]
 	public void Push_UseAbilityMessage_ReturnsFalse_WhenAbilityIsLockedForPlayer()
 	{
 		var context = new SimulationContext("match-1");

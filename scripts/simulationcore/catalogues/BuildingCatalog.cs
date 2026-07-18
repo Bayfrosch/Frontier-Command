@@ -14,6 +14,7 @@ public static class BuildingCatalog
 			BuildingType.RESOURCE_SPAWNER => new Vector2(80, 80),
 			BuildingType.RESOURCE_GATHERER => new Vector2(90, 70),
 			BuildingType.COMMAND_CENTER => new Vector2(180, 180),
+			BuildingType.POWER_PLANT => new Vector2(100, 60),
 			_ => new Vector2(0, 0)
 		};
 	}
@@ -31,6 +32,7 @@ public static class BuildingCatalog
 			BuildingType.RESOURCE_SPAWNER => 1,
 			BuildingType.RESOURCE_GATHERER => 800,
 			BuildingType.COMMAND_CENTER => 2000,
+			BuildingType.POWER_PLANT => 400,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}
@@ -42,6 +44,18 @@ public static class BuildingCatalog
 	public static ArmorClass GetArmorClass(BuildingType type)
 	{
 		return ArmorClass.STRUCTURE;
+	}
+
+	/*
+	Power production provided by each completed building.
+	*/
+	public static int GetPowerProduction(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.POWER_PLANT => 10,
+			_ => 0
+		};
 	}
 
 	/*

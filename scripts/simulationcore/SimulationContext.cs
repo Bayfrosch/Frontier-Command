@@ -145,6 +145,11 @@ public sealed class SimulationContext
 			{
 				if (player.Entities.ContainsKey(entityId))
 				{
+					if (player.Entities[entityId] is BuildingState building
+						&& building.Type != BuildingType.CONSTRUCTION_SITE)
+					{
+						player.RemoveCompletedBuilding(building.Type);
+					}
 					player.RemoveEntity(entityId);
 				}
 			}
@@ -835,6 +840,10 @@ public sealed class SimulationContext
 			case "spawn_resource_gatherer":
 				passed = HandleSpawnBuilding(msg, BuildingType.RESOURCE_GATHERER);
 				break;
+
+			case "spawn_power_plant":
+				passed = HandleSpawnBuilding(msg, BuildingType.POWER_PLANT);
+				break;
 		}
 		return passed;
 	}
@@ -1155,7 +1164,10 @@ public sealed class SimulationContext
 		);
 
 		if (msg.SpawnCompleted)
+		{
 			building.AdvanceConstruction(100);
+			player.AddCompletedBuilding(building.Type);
+		}
 
 		player.AddEntity(building);
 

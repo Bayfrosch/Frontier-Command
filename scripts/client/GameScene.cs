@@ -17,6 +17,7 @@ public partial class GameScene : Node2D
 	private static readonly Dictionary<string, BuildingType> ConstructionPreviewTypes = new()
 	{
 		["spawn_barracks"] = BuildingType.BARRACKS,
+		["spawn_power_plant"] = BuildingType.POWER_PLANT,
 		["spawn_resource_gatherer"] = BuildingType.RESOURCE_GATHERER
 	};
 	private Node2D constructionPreview = null;

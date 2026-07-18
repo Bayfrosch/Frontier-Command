@@ -154,6 +154,7 @@ public enum BuildingType
 	RESOURCE_GATHERER,
 	RESOURCE_SPAWNER,
 	COMMAND_CENTER,
+	POWER_PLANT,
 }
 
 public enum ResourceType

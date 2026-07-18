@@ -118,6 +118,17 @@ public static class AbilityCatalog
 					UnlockedFromStart = true
 				});
 				break;
+
+			case BuildingType.POWER_PLANT:
+				abilities.Add(new Ability
+				{
+					Id = "sell_building",
+					Name = "Verkaufen",
+					Cost = 0,
+					RequiresTarget = false,
+					UnlockedFromStart = true
+				});
+				break;
 		}
 		return abilities;
 	}
@@ -147,6 +158,14 @@ public static class AbilityCatalog
 					Cost = 1500,
 					RequiresTarget = true,
 					UnlockedFromStart = false
+				});
+				abilities.Add(new Ability
+				{
+					Id = "spawn_power_plant",
+					Name = "Kraftwerk",
+					Cost = 800,
+					RequiresTarget = true,
+					UnlockedFromStart = true
 				});
 				break;
 

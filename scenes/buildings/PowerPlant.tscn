@@ -1,9 +1,12 @@
-[gd_scene format=3 uid="uid://5y786nj0d8pw"]
+[gd_scene load_steps=3 format=3 uid="uid://5y786nj0d8pw"]
+
+[ext_resource type="Script" uid="uid://bhnr6n5n6w1sh" path="res://scripts/client/buildings/SimpleBuilding.cs" id="1_jr5sr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c8qrl"]
 size = Vector2(100, 60)
 
 [node name="PowerPlant" type="Node2D" unique_id=849060223]
+script = ExtResource("1_jr5sr")
 
 [node name="BodyRender" type="ColorRect" parent="." unique_id=1227736491]
 anchors_preset = 8
