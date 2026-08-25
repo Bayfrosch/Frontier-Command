@@ -134,7 +134,10 @@ public sealed class SimulationContext
 					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
 					HandleAdvanceAttack(unit);
 					UpdateMovePathAroundBuildings(unit);
+					var hadMoveOrder = unit.HasMoveOrder;
 					unit.AdvanceMovement(TimeTickSystem.TICK_DELTA);
+					if (hadMoveOrder && !unit.HasMoveOrder)
+						ResolveArrivalOverlap(unit);
 					if (unit is ResourceCollectorState collector)
 						HandleAdvanceGatherResources(collector);
 				}
@@ -421,7 +424,10 @@ public sealed class SimulationContext
 
 		for (int i = 0; i < units.Count; i++)
 		{
-			units[i].SetMoveOrder(msg.destination + GetFormationOffset(i, units.Count));
+			var targetPosition = GetOccupiedOffsetPosition(
+				msg.destination + GetFormationOffset(i, units.Count),
+				units[i].EntityId);
+			units[i].SetMoveOrder(targetPosition);
 		}
 
 		return true;
@@ -1284,11 +1290,11 @@ public sealed class SimulationContext
 	}
 
 	/*
-	Finds nearby free space so debug-spawned units do not stack exactly.
+	Finds nearby free space so units do not stack exactly on occupied positions.
 	*/
-	private Vector2 GetOccupiedOffsetPosition(Vector2 requestedPosition)
+	private Vector2 GetOccupiedOffsetPosition(Vector2 requestedPosition, string ignoredEntityId = "")
 	{
-		if (!IsPositionOccupied(requestedPosition))
+		if (!IsPositionOccupied(requestedPosition, ignoredEntityId))
 			return requestedPosition;
 
 		for (var ring = 1; ring <= 8; ring++)
@@ -1296,12 +1302,24 @@ public sealed class SimulationContext
 			foreach (var direction in GetSpawnDirectionsForRing(ring))
 			{
 				var candidate = requestedPosition + direction * UNIT_SPACING;
-				if (!IsPositionOccupied(candidate))
+				if (!IsPositionOccupied(candidate, ignoredEntityId))
 					return candidate;
 			}
 		}
 
 		return requestedPosition + new Vector2(UNIT_SPACING * 9f, 0f);
+	}
+
+	/*
+	Moves a unit aside after arrival if the destination became occupied while it was travelling.
+	*/
+	private void ResolveArrivalOverlap(UnitState unit)
+	{
+		var targetPosition = GetOccupiedOffsetPosition(unit.CurrentPosition, unit.EntityId);
+		if (targetPosition == unit.CurrentPosition)
+			return;
+
+		unit.SetCollisionAvoidanceMoveOrder(targetPosition);
 	}
 
 	/*
@@ -1607,7 +1625,7 @@ public sealed class SimulationContext
 	/*
 	Checks current and target positions to avoid obvious spawn overlap.
 	*/
-	private bool IsPositionOccupied(Vector2 position)
+	private bool IsPositionOccupied(Vector2 position, string ignoredEntityId = "")
 	{
 		var collisionDistanceSquared = COLLISION_RADIUS * COLLISION_RADIUS;
 
@@ -1615,8 +1633,9 @@ public sealed class SimulationContext
 			.SelectMany(player => player.Entities.Values)
 			.OfType<EntityState>()
 			.Any(entity =>
-				entity.CurrentPosition.DistanceSquaredTo(position) <= collisionDistanceSquared
-				|| entity is UnitState unit && unit.HasMoveOrder && unit.TargetPosition.DistanceSquaredTo(position) <= collisionDistanceSquared);
+				entity.EntityId != ignoredEntityId
+				&& (entity.CurrentPosition.DistanceSquaredTo(position) <= collisionDistanceSquared
+					|| entity is UnitState unit && unit.HasMoveOrder && unit.TargetPosition.DistanceSquaredTo(position) <= collisionDistanceSquared));
 	}
 
 	/*

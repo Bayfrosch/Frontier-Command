@@ -127,6 +127,45 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
+	public void Push_MoveUnitsMessage_OffsetsTarget_WhenDestinationIsOccupied()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var movingUnit = new UnitState("moving-unit", "player-1", Vector2.Zero, 10f);
+		var occupyingUnit = new UnitState("occupying-unit", "player-1", new Vector2(30, 40), 10f);
+		player.AddEntity(movingUnit);
+		player.AddEntity(occupyingUnit);
+		context.AddPlayer(player);
+
+		AssertThat(context.Push(CreateMoveMessage("player-1", "moving-unit", occupyingUnit.CurrentPosition))).IsTrue();
+
+		AssertThat(movingUnit.HasMoveOrder).IsTrue();
+		AssertThat(movingUnit.TargetPosition).IsEqual(occupyingUnit.CurrentPosition + new Vector2(50f, 0f));
+	}
+
+	[TestCase]
+	public void AdvanceTick_MoveUnits_OffsetsTarget_WhenArrivingAtOccupiedDestination()
+	{
+		var context = new SimulationContext("match-1");
+		var player = new PlayerState("player-1");
+		var movingUnit = new UnitState("moving-unit", "player-1", Vector2.Zero, 100f);
+		player.AddEntity(movingUnit);
+		context.AddPlayer(player);
+
+		var destination = new Vector2(20, 0);
+		AssertThat(context.Push(CreateMoveMessage("player-1", "moving-unit", destination))).IsTrue();
+
+		var occupyingUnit = new UnitState("occupying-unit", "player-1", destination, 10f);
+		player.AddEntity(occupyingUnit);
+
+		context.AdvanceTick();
+
+		AssertThat(movingUnit.CurrentPosition).IsEqual(destination);
+		AssertThat(movingUnit.HasMoveOrder).IsTrue();
+		AssertThat(movingUnit.TargetPosition).IsEqual(destination + new Vector2(50f, 0f));
+	}
+
+	[TestCase]
 	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromLeftToRight()
 	{
 		AssertMoveRoutesAroundBuilding(Vector2.Zero, new Vector2(200, 0), movedOffAxis: point => System.Math.Abs(point.Y) > 1f);

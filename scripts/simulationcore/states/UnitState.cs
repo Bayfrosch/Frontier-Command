@@ -43,16 +43,30 @@ public class UnitState : EntityState
 	*/
 	internal virtual void SetMoveOrder(Vector2 targetPosition, bool preserveAttackOrder = false, bool preserveConstructionOrder = false)
 	{
-		TargetPosition = targetPosition;
-		CurrentMoveTarget = targetPosition;
-		_moveWaypoints.Clear();
-		HasMoveOrder = true;
+		SetMoveTarget(targetPosition);
 		if (!preserveAttackOrder)
 			ClearAttackOrder();
 		if (!preserveConstructionOrder)
 			ClearConstructionOrder();
 	}
 	private readonly Queue<Vector2> _moveWaypoints = new();
+
+	/*
+	Updates only the movement target so collision nudges preserve the active order.
+	*/
+	internal void SetCollisionAvoidanceMoveOrder(Vector2 targetPosition)
+	{
+		SetMoveTarget(targetPosition);
+	}
+
+	private void SetMoveTarget(Vector2 targetPosition)
+	{
+		TargetPosition = targetPosition;
+		CurrentMoveTarget = targetPosition;
+		_moveWaypoints.Clear();
+		HasMoveOrder = true;
+	}
+
 	/*
 	Replaces the immediate path while preserving the final requested target position.
 	*/
