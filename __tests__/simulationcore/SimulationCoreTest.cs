@@ -183,6 +183,7 @@ public class SimulationCoreTest
 			0,
 			UnitType.RESOURCE_COLLECTOR,
 			Vector2.Zero,
+			Vector2.Zero,
 			UnitCatalog.GetMovementSpeed(UnitType.RESOURCE_COLLECTOR)
 		))).IsTrue();
 
@@ -1130,8 +1131,14 @@ public class SimulationCoreTest
 		var lightTank = player.Entities.Values
 			.OfType<UnitState>()
 			.Single(unit => unit.Type == UnitType.LIGHT_TANK);
+		var expectedSpawnPoint = warFactory.CurrentPosition
+			+ BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(warFactory)) / 2f
+			+ new Vector2(5, 5);
 
 		AssertThat(warFactory.ProductionQueue).IsEmpty();
+		AssertThat(lightTank.CurrentPosition).IsEqual(expectedSpawnPoint);
+		AssertThat(lightTank.HasMoveOrder).IsTrue();
+		AssertThat(lightTank.TargetPosition).IsEqual(warFactory.RallyPoint);
 		AssertThat(lightTank.MaxHealth).IsEqual(450);
 		AssertThat(lightTank.WeaponClass).IsEqual(WeaponClass.CANNON);
 	}
@@ -1190,6 +1197,7 @@ public class SimulationCoreTest
 			playerId,
 			0,
 			UnitType.BASIC_INFANTRY,
+			position,
 			position,
 			UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
 		);

@@ -1,4 +1,6 @@
 using Godot;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -81,6 +83,7 @@ public partial class GameScene : Node2D
 			gameLoop.CurrentTick,
 			UnitType.CONSTRUCTION_UNIT,
 			new Vector2(100, 250),
+			new Vector2(100, 250),
 			UnitCatalog.GetMovementSpeed(UnitType.CONSTRUCTION_UNIT)
 		));
 
@@ -90,6 +93,7 @@ public partial class GameScene : Node2D
 				"player_2",
 				gameLoop.CurrentTick,
 				UnitType.BASIC_INFANTRY,
+				new Vector2(-500, 0 + i * 50),
 				new Vector2(-500, 0 + i * 50),
 				UnitCatalog.GetMovementSpeed(UnitType.BASIC_INFANTRY)
 			));
@@ -444,15 +448,11 @@ public partial class GameScene : Node2D
 			return;
 		}
 
-		if (CurrentEntity is ClientBuilding building)
-		{
-			EntitySelectionIds.Clear();
-		}
-
 		if (!shiftHeld)
 		{
 			EntitySelectionIds.Clear();
 		}
+
 		EntitySelectionIds.Add(CurrentEntity.EntityId);
 		EmitSignal(SignalName.UnitSelection);
 	}
@@ -461,20 +461,42 @@ public partial class GameScene : Node2D
 	{
 		MessageBase command = null;
 
+		var selectedBuildings = new ArrayList();
 		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
 		if (CurrentEntity is null)
 		{
 			if (SelectedEntityIds.Count <= 0)
 				return;
 
-			command = new MoveUnitsMessage(
-				"player_1",
-				gameLoop.CurrentTick,
-				SelectedEntityIds.ToArray<string>(),
-				GetGlobalMousePosition(),
-				shiftHeld ? 1 : 0,
-				"rectangle"
-			);
+			foreach (String id in SelectedEntityIds)
+			{
+				if (!simulationCore.GetState().Players["player_1"].Entities.TryGetValue(id, out var selectedEntity))
+					return;
+				if (selectedEntity is BuildingState selectedBuilding)
+					selectedBuildings.Add(selectedBuilding);
+
+			}
+
+			if (selectedBuildings.Count > 0)
+			{
+				command = new SetRallyPointMessage(
+					"player_1",
+					gameLoop.CurrentTick,
+					SelectedEntityIds.ToArray(),
+					GetGlobalMousePosition()
+				);
+			}
+			else
+			{
+				command = new MoveUnitsMessage(
+					"player_1",
+					gameLoop.CurrentTick,
+					SelectedEntityIds.ToArray<string>(),
+					GetGlobalMousePosition(),
+					shiftHeld ? 1 : 0,
+					"rectangle"
+				);
+			}
 		}
 		else if (CurrentEntity is ClientResource)
 		{

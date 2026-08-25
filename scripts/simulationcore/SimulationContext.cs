@@ -118,11 +118,15 @@ public sealed class SimulationContext
 					if (unit is null)
 						continue;
 
+					var spawnPoint = building.CurrentPosition
+						+ BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building)) / 2f
+						+ new Vector2(5, 5);
 					unitsToSpawn.Add(new DebugSpawnUnitsMessage(
 						player.PlayerId,
 						_matchState.Tick,
 						unit.Value,
 						building.RallyPoint,
+						spawnPoint,
 						UnitCatalog.GetMovementSpeed(unit.Value)
 					));
 				} else if (entity is UnitState unit)
@@ -1219,8 +1223,10 @@ public sealed class SimulationContext
 			return false;
 
 		var unitId = NewEntityId(msg.UnitType.ToString());
-		var spawnPosition = msg.Position;
-		var targetPosition = GetOccupiedOffsetPosition(spawnPosition);
+		var spawnPosition = msg.SpawnPoint;
+		var targetPosition = msg.MoveOrder == spawnPosition
+			? GetOccupiedOffsetPosition(spawnPosition)
+			: msg.MoveOrder;
 		UnitState newUnit = CreateUnitState(unitId, msg.PlayerId, spawnPosition, msg.MovementSpeed, msg.UnitType);
 
 		player.AddEntity(newUnit);
