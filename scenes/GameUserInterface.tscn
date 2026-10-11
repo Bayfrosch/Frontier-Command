@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://rx502q8ojk4g"]
 
-[ext_resource type="Texture2D" uid="uid://bvuoiu5hdmr5e" path="res://assets/GUI_Prototype.png" id="1_1x0qv"]
+[ext_resource type="Texture2D" uid="uid://bfvtun6td1bcg" path="res://assets/GUI_Prototype.png" id="1_1x0qv"]
 [ext_resource type="PackedScene" uid="uid://eyrsmdrj0gyx" path="res://scenes/UI/SelectedEntityUI.tscn" id="2_1x0qv"]
 [ext_resource type="Script" uid="uid://bn7hvosxf7hxu" path="res://scripts/client/EnergyBar.cs" id="3_a6ken"]
 
@@ -21,55 +21,84 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="GUIGraphic" type="TextureRect" parent="MainLayout" unique_id=586338820]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("1_1x0qv")
+expand_mode = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainLayout" unique_id=1573905669]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 mouse_filter = 2
 
 [node name="TopBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=1593961572]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 3
 size_flags_vertical = 0
 mouse_filter = 0
+theme_override_constants/separation = 0
+
+[node name="LeftGroup" type="HBoxContainer" parent="MainLayout/VBoxContainer/TopBar" unique_id=1349780265]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
 theme_override_constants/separation = 12
 
-[node name="LeftPlace" type="Container" parent="MainLayout/VBoxContainer/TopBar" unique_id=1425338351]
-custom_minimum_size = Vector2(170, 0)
+[node name="LeftPlace" type="Container" parent="MainLayout/VBoxContainer/TopBar/LeftGroup" unique_id=1425338351]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 170.0
 
-[node name="MaterialCount" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=557165513]
-custom_minimum_size = Vector2(380, 0)
+[node name="MaterialCount" type="Label" parent="MainLayout/VBoxContainer/TopBar/LeftGroup" unique_id=557165513]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 380.0
 text = "Virelium: 0"
 
-[node name="ButtonsPlaceholder" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1473169176]
-custom_minimum_size = Vector2(840, 0)
+[node name="CenterGroup" type="CenterContainer" parent="MainLayout/VBoxContainer/TopBar" unique_id=811827799]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.75
+mouse_filter = 2
+
+[node name="ButtonsPlaceholder" type="Label" parent="MainLayout/VBoxContainer/TopBar/CenterGroup" unique_id=1473169176]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Buttons"
 horizontal_alignment = 1
 
-[node name="Energy" type="Label" parent="MainLayout/VBoxContainer/TopBar" unique_id=1015884839]
+[node name="RightGroup" type="HBoxContainer" parent="MainLayout/VBoxContainer/TopBar" unique_id=32431801]
 layout_mode = 2
-text = "Energie:"
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 12
 
-[node name="EnergyBar" type="ProgressBar" parent="MainLayout/VBoxContainer/TopBar" unique_id=1775897820]
-custom_minimum_size = Vector2(260, 25)
+[node name="RightSpace2" type="Container" parent="MainLayout/VBoxContainer/TopBar/RightGroup" unique_id=1808300292]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 20.0
+
+[node name="EnergyBar" type="ProgressBar" parent="MainLayout/VBoxContainer/TopBar/RightGroup" unique_id=1775897820]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 4
+size_flags_stretch_ratio = 180.0
 show_percentage = false
 script = ExtResource("3_a6ken")
+
+[node name="RightSpace" type="Container" parent="MainLayout/VBoxContainer/TopBar/RightGroup" unique_id=1891456030]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 100.0
 
 [node name="Spacer" type="Control" parent="MainLayout/VBoxContainer" unique_id=2002186177]
 layout_mode = 2
@@ -77,33 +106,53 @@ size_flags_vertical = 3
 mouse_filter = 2
 
 [node name="BottomBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=885063121]
-custom_minimum_size = Vector2(0, 140)
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
+size_flags_horizontal = 3
 mouse_filter = 2
 
 [node name="MapPlaceholder" type="Label" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1903530103]
-custom_minimum_size = Vector2(300, 250)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 220.0
 mouse_filter = 0
 theme_override_font_sizes/font_size = 32
-text = "MAP"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="MapBarSpace" type="Container" parent="MainLayout/VBoxContainer/BottomBar" unique_id=339790986]
-custom_minimum_size = Vector2(45, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 80.0
 mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1200270572]
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1000.0
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="SelectedEntityUi" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=320057448 instance=ExtResource("2_1x0qv")]
-custom_minimum_size = Vector2(1200, 135)
+[node name="SpaceTop" type="Container" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=1239076298]
 layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.75
+
+[node name="SelectedEntityUi" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=320057448 instance=ExtResource("2_1x0qv")]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="SpaceBottom" type="Container" parent="MainLayout/VBoxContainer/BottomBar/VBoxContainer" unique_id=658895877]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SpaceRight" type="Container" parent="MainLayout/VBoxContainer/BottomBar" unique_id=1317132191]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 290.0
 
 [node name="Container" type="Container" parent="MainLayout/VBoxContainer" unique_id=1768679183]
 custom_minimum_size = Vector2(0, 10)

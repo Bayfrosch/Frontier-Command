@@ -59,10 +59,10 @@ public partial class GameScene : Node2D
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 
 		materialCount = GetNode<Label>(
-			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/MaterialCount"
+			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/LeftGroup/MaterialCount"
 		);
 		energyBar = GetNode<EnergyBar>(
-			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/EnergyBar"
+			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/RightGroup/EnergyBar"
 		);
 
 		simulationCore.StateChanged += UpdateResourceUi;
