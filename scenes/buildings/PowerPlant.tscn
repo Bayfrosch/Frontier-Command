@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://5y786nj0d8pw"]
 
 [ext_resource type="Script" uid="uid://bhnr6n5n6w1sh" path="res://scripts/client/buildings/SimpleBuilding.cs" id="1_jr5sr"]
+[ext_resource type="Texture2D" uid="uid://vgmbe86wxlke" path="res://assets/PowerPlant.png" id="2_h2w2p"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c8qrl"]
 size = Vector2(100, 60)
@@ -8,37 +9,13 @@ size = Vector2(100, 60)
 [node name="PowerPlant" type="Node2D" unique_id=849060223]
 script = ExtResource("1_jr5sr")
 
-[node name="BodyRender" type="ColorRect" parent="." unique_id=1227736491]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+[node name="BodyRender" type="TextureRect" parent="." unique_id=627949559]
 offset_left = -50.0
 offset_top = -30.0
 offset_right = 50.0
 offset_bottom = 30.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.2380484, 0.62734413, 0.19573218, 1)
-
-[node name="Label" type="Label" parent="BodyRender" unique_id=345695302]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -11.5
-offset_right = 20.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "Pow"
-horizontal_alignment = 1
-vertical_alignment = 1
+texture = ExtResource("2_h2w2p")
+expand_mode = 1
 
 [node name="Area2D" type="Area2D" parent="." unique_id=363362439]
 visible = false

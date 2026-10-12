@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://dbulowa4pltoy" path="res://assets/Settings_Button_Pressed.png" id="3_vxx8g"]
 [ext_resource type="Texture2D" uid="uid://cv027h3qvw7ro" path="res://assets/Research_Button_Pressed.png" id="4_rnewm"]
 [ext_resource type="Script" uid="uid://cg27wi60rcl3d" path="res://scripts/client/GameUserInterface.cs" id="4_xg0oi"]
+[ext_resource type="PackedScene" uid="uid://bfhbfr5u0wqlo" path="res://scenes/UI/Settings.tscn" id="9_csb0y"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_w2k35"]
 texture = ExtResource("3_lvnnp")
@@ -206,52 +207,6 @@ size_flags_stretch_ratio = 290.0
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
-[node name="SettingsOverlay" type="Control" parent="." unique_id=1944202374]
+[node name="Settings" parent="." unique_id=1860861315 instance=ExtResource("9_csb0y")]
 visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="SettingsPanel" type="PanelContainer" parent="SettingsOverlay" unique_id=1076295893]
-custom_minimum_size = Vector2(380, 120)
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -190.0
-offset_top = -60.0
-offset_right = 190.0
-offset_bottom = 60.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="SettingsOverlay/SettingsPanel" unique_id=207725610]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="VBoxContainer" type="VBoxContainer" parent="SettingsOverlay/SettingsPanel/MarginContainer" unique_id=1566949152]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Title" type="Label" parent="SettingsOverlay/SettingsPanel/MarginContainer/VBoxContainer" unique_id=444125063]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Settings"
-horizontal_alignment = 1
-
-[node name="ButtonRow" type="HBoxContainer" parent="SettingsOverlay/SettingsPanel/MarginContainer/VBoxContainer" unique_id=814291309]
-layout_mode = 2
-alignment = 2
-
-[node name="CloseButton" type="Button" parent="SettingsOverlay/SettingsPanel/MarginContainer/VBoxContainer/ButtonRow" unique_id=76047300]
-custom_minimum_size = Vector2(96, 32)
-layout_mode = 2
-text = "Close"

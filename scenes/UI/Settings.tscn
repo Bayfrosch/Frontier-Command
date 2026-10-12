@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://bfhbfr5u0wqlo"]
+
+[node name="Settings" type="Control" unique_id=1860861315]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsPanel" type="PanelContainer" parent="." unique_id=479093934]
+custom_minimum_size = Vector2(380, 120)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -60.0
+offset_right = 190.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsPanel" unique_id=378172776]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingsPanel/MarginContainer" unique_id=1991806616]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=188549315]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=2071511221]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 16
+
+[node name="Button" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=835063751]
+layout_mode = 2
+text = "Button1"
+
+[node name="Button2" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1503089427]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Button2"
+
+[node name="Button3" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=380903691]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Button3"
+
+[node name="Button4" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1041885092]
+layout_mode = 2
+text = "Button4"
+
+[node name="ButtonRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=653787686]
+layout_mode = 2
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/ButtonRow" unique_id=1783107557]
+custom_minimum_size = Vector2(96, 32)
+layout_mode = 2
+text = "Close"

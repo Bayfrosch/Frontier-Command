@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dgflsx4r61iot"]
 
 [ext_resource type="Script" uid="uid://br2ef71l1w2ki" path="res://scripts/client/GameScene.cs" id="1_j8ivh"]
-[ext_resource type="PackedScene" uid="uid://rx502q8ojk4g" path="res://scenes/GameUserInterface.tscn" id="2_4doxw"]
+[ext_resource type="PackedScene" uid="uid://rx502q8ojk4g" path="res://scenes/UI/GameUserInterface.tscn" id="2_4doxw"]
 [ext_resource type="Script" uid="uid://dydin2bng3rwv" path="res://scripts/simulationcore/TimeTickSystem.cs" id="2_j8ivh"]
 [ext_resource type="Script" uid="uid://cvf4mreu4cle8" path="res://scripts/client/LocalSimulationNode.cs" id="4_7ddre"]
 [ext_resource type="Script" uid="uid://bciyihg0tcvnk" path="res://scripts/client/CameraController.cs" id="5_5a1sk"]

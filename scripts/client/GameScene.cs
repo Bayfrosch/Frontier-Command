@@ -28,6 +28,7 @@ public partial class GameScene : Node2D
 	private static readonly Color InvalidConstructionPreviewColor = new(1f, 0.15f, 0.15f, 0.65f);
 	private Node2D constructionPreview = null;
 	private BuildingType? constructionPreviewBuildingType = null;
+	private SelectionBoxOverlay selectionBoxOverlay = null;
 	private HashSet<string> EntitySelectionIds = new();
 	public IReadOnlyCollection<string> SelectedEntityIds => EntitySelectionIds;
 	private bool shiftHeld = false;
@@ -43,6 +44,14 @@ public partial class GameScene : Node2D
 	{
 		gameLoop = GetNode<TimeTickSystem>("GameLoop");
 		simulationCore = GetNode<LocalSimulationNode>("SimulationCore");
+		selectionBoxOverlay = new SelectionBoxOverlay
+		{
+			Name = "SelectionBoxOverlay",
+			ZIndex = (int)RenderingServer.CanvasItemZMax,
+			ZAsRelative = false
+		};
+		AddChild(selectionBoxOverlay);
+
 		if (simulationCore is null)
 		{
 			GD.PushError("SimulationCore node was not found or has the wrong script");
@@ -211,7 +220,7 @@ public partial class GameScene : Node2D
 				SelectionStartPos.DistanceTo(SelectionEndPos) >= DragThreshold)
 			{
 				IsDraggingSelection = true;
-				QueueRedraw();
+				selectionBoxOverlay.SetSelectionBox(SelectionStartPos, SelectionEndPos);
 			}
 		}
 	}
@@ -272,20 +281,7 @@ public partial class GameScene : Node2D
 	{
 		IsPotentialSelectionDrag = false;
 		IsDraggingSelection = false;
-		QueueRedraw();
-	}
-
-	public override void _Draw()
-	{
-		if (!IsDraggingSelection)
-			return;
-
-		var rect = new Rect2(
-			SelectionStartPos,
-			SelectionEndPos - SelectionStartPos
-		).Abs();
-
-		DrawRect(rect, new Color(0.2f, 0.9f, 0.0f, 0.8f), false, 2f);
+		selectionBoxOverlay.ClearSelectionBox();
 	}
 
 
@@ -618,5 +614,35 @@ public partial class GameScene : Node2D
 			return null;
 
 		return area.GetParent() as ClientEntity;
+	}
+
+	private partial class SelectionBoxOverlay : Node2D
+	{
+		private static readonly Color SelectionBoxColor = new(0.2f, 0.9f, 0.0f, 0.8f);
+		private bool isVisible = false;
+		private Vector2 start;
+		private Vector2 end;
+
+		public void SetSelectionBox(Vector2 p_start, Vector2 p_end)
+		{
+			isVisible = true;
+			start = p_start;
+			end = p_end;
+			QueueRedraw();
+		}
+
+		public void ClearSelectionBox()
+		{
+			isVisible = false;
+			QueueRedraw();
+		}
+
+		public override void _Draw()
+		{
+			if (!isVisible)
+				return;
+
+			DrawRect(new Rect2(start, end - start).Abs(), SelectionBoxColor, false, 2f);
+		}
 	}
 }
