@@ -58,12 +58,17 @@ public partial class GameScene : Node2D
 		}
 		selectedEntityUI.AbilityPressed += OnAbilityPressed;
 
-		materialCount = GetNode<Label>(
-			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/LeftGroup/MaterialCount"
+		materialCount = GetNodeOrNull<Label>(
+			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/VBoxContainer/MaterialCount"
 		);
-		energyBar = GetNode<EnergyBar>(
-			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/RightGroup/EnergyBar"
+		if (materialCount is null)
+			GD.PushError("MaterialCount node was not found or has the wrong script");
+
+		energyBar = GetNodeOrNull<EnergyBar>(
+			"Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/TopBar/RightGroup/VBoxContainer/EnergyBar"
 		);
+		if (energyBar is null)
+			GD.PushError("EnergyBar node was not found or has the wrong script");
 
 		simulationCore.StateChanged += UpdateResourceUi;
 		UpdateResourceUi();
@@ -592,8 +597,11 @@ public partial class GameScene : Node2D
 		if (!simulationCore.GetState().Players.TryGetValue("player_1", out var player))
 			return;
 
-		materialCount.Text = $"Virelium: {player.Virelium}";
-		energyBar.ApplyEnergy(player.EnergyProduced, player.EnergyConsumed);
+		if (materialCount is not null)
+			materialCount.Text = $"Virelium: {player.Virelium}";
+
+		if (energyBar is not null)
+			energyBar.ApplyEnergy(player.EnergyProduced, player.EnergyConsumed);
 	}
 
 	private bool IsAbilityUnlockedForLocalPlayer(string abilityId)
