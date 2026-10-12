@@ -2,7 +2,19 @@
 
 [ext_resource type="Texture2D" uid="uid://bfvtun6td1bcg" path="res://assets/GUI_Prototype.png" id="1_1x0qv"]
 [ext_resource type="PackedScene" uid="uid://eyrsmdrj0gyx" path="res://scenes/UI/SelectedEntityUI.tscn" id="2_1x0qv"]
+[ext_resource type="Texture2D" uid="uid://b2f5cpe38k5jl" path="res://assets/Settings_Button.png" id="2_553ex"]
 [ext_resource type="Script" uid="uid://bn7hvosxf7hxu" path="res://scripts/client/EnergyBar.cs" id="3_a6ken"]
+[ext_resource type="Texture2D" uid="uid://dbulowa4pltoy" path="res://assets/Settings_Button_Pressed.png" id="3_vxx8g"]
+[ext_resource type="Script" uid="uid://cg27wi60rcl3d" path="res://scripts/client/GameUserInterface.cs" id="4_xg0oi"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vxx8g"]
+texture = ExtResource("2_553ex")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7sj0m"]
+texture = ExtResource("3_vxx8g")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lyyww"]
+texture = ExtResource("2_553ex")
 
 [node name="GameUserInterface" type="Control" unique_id=1253293035]
 layout_mode = 3
@@ -12,6 +24,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("4_xg0oi")
 
 [node name="MainLayout" type="MarginContainer" parent="." unique_id=775742478]
 layout_mode = 1
@@ -38,8 +51,12 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 
+[node name="spacer" type="Container" parent="MainLayout/VBoxContainer" unique_id=1900032259]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
 [node name="TopBar" type="HBoxContainer" parent="MainLayout/VBoxContainer" unique_id=1593961572]
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
@@ -63,17 +80,30 @@ size_flags_horizontal = 3
 size_flags_stretch_ratio = 380.0
 text = "Virelium: 0"
 
-[node name="CenterGroup" type="CenterContainer" parent="MainLayout/VBoxContainer/TopBar" unique_id=811827799]
+[node name="HBoxContainer" type="HBoxContainer" parent="MainLayout/VBoxContainer/TopBar" unique_id=2119147137]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.75
-mouse_filter = 2
+theme_override_constants/separation = 80
 
-[node name="ButtonsPlaceholder" type="Label" parent="MainLayout/VBoxContainer/TopBar/CenterGroup" unique_id=1473169176]
+[node name="ButtonsPlaceholder" type="Label" parent="MainLayout/VBoxContainer/TopBar/HBoxContainer" unique_id=1473169176]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Buttons"
+text = "Button"
 horizontal_alignment = 1
+
+[node name="ButtonsPlaceholder2" type="Label" parent="MainLayout/VBoxContainer/TopBar/HBoxContainer" unique_id=2020803002]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Button"
+horizontal_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="MainLayout/VBoxContainer/TopBar/HBoxContainer" unique_id=75217919]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_vxx8g")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_7sj0m")
+theme_override_styles/hover = SubResource("StyleBoxTexture_lyyww")
 
 [node name="RightGroup" type="HBoxContainer" parent="MainLayout/VBoxContainer/TopBar" unique_id=32431801]
 layout_mode = 2
@@ -157,3 +187,54 @@ size_flags_stretch_ratio = 290.0
 [node name="Container" type="Container" parent="MainLayout/VBoxContainer" unique_id=1768679183]
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
+
+[node name="SettingsOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="SettingsPanel" type="PanelContainer" parent="SettingsOverlay"]
+custom_minimum_size = Vector2(380, 120)
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -60.0
+offset_right = 190.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsOverlay/SettingsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingsOverlay/SettingsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="SettingsOverlay/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="SettingsOverlay/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="SettingsOverlay/SettingsPanel/MarginContainer/VBoxContainer/ButtonRow"]
+custom_minimum_size = Vector2(96, 32)
+layout_mode = 2
+text = "Close"
