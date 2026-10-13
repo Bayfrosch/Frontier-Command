@@ -2,17 +2,14 @@ using Godot;
 
 public partial class ConstructionSite : ClientBuilding
 {
-	private ColorRect BodyRender = null;
 	private ProgressBar BuildProgressBar = null;
-	private CollisionShape2D CollisionShape = null;
+	private BuildingType? footprintType;
 
     public override void _Ready()
     {
 		base._Ready();
 
-		BodyRender = GetNode<ColorRect>("BodyRender");
 		BuildProgressBar = GetNode<ProgressBar>("BodyRender/BuildProgressBar");
-		CollisionShape = GetNode<CollisionShape2D>("Area2D/CollisionShape2D");
 		BuildProgressBar.MaxValue = 100;
 		BuildProgressBar.Value = 0;
     }
@@ -21,33 +18,42 @@ public partial class ConstructionSite : ClientBuilding
     {
         base.ApplyState(state);
 
-		ApplyFootprintSize(state.pendingBuilding);
+		ApplyFootprint(state.pendingBuilding);
 		BuildProgressBar.Value = state.BuildProgression;
 		if (state.BuildProgression >= 100)
 			BuildProgressBar.Visible = false;
 
     }
 
-	private void ApplyFootprintSize(BuildingType pendingBuildingType)
+	// Also used by placement previews before the node enters the scene tree.
+	public void ApplyFootprint(BuildingType pendingBuildingType)
 	{
-		var footprintSize = BuildingCatalog.GetFoodprintSize(pendingBuildingType);
+		if (footprintType == pendingBuildingType)
+			return;
 
-		BodyRender.OffsetLeft = -footprintSize.X / 2f;
-		BodyRender.OffsetTop = -footprintSize.Y / 2f;
-		BodyRender.OffsetRight = footprintSize.X / 2f;
-		BodyRender.OffsetBottom = footprintSize.Y / 2f;
+		var footprint = BuildingCatalog.GetFootprintRect(pendingBuildingType, Vector2.Zero);
+		var body = GetNode<ColorRect>("BodyRender");
+		var progressBar = GetNode<ProgressBar>("BodyRender/BuildProgressBar");
+		var collisionShape = GetNode<CollisionShape2D>("Area2D/CollisionShape2D");
 
-		BuildProgressBar.OffsetLeft = -footprintSize.X / 2f + 5f;
-		BuildProgressBar.OffsetRight = footprintSize.X / 2f - 5f;
+		body.OffsetLeft = footprint.Position.X;
+		body.OffsetTop = footprint.Position.Y;
+		body.OffsetRight = footprint.End.X;
+		body.OffsetBottom = footprint.End.Y;
 
-		if (CollisionShape.Shape is RectangleShape2D rectangleShape)
+		progressBar.OffsetLeft = -footprint.Size.X / 2f + 5f;
+		progressBar.OffsetRight = footprint.Size.X / 2f - 5f;
+		collisionShape.Position = footprint.GetCenter();
+
+		if (collisionShape.Shape is RectangleShape2D rectangleShape)
 		{
 			var siteShape = rectangleShape.Duplicate() as RectangleShape2D;
 			if (siteShape is null)
 				return;
 
-			siteShape.Size = footprintSize;
-			CollisionShape.Shape = siteShape;
+			siteShape.Size = footprint.Size;
+			collisionShape.Shape = siteShape;
 		}
+		footprintType = pendingBuildingType;
 	}
 }

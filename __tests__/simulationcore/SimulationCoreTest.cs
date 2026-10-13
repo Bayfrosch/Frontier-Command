@@ -168,13 +168,13 @@ public class SimulationCoreTest
 	[TestCase]
 	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromLeftToRight()
 	{
-		AssertMoveRoutesAroundBuilding(Vector2.Zero, new Vector2(200, 0), movedOffAxis: point => System.Math.Abs(point.Y) > 1f);
+		AssertMoveRoutesAroundBuilding(new Vector2(-100, 0), new Vector2(300, 0), movedOffAxis: point => System.Math.Abs(point.Y) > 1f);
 	}
 
 	[TestCase]
 	public void AdvanceTick_MoveUnits_RoutesAroundBuildingFootprints_FromRightToLeft()
 	{
-		AssertMoveRoutesAroundBuilding(new Vector2(200, 0), Vector2.Zero, movedOffAxis: point => System.Math.Abs(point.Y) > 1f);
+		AssertMoveRoutesAroundBuilding(new Vector2(300, 0), new Vector2(-100, 0), movedOffAxis: point => System.Math.Abs(point.Y) > 1f);
 	}
 
 	[TestCase]
@@ -612,7 +612,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var neutral = new PlayerState("neutral");
-		var player = new PlayerState("player-1");
+		var player = new PlayerState("player-1", 0);
 		context.AddPlayer(neutral);
 		context.AddPlayer(player);
 
@@ -627,7 +627,7 @@ public class SimulationCoreTest
 		var gatherer = new BuildingState(
 			"gatherer-1",
 			"player-1",
-			resource.CurrentPosition + new Vector2(100, 0),
+			resource.CurrentPosition + new Vector2(BuildingCatalog.GetFoodprintSize(BuildingType.RESOURCE_GATHERER).X / 2f + 100f, 0),
 			BuildingType.RESOURCE_GATHERER,
 			""
 		);
@@ -664,9 +664,9 @@ public class SimulationCoreTest
 		AssertThat(collector.Carry).IsEqual(collector.MaxCapacity);
 		AssertThat(resource.CurrentAmount).IsEqual(ResourceCatalog.GetMaxAmount(ResourceType.VIRELIUM) - collector.MaxCapacity);
 		AssertThat(collector.HasMoveOrder).IsTrue();
-		var gathererHalfWidth = BuildingCatalog.GetFoodprintSize(BuildingType.RESOURCE_GATHERER).X / 2f;
+		var gathererFootprint = BuildingCatalog.GetFootprintRect(gatherer);
 		AssertThat(collector.TargetPosition).IsEqual(
-			gatherer.CurrentPosition + Vector2.Left * (gathererHalfWidth + 10f));
+			new Vector2(gathererFootprint.Position.X - 10f, resource.CurrentPosition.Y));
 
 		for (var i = 0; i < 5; i++)
 			context.AdvanceTick();
@@ -937,7 +937,7 @@ public class SimulationCoreTest
 			p_issued_at_tick: 0,
 			p_caster_entity_ids: new[] { "builder-1" },
 			p_ability_id: "spawn_barracks",
-			p_target_position: new Vector2(120, 0)
+			p_target_position: new Vector2(BuildingCatalog.GetFoodprintSize(BuildingType.BARRACKS).X, 0)
 		);
 
 		AssertThat(context.Push(msg)).IsTrue();
@@ -1029,8 +1029,9 @@ public class SimulationCoreTest
 
 		var building = player.Entities.Values.OfType<BuildingState>().Single();
 		AssertThat(player.EnergyConsumed).IsEqual(2);
-		AssertThat(building.Abilities.Count).IsEqual(1);
+		AssertThat(building.Abilities.Count).IsEqual(2);
 		AssertThat(building.Abilities.Any(ability => ability.Id == "sell_building")).IsTrue();
+		AssertThat(building.Abilities.Any(ability => ability.Id == "spawn_light_tank")).IsTrue();
 	}
 
 	[TestCase]
@@ -1170,9 +1171,7 @@ public class SimulationCoreTest
 		var lightTank = player.Entities.Values
 			.OfType<UnitState>()
 			.Single(unit => unit.Type == UnitType.LIGHT_TANK);
-		var expectedSpawnPoint = warFactory.CurrentPosition
-			+ BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(warFactory)) / 2f
-			+ new Vector2(5, 5);
+		var expectedSpawnPoint = BuildingCatalog.GetFootprintRect(warFactory).End + new Vector2(5, 5);
 
 		AssertThat(warFactory.ProductionQueue).IsEmpty();
 		AssertThat(lightTank.CurrentPosition).IsEqual(expectedSpawnPoint);
@@ -1253,12 +1252,11 @@ public class SimulationCoreTest
 
 	private static bool IsInsideBuildingFootprint(Vector2 point, BuildingState building)
 	{
-		var footprintSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
-		var halfSize = footprintSize / 2f;
-		return point.X >= building.CurrentPosition.X - halfSize.X
-			&& point.X <= building.CurrentPosition.X + halfSize.X
-			&& point.Y >= building.CurrentPosition.Y - halfSize.Y
-			&& point.Y <= building.CurrentPosition.Y + halfSize.Y;
+		var footprint = BuildingCatalog.GetFootprintRect(building);
+		return point.X >= footprint.Position.X
+			&& point.X <= footprint.End.X
+			&& point.Y >= footprint.Position.Y
+			&& point.Y <= footprint.End.Y;
 	}
 
 	private static void AssertMoveRoutesAroundBuilding(Vector2 start, Vector2 destination, System.Func<Vector2, bool> movedOffAxis)

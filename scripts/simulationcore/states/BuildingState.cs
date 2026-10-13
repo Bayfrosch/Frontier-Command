@@ -11,7 +11,7 @@ public sealed class BuildingState : EntityState
 		: base(entityId, ownerPlayerId, currentPos, BuildingCatalog.GetMaxHealth(BuildingType.CONSTRUCTION_SITE), BuildingCatalog.GetArmorClass(BuildingType.CONSTRUCTION_SITE))
 	{
 		Type = BuildingType.CONSTRUCTION_SITE;
-		RallyPoint = currentPos + BuildingCatalog.GetFoodprintSize(pendingBuildingType) / 2f + new Vector2(20f, 20f);
+		RallyPoint = BuildingCatalog.GetFootprintRect(pendingBuildingType, currentPos).End + new Vector2(20f, 20f);
 		Abilities = AbilityCatalog.ForBuilding(BuildingType.CONSTRUCTION_SITE);
 		ConstructionUnitId = constructionUnitId;
 		ConstructionCost = Math.Max(0, constructionCost);

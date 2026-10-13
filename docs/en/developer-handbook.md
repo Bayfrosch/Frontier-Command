@@ -399,6 +399,18 @@ Buildings that do not consume Energy should use the default `0`.
 
 `GetFootprintType` usually does not need changes unless construction-site behavior changes.
 
+Footprint sizes and offsets must match the rectangle at `Area2D/CollisionShape2D`
+in the completed building scene, including its position relative to the root node.
+Use the collision rectangle rather than the texture dimensions: building art can
+extend beyond the ground footprint. After resizing or moving a scene's collision,
+update `GetFoodprintSize` and `GetFootprintOffset` in the catalog.
+`BuildingFootprintTest.CatalogFootprints_MatchAuthoredSceneCollisions` checks every
+completed building scene for drift.
+
+Use `BuildingCatalog.GetFootprintRect` for placement, navigation, distances, and
+exit positions so the offset is applied consistently. Its `BuildingState` overload
+also resolves a construction site's pending building type.
+
 ## 3. Add Building Abilities
 
 Edit `scripts/simulationcore/AbilityCatalog.cs`.
@@ -549,7 +561,9 @@ Example:
 ["spawn_new_building"] = BuildingType.NEW_BUILDING
 ```
 
-The preview uses `ConstructionSite.tscn` and resizes its body/collision footprint from `BuildingCatalog`.
+The preview uses `ConstructionSite.tscn` and calls `ConstructionSite.ApplyFootprint`,
+which applies the catalog size and offset to both its body and collision. Active
+construction sites use the same method, so completion keeps the reserved footprint.
 
 ## 9. Add Tests
 

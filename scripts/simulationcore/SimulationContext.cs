@@ -118,9 +118,7 @@ public sealed class SimulationContext
 					if (unit is null)
 						continue;
 
-					var spawnPoint = building.CurrentPosition
-						+ BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building)) / 2f
-						+ new Vector2(5, 5);
+					var spawnPoint = BuildingCatalog.GetFootprintRect(building).End + new Vector2(5, 5);
 					unitsToSpawn.Add(new DebugSpawnUnitsMessage(
 						player.PlayerId,
 						_matchState.Tick,
@@ -363,10 +361,16 @@ public sealed class SimulationContext
 		}
 
 		var attackRangeSquared = unit.AttackRange * unit.AttackRange;
-		if (unit.CurrentPosition.DistanceSquaredTo(target.CurrentPosition) > attackRangeSquared)
+		var distanceSquared = target is BuildingState targetBuilding
+			? DistanceSquaredToBuildingFootprint(unit.CurrentPosition, targetBuilding)
+			: unit.CurrentPosition.DistanceSquaredTo(target.CurrentPosition);
+		if (distanceSquared > attackRangeSquared)
 		{
 			unit.ResetAttackWindup();
-			unit.SetMoveOrder(target.CurrentPosition + unit.AttackFormationOffset, preserveAttackOrder: true);
+			var approachPosition = target is BuildingState building
+				? GetBuildingApproachPosition(unit.CurrentPosition + unit.AttackFormationOffset, building, unit.AttackRange / 2f)
+				: target.CurrentPosition + unit.AttackFormationOffset;
+			unit.SetMoveOrder(approachPosition, preserveAttackOrder: true);
 			return;
 		}
 
@@ -497,8 +501,9 @@ public sealed class SimulationContext
 	*/
 	private Vector2 FindShortestPathToBuilding(Vector2 unitPosition, BuildingState building)
 	{
-		var buildingSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
-		var buildingCenter = building.CurrentPosition;
+		var footprint = BuildingCatalog.GetFootprintRect(building);
+		var buildingSize = footprint.Size;
+		var buildingCenter = footprint.GetCenter();
 		var direction = unitPosition - buildingCenter;
 
 		if (direction == Vector2.Zero)
@@ -548,19 +553,18 @@ public sealed class SimulationContext
 	*/
 	private static float DistanceSquaredToBuildingFootprint(Vector2 point, BuildingState building)
 	{
-		var size = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
-		var halfSize = size / 2f;
+		var footprint = BuildingCatalog.GetFootprintRect(building);
 
 		float closestX = Math.Clamp(
 			point.X,
-			building.CurrentPosition.X - halfSize.X,
-			building.CurrentPosition.X + halfSize.X
+			footprint.Position.X,
+			footprint.End.X
 		);
 
 		float closestY = Math.Clamp(
 			point.Y,
-			building.CurrentPosition.Y - halfSize.Y,
-			building.CurrentPosition.Y + halfSize.Y
+			footprint.Position.Y,
+			footprint.End.Y
 		);
 		
 		return point.DistanceSquaredTo(new Vector2(closestX, closestY));
@@ -1112,8 +1116,9 @@ public sealed class SimulationContext
 		BuildingState building,
 		float clearance)
 	{
-		var halfSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building)) / 2f;
-		var localPosition = approachPosition - building.CurrentPosition;
+		var footprint = BuildingCatalog.GetFootprintRect(building);
+		var halfSize = footprint.Size / 2f;
+		var localPosition = approachPosition - footprint.GetCenter();
 		var borderPosition = new Vector2(
 			Math.Clamp(localPosition.X, -halfSize.X, halfSize.X),
 			Math.Clamp(localPosition.Y, -halfSize.Y, halfSize.Y));
@@ -1151,7 +1156,7 @@ public sealed class SimulationContext
 			}
 		}
 
-		return building.CurrentPosition
+		return footprint.GetCenter()
 			+ borderPosition
 			+ outwardDirection.Normalized() * Math.Max(0f, clearance);
 	}
@@ -1583,11 +1588,7 @@ public sealed class SimulationContext
 
 	private static Rect2 GetPathBlockingRect(BuildingState building)
 	{
-		var footprintSize = BuildingCatalog.GetFoodprintSize(BuildingCatalog.GetFootprintType(building));
-		return new Rect2(
-			building.CurrentPosition - footprintSize / 2f,
-			footprintSize
-		);
+		return BuildingCatalog.GetFootprintRect(building);
 	}
 
 	private static bool SegmentIntersectsRect(Vector2 start, Vector2 end, Rect2 rect)
@@ -1634,8 +1635,10 @@ public sealed class SimulationContext
 			.OfType<EntityState>()
 			.Any(entity =>
 				entity.EntityId != ignoredEntityId
-				&& (entity.CurrentPosition.DistanceSquaredTo(position) <= collisionDistanceSquared
-					|| entity is UnitState unit && unit.HasMoveOrder && unit.TargetPosition.DistanceSquaredTo(position) <= collisionDistanceSquared));
+				&& (entity is BuildingState building
+					? BuildingCatalog.GetFootprintRect(building).HasPoint(position)
+					: entity.CurrentPosition.DistanceSquaredTo(position) <= collisionDistanceSquared
+						|| entity is UnitState unit && unit.HasMoveOrder && unit.TargetPosition.DistanceSquaredTo(position) <= collisionDistanceSquared));
 	}
 
 	/*

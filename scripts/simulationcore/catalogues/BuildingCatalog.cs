@@ -3,21 +3,45 @@ using Godot;
 public static class BuildingCatalog
 {
 	/*
-	Central place for building footprint sizes.
-	Client previews and placement-adjacent logic use the same values.
+	Footprints match Area2D/CollisionShape2D in the authored building scenes.
+	Texture bounds may extend beyond these ground footprints.
 	*/
 	public static Vector2 GetFoodprintSize(BuildingType type)
 	{
 		return type switch
 		{
-			BuildingType.BARRACKS => new Vector2(120, 80),
+			BuildingType.BARRACKS => new Vector2(239, 131),
 			BuildingType.RESOURCE_SPAWNER => new Vector2(80, 80),
-			BuildingType.RESOURCE_GATHERER => new Vector2(130, 90),
-			BuildingType.COMMAND_CENTER => new Vector2(180, 180),
-			BuildingType.POWER_PLANT => new Vector2(100, 60),
-			BuildingType.WAR_FACTORY => new Vector2(140, 90),
+			BuildingType.RESOURCE_GATHERER => new Vector2(324, 170),
+			BuildingType.COMMAND_CENTER => new Vector2(320, 304),
+			BuildingType.POWER_PLANT => new Vector2(183, 86),
+			BuildingType.WAR_FACTORY => new Vector2(276, 150),
 			_ => new Vector2(0, 0)
 		};
+	}
+
+	public static Vector2 GetFootprintOffset(BuildingType type)
+	{
+		return type switch
+		{
+			BuildingType.BARRACKS => new Vector2(0.5f, 14.5f),
+			BuildingType.RESOURCE_GATHERER => new Vector2(0, 11),
+			BuildingType.COMMAND_CENTER => new Vector2(70, 62),
+			BuildingType.POWER_PLANT => new Vector2(-0.5f, -2),
+			BuildingType.WAR_FACTORY => new Vector2(0, 3),
+			_ => Vector2.Zero
+		};
+	}
+
+	public static Rect2 GetFootprintRect(BuildingType type, Vector2 position)
+	{
+		var size = GetFoodprintSize(type);
+		return new Rect2(position + GetFootprintOffset(type) - size / 2f, size);
+	}
+
+	public static Rect2 GetFootprintRect(BuildingState building)
+	{
+		return GetFootprintRect(GetFootprintType(building), building.CurrentPosition);
 	}
 
 	/*
@@ -84,7 +108,7 @@ public static class BuildingCatalog
 	}
 
 	/*
-	Returns true when two centered building footprints overlap.
+	Returns true when two building footprints overlap, including their scene offsets.
 	Touching edges are allowed so buildings can be placed directly beside each other.
 	*/
 	public static bool FootprintsOverlap(
@@ -93,10 +117,7 @@ public static class BuildingCatalog
 		BuildingType secondType,
 		Vector2 secondPosition)
 	{
-		var combinedHalfSize = (GetFoodprintSize(firstType) + GetFoodprintSize(secondType)) / 2f;
-		var centerDistance = (firstPosition - secondPosition).Abs();
-
-		return centerDistance.X < combinedHalfSize.X
-			&& centerDistance.Y < combinedHalfSize.Y;
+		return GetFootprintRect(firstType, firstPosition)
+			.Intersects(GetFootprintRect(secondType, secondPosition));
 	}
 }

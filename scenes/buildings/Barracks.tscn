@@ -7,30 +7,34 @@
 bg_color = Color(0, 0.6732143, 0.77275443, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_n8bkc"]
-size = Vector2(120, 80)
+size = Vector2(239, 131)
 
 [node name="Building" type="Node2D" unique_id=989638719]
 script = ExtResource("1_4cvxb")
 
 [node name="BodyRender" type="TextureRect" parent="." unique_id=1972028295]
-offset_left = -60.0
-offset_top = -40.0
-offset_right = 60.0
-offset_bottom = 40.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -80.0
+offset_right = 120.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("2_iaqe3")
 expand_mode = 1
 
 [node name="ProductionProgressBar" type="ProgressBar" parent="BodyRender" unique_id=601997097]
 layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
+anchors_preset = 12
 anchor_top = 1.0
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -50.0
 offset_top = 2.0
-offset_right = 50.0
-offset_bottom = 7.0
+offset_bottom = 9.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/fill = SubResource("StyleBoxFlat_a3sb6")
@@ -39,4 +43,5 @@ show_percentage = false
 [node name="Area2D" type="Area2D" parent="." unique_id=203866379]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=374974786]
+position = Vector2(0.5, 14.5)
 shape = SubResource("RectangleShape2D_n8bkc")

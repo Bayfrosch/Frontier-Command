@@ -84,20 +84,23 @@ public partial class GameScene : Node2D
 
 		// Debuging 
 		// Spawn Command Center
+		var commandCenterPosition = new Vector2(100, 100);
 		simulationCore.Push(new DebugSpawnBuildingMessage(
 			"player_1",
 			gameLoop.CurrentTick,
 			BuildingType.COMMAND_CENTER,
-			new Vector2(100, 100)
+			commandCenterPosition
 		));
 
 		// Spawn units in order to test the game
+		var builderPosition = BuildingCatalog.GetFootprintRect(BuildingType.COMMAND_CENTER, commandCenterPosition).End
+			+ new Vector2(20, 20);
 		simulationCore.Push(new DebugSpawnUnitsMessage(
 			"player_1",
 			gameLoop.CurrentTick,
 			UnitType.CONSTRUCTION_UNIT,
-			new Vector2(100, 250),
-			new Vector2(100, 250),
+			builderPosition,
+			builderPosition,
 			UnitCatalog.GetMovementSpeed(UnitType.CONSTRUCTION_UNIT)
 		));
 
@@ -327,7 +330,7 @@ public partial class GameScene : Node2D
 
 		constructionPreview = ConstructionSitePreviewScene.Instantiate<Node2D>();
 		constructionPreviewBuildingType = previewBuildingType;
-		ConfigureConstructionPreviewFootprint(constructionPreview, previewBuildingType);
+		((ConstructionSite)constructionPreview).ApplyFootprint(previewBuildingType);
 		constructionPreview.ZIndex = 100;
 		ClientWorldInput.IgnoreGuiMouse(constructionPreview);
 		DisablePreviewPicking(constructionPreview);
@@ -360,30 +363,6 @@ public partial class GameScene : Node2D
 				position,
 				BuildingCatalog.GetFootprintType(building),
 				building.CurrentPosition));
-	}
-
-	private static void ConfigureConstructionPreviewFootprint(Node2D preview, BuildingType buildingType)
-	{
-		var footprintSize = BuildingCatalog.GetFoodprintSize(buildingType);
-
-		if (preview.GetNodeOrNull<ColorRect>("BodyRender") is ColorRect body)
-		{
-			body.OffsetLeft = -footprintSize.X / 2f;
-			body.OffsetTop = -footprintSize.Y / 2f;
-			body.OffsetRight = footprintSize.X / 2f;
-			body.OffsetBottom = footprintSize.Y / 2f;
-		}
-
-		if (preview.GetNodeOrNull<CollisionShape2D>("Area2D/CollisionShape2D") is CollisionShape2D collisionShape
-			&& collisionShape.Shape is RectangleShape2D rectangleShape)
-		{
-			var previewShape = rectangleShape.Duplicate() as RectangleShape2D;
-			if (previewShape is null)
-				return;
-
-			previewShape.Size = footprintSize;
-			collisionShape.Shape = previewShape;
-		}
 	}
 
 	private void ClearAbilityTargetSelection()
