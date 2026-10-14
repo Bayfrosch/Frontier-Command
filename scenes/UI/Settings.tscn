@@ -40,28 +40,18 @@ theme_override_font_sizes/font_size = 24
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=2071511221]
+[node name="ResolutionRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=2071511221]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 16
 
-[node name="Button" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=835063751]
+[node name="ResolutionLabel" type="Label" parent="SettingsPanel/MarginContainer/VBoxContainer/ResolutionRow" unique_id=835063751]
 layout_mode = 2
-text = "Button1"
+text = "Resolution"
 
-[node name="Button2" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1503089427]
+[node name="ResolutionOptions" type="OptionButton" parent="SettingsPanel/MarginContainer/VBoxContainer/ResolutionRow" unique_id=1503089427]
 layout_mode = 2
-size_flags_horizontal = 4
-text = "Button2"
-
-[node name="Button3" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=380903691]
-layout_mode = 2
-size_flags_horizontal = 8
-text = "Button3"
-
-[node name="Button4" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1041885092]
-layout_mode = 2
-text = "Button4"
+size_flags_horizontal = 3
 
 [node name="ButtonRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=653787686]
 layout_mode = 2
