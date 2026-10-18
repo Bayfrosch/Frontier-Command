@@ -105,6 +105,17 @@ public sealed class SimulationContext
 		
 		foreach (var player in _matchState.Players.Values)
 		{
+			foreach (var project in player.ResearchProjects.Values.ToArray())
+			{
+				if (!TryGetPlayerEntity<BuildingState>(player.PlayerId, project.StructureId, out var host)
+					|| host is null || host.Health <= 0)
+					continue;
+				if (project.Advance())
+				{
+					player.AddResearch(project.ResearchId);
+					player.RemoveResearchProject(project.ResearchId);
+				}
+			}
 			foreach (var entity in player.Entities.Values)
 			{
 				if (entity is BuildingState building)
@@ -726,15 +737,35 @@ public sealed class SimulationContext
 		}
 		return true;
 	}
-	// TODO:
 	private bool HandleStartResearch(StartResearchMessage msg)
 	{
-		return false;
+		if (!TryGetPlayer(msg.player_id, out var player) || player is null
+			|| !ResearchCatalog.TryGet(msg.research_id, out var technology))
+			return false;
+		// shortcut: the Command Center hosts outline research until a research-center building exists.
+		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.research_structure_id, out var host)
+			|| host is null || host.Type != BuildingType.COMMAND_CENTER || host.Health <= 0)
+			return false;
+		if (player.Research.ContainsKey(technology.Id)
+			|| player.ResearchProjects.Values.Any(project => project.Chapter == technology.Chapter)
+			|| ResearchCatalog.LockReason(player, technology).Length > 0
+			|| player.Virelium < technology.MaterialCost)
+			return false;
+
+		player.RemoveMaterials(technology.MaterialCost);
+		player.AddResearchProject(new ResearchProjectState(technology, msg.research_structure_id));
+		return true;
 	}
-	// TODO:
 	private bool HandleCancelResearch(CancelResearchMessage msg)
 	{
-		return false;
+		if (!TryGetPlayer(msg.player_id, out var player) || player is null
+			|| !player.ResearchProjects.TryGetValue(msg.research_queue_item_id, out var project)
+			|| project.StructureId != msg.research_structure_id)
+			return false;
+
+		player.RemoveResearchProject(project.ResearchId);
+		player.AddMaterials(project.PaidMaterials);
+		return true;
 	}
 	// TODO:
 	private bool HandleChooseCapitalUpgrade(ChooseCapitalUpgradeMessage msg)

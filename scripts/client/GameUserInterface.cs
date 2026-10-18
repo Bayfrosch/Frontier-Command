@@ -2,6 +2,7 @@ using Godot;
 
 public partial class GameUserInterface : Control
 {
+	public ResearchOverlay Research { get; private set; }
 	private Control settings = null;
 	private OptionButton resolutionOptions;
 	private readonly Vector2I[] resolutions =
@@ -15,6 +16,15 @@ public partial class GameUserInterface : Control
 
 	public override void _Ready()
 	{
+		var researchButton = GetNode<Button>("MainLayout/VBoxContainer/TopBar/HBoxContainer/ResearchButton");
+		Research = GetNode<ResearchOverlay>("Research");
+		researchButton.Pressed += () =>
+		{
+			settings.Hide();
+			Research.Show();
+			Research.GetNode<Button>("ResearchPanel/Margin/Layout/Header/CloseButton").GrabFocus();
+		};
+		Research.Closed += () => researchButton.GrabFocus();
 		var settingsButton = GetNode<Button>("MainLayout/VBoxContainer/TopBar/HBoxContainer/SettingsButton");
 		settings = GetNode<Control>("Settings");
 		var closeButton = GetNode<Button>("Settings/SettingsPanel/MarginContainer/VBoxContainer/ButtonRow/CloseButton");
@@ -25,6 +35,15 @@ public partial class GameUserInterface : Control
 
 		settingsButton.Pressed += ToggleSettings;
 		closeButton.Pressed += HideSettings;
+	}
+
+	public override void _UnhandledKeyInput(InputEvent @event)
+	{
+		if (Research.Visible && @event.IsActionPressed("ui_cancel"))
+		{
+			Research.Close();
+			GetViewport().SetInputAsHandled();
+		}
 	}
 
 	private void ToggleSettings()

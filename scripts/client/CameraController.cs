@@ -8,6 +8,12 @@ public partial class CameraController : Camera2D
 
 	private bool isDraggingCamera = false;
 
+	public void BlockInput(bool blocked)
+	{
+		isDraggingCamera = false;
+		SetProcessInput(!blocked);
+	}
+
 	public override void _Input(InputEvent @event)
 	{
 		if (@event is InputEventMouseButton mouseButtonEvent)

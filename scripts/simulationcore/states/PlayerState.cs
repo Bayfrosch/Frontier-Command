@@ -79,6 +79,10 @@ public sealed class PlayerState
 	*/
 	private readonly Dictionary<string, bool> _research = new();
 	public IReadOnlyDictionary<string, bool> Research => _research;
+	private readonly Dictionary<string, ResearchProjectState> _researchProjects = new();
+	public IReadOnlyDictionary<string, ResearchProjectState> ResearchProjects => _researchProjects;
+	internal void AddResearchProject(ResearchProjectState project) => _researchProjects.Add(project.ResearchId, project);
+	internal bool RemoveResearchProject(string researchId) => _researchProjects.Remove(researchId);
 	private readonly HashSet<string> _unlockedAbilities = AbilityCatalog.GetDefaultUnlockedAbilityIds();
 	public IReadOnlySet<string> UnlockedAbilities => _unlockedAbilities;
 	public int AbilityUnlockRevision { get; private set; }

@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cv027h3qvw7ro" path="res://assets/Research_Button_Pressed.png" id="4_rnewm"]
 [ext_resource type="Script" uid="uid://cg27wi60rcl3d" path="res://scripts/client/GameUserInterface.cs" id="4_xg0oi"]
 [ext_resource type="PackedScene" uid="uid://bfhbfr5u0wqlo" path="res://scenes/UI/Settings.tscn" id="9_csb0y"]
+[ext_resource type="PackedScene" uid="uid://bwcm1j5icjh0c" path="res://scenes/UI/Research.tscn" id="10_research"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_w2k35"]
 texture = ExtResource("3_lvnnp")
@@ -93,6 +94,7 @@ theme_override_constants/separation = 80
 [node name="ResearchButton" type="Button" parent="MainLayout/VBoxContainer/TopBar/HBoxContainer" unique_id=1051531588]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
+tooltip_text = "Research"
 theme_override_styles/normal = SubResource("StyleBoxTexture_w2k35")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_dlwme")
 theme_override_styles/hover = SubResource("StyleBoxTexture_dtun5")
@@ -209,4 +211,7 @@ layout_mode = 2
 
 [node name="Settings" parent="." unique_id=1860861315 instance=ExtResource("9_csb0y")]
 visible = false
+layout_mode = 1
+
+[node name="Research" parent="." instance=ExtResource("10_research")]
 layout_mode = 1

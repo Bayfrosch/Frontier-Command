@@ -51,6 +51,17 @@ public partial class GameScene : Node2D
 			ZAsRelative = false
 		};
 		AddChild(selectionBoxOverlay);
+		var research = GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
+		research.BindSimulation(simulationCore);
+		research.VisibilityChanged += () =>
+		{
+			ClearSelectionDragState();
+			if (research.Visible)
+				ClearAbilityTargetSelection();
+			SetProcessInput(!research.Visible);
+			SetProcessUnhandledInput(!research.Visible);
+			GetNode<CameraController>("Camera2D").BlockInput(research.Visible);
+		};
 
 		if (simulationCore is null)
 		{

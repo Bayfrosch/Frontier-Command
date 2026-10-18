@@ -1,5 +1,8 @@
 [gd_scene format=3 uid="uid://bfhbfr5u0wqlo"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x7qbw"]
+bg_color = Color(0.14767182, 0.14767182, 0.14767176, 1)
+
 [node name="Settings" type="Control" unique_id=1860861315]
 layout_mode = 3
 anchors_preset = 15
@@ -22,6 +25,7 @@ offset_right = 190.0
 offset_bottom = 60.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_x7qbw")
 
 [node name="MarginContainer" type="MarginContainer" parent="SettingsPanel" unique_id=378172776]
 layout_mode = 2
