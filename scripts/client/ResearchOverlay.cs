@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+//TODO: Link buttons to messages
+//TODO: Power doesnt get consumed
+
 public partial class ResearchOverlay : Control
 {
 	[Signal]
@@ -19,6 +22,10 @@ public partial class ResearchOverlay : Control
 	private readonly Dictionary<string, Button> cards = new();
 	private readonly Dictionary<ResearchChapter, Control> canvases = new();
 	private readonly List<(Label Label, ResearchDefinition[] Technologies)> treeProgress = new();
+	private readonly HashSet<string> completedCards = new();
+	private readonly StyleBoxFlat completedNormal = CardStyle(new Color("17392b"), new Color("69c991"));
+	private readonly StyleBoxFlat completedHover = CardStyle(new Color("224c36"), new Color("90e5b0"));
+	private readonly StyleBoxFlat completedSelected = CardStyle(new Color("24573b"), new Color("edc77f"));
 	private Label title;
 	private Label category;
 	private Label description;
@@ -260,6 +267,14 @@ public partial class ResearchOverlay : Control
 		}
 		foreach (var technology in ResearchCatalog.All)
 		{
+			var card = cards[technology.Id];
+			if (player.Research.ContainsKey(technology.Id) && completedCards.Add(technology.Id))
+			{
+				card.AddThemeStyleboxOverride("normal", completedNormal);
+				card.AddThemeStyleboxOverride("hover", completedHover);
+				card.AddThemeStyleboxOverride("pressed", completedSelected);
+				card.AddThemeStyleboxOverride("hover_pressed", completedSelected);
+			}
 			var otherPath = IsOtherDoctrinePath(technology, chosenDoctrine);
 			var state = otherPath ? doctrinePending ? "OTHER PATH PENDING" : "EXCLUDED"
 				: player.Research.ContainsKey(technology.Id) ? "COMPLETE"
@@ -268,10 +283,10 @@ public partial class ResearchOverlay : Control
 			var doctrine = technology.Id is "infantry_doctrine" or "tank_doctrine";
 			if (doctrine && chosenDoctrine is null)
 				state = technology.Tree == "Infantry" ? "EXCLUDES TANKS" : "EXCLUDES INFANTRY";
-			cards[technology.Id].Text = doctrine
+			card.Text = doctrine
 				? $"{technology.Name}\n{state}\n{technology.MaterialCost:N0} Materials"
 				: $"{technology.Name}\n{state}  |  {technology.MaterialCost:N0} Materials";
-			cards[technology.Id].Modulate = otherPath ? new Color(0.45f, 0.45f, 0.45f) : Colors.White;
+			card.Modulate = otherPath ? new Color(0.45f, 0.45f, 0.45f) : Colors.White;
 		}
 	}
 
