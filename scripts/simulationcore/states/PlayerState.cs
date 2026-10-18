@@ -32,6 +32,14 @@ public sealed class PlayerState
 		EnergyConsumed += BuildingCatalog.GetPowerConsumption(type);
 		UpdateAbilityUnlocks();
 	}
+	internal void AddEnergyConsumption(int val)
+	{
+		EnergyConsumed += val;
+	}
+	internal void RemoveEnergyConsumption(int val)
+	{
+		EnergyConsumed -= val;
+	}
 	internal void RemoveCompletedBuilding(BuildingType type)
 	{
 		_completeBuildingCount[type] = Math.Max(0, GetCompleteBuildingCount(type) - 1);

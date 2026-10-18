@@ -110,8 +110,13 @@ public sealed class SimulationContext
 				if (!TryGetPlayerEntity<BuildingState>(player.PlayerId, project.StructureId, out var host)
 					|| host is null || host.Health <= 0)
 					continue;
-				if (project.Advance())
+
+				if (!ResearchCatalog.TryGet(project.ResearchId, out var technology))
+					continue;
+
+				if (project.Advance(player.EnergyConsumed <= player.EnergyProduced))
 				{
+					player.RemoveEnergyConsumption(technology.Energy);
 					player.AddResearch(project.ResearchId);
 					player.RemoveResearchProject(project.ResearchId);
 				}
@@ -752,6 +757,7 @@ public sealed class SimulationContext
 			|| player.Virelium < technology.MaterialCost)
 			return false;
 
+		player.AddEnergyConsumption(technology.Energy);
 		player.RemoveMaterials(technology.MaterialCost);
 		player.AddResearchProject(new ResearchProjectState(technology, msg.research_structure_id));
 		return true;
@@ -760,9 +766,11 @@ public sealed class SimulationContext
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null
 			|| !player.ResearchProjects.TryGetValue(msg.research_queue_item_id, out var project)
-			|| project.StructureId != msg.research_structure_id)
+			|| project.StructureId != msg.research_structure_id
+			|| !ResearchCatalog.TryGet(project.ResearchId, out var technology))
 			return false;
 
+		player.RemoveEnergyConsumption(technology.Energy);
 		player.RemoveResearchProject(project.ResearchId);
 		player.AddMaterials(project.PaidMaterials);
 		return true;

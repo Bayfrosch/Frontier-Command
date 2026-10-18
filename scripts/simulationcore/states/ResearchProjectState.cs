@@ -16,5 +16,9 @@ public sealed class ResearchProjectState
 	public int DurationTicks { get; }
 	public int ElapsedTicks { get; private set; }
 
-	internal bool Advance() => ++ElapsedTicks >= DurationTicks;
+	internal bool Advance(bool hasEnergy) {
+		if (hasEnergy)
+			ElapsedTicks++;
+		return ElapsedTicks >= DurationTicks;
+	}
 }

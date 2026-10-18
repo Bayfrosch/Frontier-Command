@@ -27,6 +27,34 @@ public class ResearchOverlayTest
 	}
 
 	[TestCase]
+	public async Task PowerDeficit_PausesDisplayedTimer_AndRestoredPowerResumesIt()
+	{
+		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
+		await runner.SimulateFrames(2);
+		var scene = runner.Scene();
+		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
+		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
+		var player = simulation.GetState().Players["player_1"];
+		overlay.Show();
+		overlay.GetNode<Button>("ResearchPanel/Margin/Layout/Body/TreeScroll/TreeCenter/MilitaryTree/light_tanks")
+			.EmitSignal(Button.SignalName.Pressed);
+		overlay.GetNode<Button>(StartPath).EmitSignal(Button.SignalName.Pressed);
+		var status = overlay.GetNode<Label>("ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/Status");
+		AssertThat(status.Text).IsEqual("Paused: insufficient energy (60s remaining)");
+		for (var tick = 0; tick < 20; tick++)
+			simulation.Context.AdvanceTick();
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(status.Text).IsEqual("Paused: insufficient energy (60s remaining)");
+		AssertThat(player.ResearchProjects["light_tanks"].ElapsedTicks).IsEqual(0);
+
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		for (var tick = 0; tick < 5; tick++)
+			simulation.Context.AdvanceTick();
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(status.Text).IsEqual("Researching: 59s remaining");
+	}
+
+	[TestCase]
 	public async Task ChapterTabs_SelectCivilianAndMilitaryTrees_AfterScrolling()
 	{
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
@@ -225,6 +253,8 @@ public class ResearchOverlayTest
 		AssertThat(tanks.Modulate).IsEqual(originalColor);
 		tanks.EmitSignal(Button.SignalName.Pressed);
 		overlay.GetNode<Button>(StartPath).EmitSignal(Button.SignalName.Pressed);
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		for (var tick = 0; tick < 600; tick++)
 			simulation.Context.AdvanceTick();
 		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);

@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-//TODO: Link buttons to messages
-//TODO: Power doesnt get consumed
-
 public partial class ResearchOverlay : Control
 {
 	[Signal]
@@ -251,8 +248,10 @@ public partial class ResearchOverlay : Control
 			progress.Value = 100.0 * project.ElapsedTicks / project.DurationTicks;
 			var remaining = Mathf.CeilToInt((project.DurationTicks - project.ElapsedTicks) * TimeTickSystem.TICK_DELTA);
 			var hostAlive = player.Entities.TryGetValue(project.StructureId, out var host) && host.Health > 0;
-			status.Text = hostAlive ? $"Researching: {remaining}s remaining" : "Paused: research host lost";
-			cancelButton.Text = $"Cancel / refund {project.PaidMaterials:N0}";
+			status.Text = !hostAlive ? "Paused: research host lost"
+				: player.EnergyConsumed > player.EnergyProduced ? $"Paused: insufficient energy ({remaining}s remaining)"
+				: $"Researching: {remaining}s remaining";
+			cancelButton.Text = "Cancel";
 		}
 		else
 		{

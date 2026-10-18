@@ -18,6 +18,59 @@ public class ResearchTest
 	}
 
 	[TestCase]
+	public void PowerDeficit_PausesProgress_AndRestoredPowerResumesUntilCompletion()
+	{
+		var (context, player, _) = CreateGame();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"))).IsTrue();
+		var project = player.ResearchProjects["light_tanks"];
+		for (var tick = 0; tick < 10; tick++)
+			context.AdvanceTick();
+		AssertThat(project.ElapsedTicks).IsEqual(0);
+		AssertThat(player.EnergyConsumed).IsEqual(10);
+
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		for (var tick = 0; tick < 100; tick++)
+			context.AdvanceTick();
+		AssertThat(project.ElapsedTicks).IsEqual(100);
+
+		player.RemoveCompletedBuilding(BuildingType.POWER_PLANT);
+		for (var tick = 0; tick < 400; tick++)
+			context.AdvanceTick();
+		AssertThat(project.ElapsedTicks).IsEqual(100);
+		AssertThat(player.Research.ContainsKey("light_tanks")).IsFalse();
+		AssertThat(player.EnergyConsumed).IsEqual(10);
+
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		for (var tick = 100; tick < project.DurationTicks; tick++)
+			context.AdvanceTick();
+		AssertThat(player.Research.ContainsKey("light_tanks")).IsTrue();
+		AssertThat(player.ResearchProjects.Count).IsEqual(0);
+		AssertThat(player.EnergyConsumed).IsEqual(0);
+		context.AdvanceTick();
+		AssertThat(player.EnergyConsumed).IsEqual(0);
+	}
+
+	[TestCase]
+	public void CancelDuringPowerDeficit_ReleasesOnlyCancelledProjectsEnergy_AndResumesOtherProject()
+	{
+		var (context, player, _) = CreateGame();
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"));
+		context.Push(new StartResearchMessage("player", 0, "center", "refining"));
+		context.AdvanceTick();
+		AssertThat(player.ResearchProjects["light_tanks"].ElapsedTicks).IsEqual(0);
+		AssertThat(player.ResearchProjects["refining"].ElapsedTicks).IsEqual(0);
+		AssertThat(player.EnergyConsumed).IsEqual(15);
+
+		AssertThat(context.Push(new CancelResearchMessage("player", 1, "center", "refining"))).IsTrue();
+		AssertThat(player.EnergyConsumed).IsEqual(10);
+		AssertThat(context.Push(new CancelResearchMessage("player", 1, "center", "refining"))).IsFalse();
+		AssertThat(player.EnergyConsumed).IsEqual(10);
+		context.AdvanceTick();
+		AssertThat(player.ResearchProjects["light_tanks"].ElapsedTicks).IsEqual(1);
+	}
+
+	[TestCase]
 	public void Start_SpendsOnce_AndAllowsOneProjectPerChapter()
 	{
 		var (context, player, _) = CreateGame();
@@ -72,6 +125,7 @@ public class ResearchTest
 	public void Cancel_RefundsFullCostAfterProgress_OnlyOnce()
 	{
 		var (context, player, _) = CreateGame();
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"));
 		for (var tick = 0; tick < 100; tick++)
 			context.AdvanceTick();
@@ -88,6 +142,7 @@ public class ResearchTest
 	public void Complete_UsesSimulationTime_WithoutGrantingGameplayAbilities()
 	{
 		var (context, player, _) = CreateGame();
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		var abilities = player.UnlockedAbilities.ToArray();
 		context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"));
 		for (var tick = 0; tick < 299; tick++)
@@ -107,6 +162,7 @@ public class ResearchTest
 	public void LostHost_PausesProject_AndStillAllowsFullRefund()
 	{
 		var (context, player, host) = CreateGame();
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"));
 		host.TakeDamage(host.MaxHealth);
 		for (var tick = 0; tick < 400; tick++)
@@ -182,6 +238,8 @@ public class ResearchTest
 			CompleteCoreTree(player, ResearchChapter.Military, "Tanks");
 			CompleteCoreTree(player, ResearchChapter.Civilian, "Extraction");
 			AssertThat(context.Push(new StartResearchMessage("player", 0, "center", doctrine))).IsTrue();
+			player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+			player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 			for (var tick = 0; tick < 600; tick++)
 				context.AdvanceTick();
 			var balance = player.Virelium;
