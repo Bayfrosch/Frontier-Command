@@ -9,7 +9,8 @@ public partial class ResearchOverlay : Control
 	public delegate void ClosedEventHandler();
 
 	private const string DetailPath = "ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/";
-	private static readonly Vector2 CardSize = new(280, 96);
+	private static readonly Vector2 CardSize = new(240, 64);
+	private static readonly Vector2 CardStep = new(288, 100);
 	private static readonly Dictionary<ResearchChapter, string[]> Trees = new()
 	{
 		[ResearchChapter.Military] = ["Infantry", "Tanks", "Aircraft"],
@@ -110,7 +111,7 @@ public partial class ResearchOverlay : Control
 					var tree = Trees[chapter][column];
 					var nodes = technologies.Where(technology => technology.Tree == tree && technology.Generation == generation).ToArray();
 					rows = Math.Max(rows, nodes.Length);
-					var x = 152 + column * 332 + (chapter == ResearchChapter.Fleet ? 166 : 0);
+					var x = 152 + column * CardStep.X + (chapter == ResearchChapter.Fleet ? CardStep.X / 2 : 0);
 					if (generation == 1)
 					{
 						var heading = new Label
@@ -125,7 +126,7 @@ public partial class ResearchOverlay : Control
 					for (var row = 0; row < nodes.Length; row++)
 					{
 						var technology = nodes[row];
-						var position = new Vector2(x, y + row * 145);
+						var position = new Vector2(x, y + row * CardStep.Y);
 						canvas.Positions.Add(technology.Id, position);
 						var card = new Button
 						{
@@ -150,16 +151,16 @@ public partial class ResearchOverlay : Control
 				{
 					var eitherOr = new Label
 					{
-						Name = "DoctrineEitherOr", Position = new Vector2(438, y + 34), Size = new Vector2(40, 28),
+						Name = "DoctrineEitherOr", Position = new Vector2(396, y + 18), Size = new Vector2(40, 28),
 						Text = "OR", HorizontalAlignment = HorizontalAlignment.Center, MouseFilter = MouseFilterEnum.Ignore
 					};
 					eitherOr.AddThemeColorOverride("font_color", new Color("e3a76a"));
 					eitherOr.AddThemeFontSizeOverride("font_size", 20);
 					canvas.AddChild(eitherOr);
 				}
-				y += rows * 145 + 32;
+				y += rows * CardStep.Y + 32;
 			}
-			canvas.CustomMinimumSize = new Vector2(1120, y);
+			canvas.CustomMinimumSize = new Vector2(992, y);
 		}
 	}
 
@@ -168,7 +169,7 @@ public partial class ResearchOverlay : Control
 		canvas.AddChild(new ColorRect
 		{
 			Name = $"Generation{generation}Divider",
-			Position = new Vector2(128, y), Size = new Vector2(992, 2),
+			Position = new Vector2(128, y), Size = new Vector2(864, 2),
 			Color = new Color("777052"), MouseFilter = MouseFilterEnum.Ignore
 		});
 		var number = generation switch { 1 => "I", 2 => "II", _ => "III" };
@@ -267,7 +268,10 @@ public partial class ResearchOverlay : Control
 		foreach (var technology in ResearchCatalog.All)
 		{
 			var card = cards[technology.Id];
-			if (player.Research.ContainsKey(technology.Id) && completedCards.Add(technology.Id))
+			var cardCompleted = player.Research.ContainsKey(technology.Id);
+			var cardResearching = player.ResearchProjects.ContainsKey(technology.Id);
+			var cardLocked = !cardCompleted && !cardResearching && ResearchCatalog.LockReason(player, technology).Length > 0;
+			if (cardCompleted && completedCards.Add(technology.Id))
 			{
 				card.AddThemeStyleboxOverride("normal", completedNormal);
 				card.AddThemeStyleboxOverride("hover", completedHover);
@@ -276,16 +280,16 @@ public partial class ResearchOverlay : Control
 			}
 			var otherPath = IsOtherDoctrinePath(technology, chosenDoctrine);
 			var state = otherPath ? doctrinePending ? "OTHER PATH PENDING" : "EXCLUDED"
-				: player.Research.ContainsKey(technology.Id) ? "COMPLETE"
-				: player.ResearchProjects.ContainsKey(technology.Id) ? "RESEARCHING"
-				: ResearchCatalog.LockReason(player, technology).Length > 0 ? "LOCKED" : "READY";
+				: cardCompleted ? "COMPLETE"
+				: cardResearching ? "RESEARCHING" : "";
 			var doctrine = technology.Id is "infantry_doctrine" or "tank_doctrine";
 			if (doctrine && chosenDoctrine is null)
 				state = technology.Tree == "Infantry" ? "EXCLUDES TANKS" : "EXCLUDES INFANTRY";
-			card.Text = doctrine
-				? $"{technology.Name}\n{state}\n{technology.MaterialCost:N0} Materials"
-				: $"{technology.Name}\n{state}  |  {technology.MaterialCost:N0} Materials";
-			card.Modulate = otherPath ? new Color(0.45f, 0.45f, 0.45f) : Colors.White;
+			card.Text = state.Length == 0
+				? technology.Name
+				: $"{technology.Name}\n{state}";
+			card.Modulate = otherPath ? new Color(0.45f, 0.45f, 0.45f)
+				: cardLocked ? new Color(0.55f, 0.55f, 0.55f) : Colors.White;
 		}
 	}
 
