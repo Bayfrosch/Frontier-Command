@@ -69,7 +69,7 @@ public static class AbilityCatalog
 					Name = "Rocket Troops",
 					Cost = 120,
 					RequiresTarget = false,
-					UnlockedFromStart = true
+					UnlockedFromStart = false
 				});
 				break;
 

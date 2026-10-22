@@ -18,6 +18,201 @@ public class ResearchTest
 	}
 
 	[TestCase]
+	public void InfantryBranches_UnlockIndependentlyAfterRecruitment()
+	{
+		var (context, player, _) = CreateGame();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "better_weapons"))).IsFalse();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "support_equipment"))).IsFalse();
+		player.AddResearch("infantry_training");
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "better_weapons"))).IsTrue();
+		AssertThat(context.Push(new CancelResearchMessage("player", 0, "center", "better_weapons"))).IsTrue();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "anti_armor_infantry"))).IsTrue();
+		AssertThat(context.Push(new CancelResearchMessage("player", 0, "center", "anti_armor_infantry"))).IsTrue();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "support_equipment"))).IsFalse();
+		player.AddResearch("anti_armor_infantry");
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "support_equipment"))).IsTrue();
+	}
+
+	[TestCase]
+	public void SupportEquipment_TwoLevelsPreserveDamageAndRefundThePriceActuallyPaid()
+	{
+		var (context, player, _) = CreateGame();
+		player.AddResearch("infantry_training");
+		player.AddResearch("anti_armor_infantry");
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		var infantry = new UnitState("infantry", "player", new Vector2(500, 0), 100f);
+		var rpg = new UnitState("rpg", "player", new Vector2(600, 0), 80f, UnitType.RPG_TROOPER);
+		var tank = new UnitState("tank", "player", new Vector2(700, 0), 70f, UnitType.LIGHT_TANK);
+		player.AddEntity(infantry);
+		player.AddEntity(rpg);
+		player.AddEntity(tank);
+		infantry.TakeDamage(60);
+		var opponent = new PlayerState("opponent");
+		var enemy = new UnitState("enemy", "opponent", new Vector2(800, 0), 100f);
+		opponent.AddEntity(enemy);
+		context.AddPlayer(opponent);
+
+		for (var level = 1; level <= 2; level++)
+		{
+			var price = level == 1 ? 1400 : 1800;
+			var balance = player.Virelium;
+			var start = new StartResearchMessage("player", context.get().Tick, "center", "support_equipment");
+			AssertThat(context.Push(start)).IsTrue();
+			AssertThat(context.Push(start)).IsFalse();
+			AssertThat(player.Virelium).IsEqual(balance - price);
+			AssertThat(player.EnergyConsumed).IsEqual(10);
+			context.AdvanceTick();
+			AssertThat(context.Push(new CancelResearchMessage("player", context.get().Tick, "center", "support_equipment"))).IsTrue();
+			AssertThat(player.Virelium).IsEqual(balance);
+			AssertThat(player.GetResearchLevel("support_equipment")).IsEqual(level - 1);
+			AssertThat(player.EnergyConsumed).IsEqual(0);
+			AssertThat(context.Push(start)).IsTrue();
+			var project = player.ResearchProjects["support_equipment"];
+			AssertThat(project.Level).IsEqual(level);
+			AssertThat(project.DurationTicks).IsEqual(375);
+			player.RemoveCompletedBuilding(BuildingType.POWER_PLANT);
+			context.AdvanceTick();
+			AssertThat(project.ElapsedTicks).IsEqual(0);
+			player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+			for (var tick = 0; tick < project.DurationTicks - 1; tick++)
+				context.AdvanceTick();
+			AssertThat(infantry.Health).IsEqual(40 + (level - 1) * 25);
+			context.AdvanceTick();
+			AssertThat(player.GetResearchLevel("support_equipment")).IsEqual(level);
+			AssertThat(infantry.Health).IsEqual(40 + level * 25);
+			AssertThat(infantry.MaxHealth).IsEqual(100 + level * 25);
+			AssertThat(rpg.Health).IsEqual(100 + level * 25);
+			AssertThat(rpg.MaxHealth).IsEqual(100 + level * 25);
+			AssertThat(tank.MaxHealth).IsEqual(450);
+			AssertThat(enemy.MaxHealth).IsEqual(100);
+			AssertThat(player.EnergyConsumed).IsEqual(0);
+			player.AddResearch("support_equipment", level);
+			AssertThat(infantry.Health).IsEqual(40 + level * 25);
+		}
+		var finalBalance = player.Virelium;
+		AssertThat(context.Push(new StartResearchMessage("player", context.get().Tick, "center", "support_equipment"))).IsFalse();
+		AssertThat(player.Virelium).IsEqual(finalBalance);
+		foreach (var type in new[] { UnitType.BASIC_INFANTRY, UnitType.RPG_TROOPER })
+		{
+			AssertThat(context.Push(new DebugSpawnUnitsMessage("player", context.get().Tick, type, new Vector2(900, 0), new Vector2(900, 0), 100f))).IsTrue();
+			AssertThat(player.Entities.Values.OfType<UnitState>().Where(unit => unit.Type == type).All(unit => unit.MaxHealth == 150)).IsTrue();
+		}
+		infantry.TakeDamage(1000);
+		player.AddResearch("support_equipment", 2);
+		AssertThat(infantry.Health).IsEqual(0);
+	}
+
+	[TestCase]
+	public void SupportEquipment_FirstLevelCountsButDoesNotCompleteOtherResearch()
+	{
+		var (_, player, _) = CreateGame();
+		player.AddResearch("infantry_training");
+		player.AddResearch("anti_armor_infantry");
+		player.AddResearch("support_equipment", 2);
+		AssertThat(ResearchCatalog.CompletedCoreTrees(player, ResearchChapter.Military)).IsEqual(0);
+		AssertThat(player.Research.ContainsKey("better_weapons")).IsFalse();
+
+		var (_, other, _) = CreateGame();
+		other.AddResearch("infantry_training");
+		other.AddResearch("anti_armor_infantry");
+		other.AddResearch("better_weapons");
+		AssertThat(ResearchCatalog.CompletedCoreTrees(other, ResearchChapter.Military)).IsEqual(0);
+		other.AddResearch("support_equipment");
+		AssertThat(ResearchCatalog.CompletedCoreTrees(other, ResearchChapter.Military)).IsEqual(1);
+		var followingResearch = new ResearchDefinition("following", "Following research", ResearchChapter.Military,
+			"Infantry", 1, 100, 0, 1, "", ["support_equipment"]);
+		AssertThat(ResearchCatalog.LockReason(other, followingResearch)).IsEqual("");
+		AssertThat(other.Research.ContainsKey("following")).IsFalse();
+	}
+
+	[TestCase]
+	public void AntiArmorSquads_UnlocksRpgProductionOnlyAfterCompletionForItsOwner()
+	{
+		var (context, player, _) = CreateGame();
+		var opponent = new PlayerState("opponent");
+		context.AddPlayer(opponent);
+		player.AddResearch("infantry_training");
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		AssertThat(context.Push(new DebugSpawnBuildingMessage("player", 0, BuildingType.BARRACKS, new Vector2(500, 0)))).IsTrue();
+		var barracks = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.BARRACKS);
+		var ability = new UseAbilityMessage("player", 0, new[] { barracks.EntityId }, "spawn_rocket_troops");
+		var train = new TrainUnitsMessage(UnitType.RPG_TROOPER, "player", 0, barracks.EntityId);
+		var materials = player.Virelium;
+		AssertThat(player.UnlockedAbilities.Contains("spawn_rocket_troops")).IsFalse();
+		AssertThat(context.Push(ability)).IsFalse();
+		AssertThat(context.Push(train)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(materials);
+		AssertThat(barracks.ProductionQueue).IsEmpty();
+
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "anti_armor_infantry"))).IsTrue();
+		context.AdvanceTick();
+		AssertThat(context.Push(ability)).IsFalse();
+		AssertThat(context.Push(train)).IsFalse();
+		AssertThat(context.Push(new CancelResearchMessage("player", 1, "center", "anti_armor_infantry"))).IsTrue();
+		AssertThat(context.Push(train)).IsFalse();
+		AssertThat(context.Push(new StartResearchMessage("player", 1, "center", "anti_armor_infantry"))).IsTrue();
+		var duration = player.ResearchProjects["anti_armor_infantry"].DurationTicks;
+		for (var tick = 0; tick < duration - 1; tick++)
+			context.AdvanceTick();
+		AssertThat(context.Push(train)).IsFalse();
+		var revision = player.AbilityUnlockRevision;
+		context.AdvanceTick();
+
+		AssertThat(player.AbilityUnlockRevision).IsEqual(revision + 1);
+		AssertThat(opponent.UnlockedAbilities.Contains("spawn_rocket_troops")).IsFalse();
+		AssertThat(context.Push(ability)).IsTrue();
+		AssertThat(context.Push(train)).IsTrue();
+		AssertThat(barracks.ProductionQueue.Count).IsEqual(2);
+		for (var tick = 0; tick < UnitCatalog.GetProductionTime(UnitType.RPG_TROOPER) / 5; tick++)
+			context.AdvanceTick();
+		AssertThat(player.Entities.Values.OfType<UnitState>().Single().Type).IsEqual(UnitType.RPG_TROOPER);
+	}
+
+	[TestCase]
+	public void BetterWeapons_UpgradesExistingAndNewBasicInfantryAndTheirCombatDamageOnly()
+	{
+		var (context, player, _) = CreateGame();
+		player.AddResearch("infantry_training");
+		player.AddResearch("anti_armor_infantry");
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		foreach (var type in System.Enum.GetValues<UnitType>())
+			player.AddEntity(new UnitState(type.ToString(), "player", new Vector2(500, 0), 100f, type));
+		var infantry = (UnitState)player.Entities[UnitType.BASIC_INFANTRY.ToString()];
+		var opponent = new PlayerState("opponent");
+		var target = new UnitState("target", "opponent", new Vector2(550, 0), 100f);
+		opponent.AddEntity(target);
+		context.AddPlayer(opponent);
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "better_weapons"))).IsTrue();
+		context.AdvanceTick();
+		AssertThat(infantry.AttackDamage).IsEqual(10);
+		AssertThat(context.Push(new CancelResearchMessage("player", 1, "center", "better_weapons"))).IsTrue();
+		AssertThat(infantry.AttackDamage).IsEqual(10);
+		AssertThat(context.Push(new StartResearchMessage("player", 1, "center", "better_weapons"))).IsTrue();
+		var duration = player.ResearchProjects["better_weapons"].DurationTicks;
+		for (var tick = 0; tick < duration - 1; tick++)
+			context.AdvanceTick();
+		AssertThat(infantry.AttackDamage).IsEqual(10);
+		context.AdvanceTick();
+
+		AssertThat(infantry.AttackDamage).IsEqual(12);
+		AssertThat(target.AttackDamage).IsEqual(10);
+		foreach (var unit in player.Entities.Values.OfType<UnitState>().Where(unit => unit.Type != UnitType.BASIC_INFANTRY))
+			AssertThat(unit.AttackDamage).IsEqual(UnitCatalog.GetAttackDamage(unit.Type));
+		player.AddResearch("better_weapons");
+		AssertThat(infantry.AttackDamage).IsEqual(12);
+		AssertThat(context.Push(new DebugSpawnUnitsMessage("player", 400, UnitType.BASIC_INFANTRY,
+			new Vector2(800, 0), new Vector2(800, 0), 100f))).IsTrue();
+		AssertThat(player.Entities.Values.OfType<UnitState>().Where(unit => unit.Type == UnitType.BASIC_INFANTRY)
+			.All(unit => unit.AttackDamage == 12)).IsTrue();
+
+		AssertThat(context.Push(new AttackTargetMessage("player", 400, new[] { infantry.EntityId }, target.EntityId))).IsTrue();
+		context.AdvanceTick();
+		context.AdvanceTick();
+		// Small arms deal 125% damage against light armor: 12 * 1.25 = 15.
+		AssertThat(target.Health).IsEqual(target.MaxHealth - 15);
+	}
+
+	[TestCase]
 	public void PowerDeficit_PausesProgress_AndRestoredPowerResumesUntilCompletion()
 	{
 		var (context, player, _) = CreateGame();

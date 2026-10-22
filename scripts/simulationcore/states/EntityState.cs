@@ -41,4 +41,10 @@ public abstract class EntityState
 			? MaxHealth
 			: Math.Min(Health, MaxHealth);
 	}
+	protected void SetMaxHealthPreservingDamage(int maxHealth)
+	{
+		maxHealth = Math.Max(1, maxHealth);
+		Health = Health > 0 ? Math.Clamp(Health + maxHealth - MaxHealth, 0, maxHealth) : 0;
+		MaxHealth = maxHealth;
+	}
 }

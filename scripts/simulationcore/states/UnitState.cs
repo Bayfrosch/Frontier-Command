@@ -28,6 +28,8 @@ public class UnitState : EntityState
 	public string ConstructionTargetId { get; private set; } = "";
 	public bool HasConstructionOrder { get; private set; }
 	public int AttackDamage { get; private set; }
+	internal void SetAttackDamage(int damage) => AttackDamage = damage;
+	internal void ApplyHealthBonus(int bonus) => SetMaxHealthPreservingDamage(UnitCatalog.GetMaxHealth(Type) + bonus);
 	public WeaponClass WeaponClass { get; private set; }
 	public float AttackRange { get; private set; }
 	public float AttackWindupTime { get; private set; }

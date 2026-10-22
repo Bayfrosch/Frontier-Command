@@ -72,6 +72,8 @@ public sealed class PlayerState
 	*/
 	internal void AddEntity(EntityState entity)
 	{
+		if (entity is UnitState unit)
+			ApplyUnitResearch(unit);
 		_entities[entity.EntityId] = entity;
 	}
 	/*
@@ -85,8 +87,9 @@ public sealed class PlayerState
 	_research is the private editable version of the Dictionary
 	Research is the public version which cannot be edited but only read
 	*/
-	private readonly Dictionary<string, bool> _research = new();
-	public IReadOnlyDictionary<string, bool> Research => _research;
+	private readonly Dictionary<string, int> _research = new();
+	public IReadOnlyDictionary<string, int> Research => _research;
+	public int GetResearchLevel(string research) => _research.GetValueOrDefault(research);
 	private readonly Dictionary<string, ResearchProjectState> _researchProjects = new();
 	public IReadOnlyDictionary<string, ResearchProjectState> ResearchProjects => _researchProjects;
 	internal void AddResearchProject(ResearchProjectState project) => _researchProjects.Add(project.ResearchId, project);
@@ -107,10 +110,25 @@ public sealed class PlayerState
 	/*
 	Marks research as unlocked for this player.
 	*/
-	internal void AddResearch(string research)
+	internal void AddResearch(string research, int level = 1)
 	{
-		_research[research] = true;
+		_research[research] = Math.Max(GetResearchLevel(research), level);
+		if (research == "anti_armor_infantry")
+			UnlockAbility("spawn_rocket_troops");
+		if (research is "better_weapons" or "support_equipment")
+		{
+			foreach (var unit in _entities.Values.OfType<UnitState>())
+				ApplyUnitResearch(unit);
+		}
 	}
+	private void ApplyUnitResearch(UnitState unit)
+	{
+		unit.SetAttackDamage(GetAttackDamage(unit.Type));
+		if (unit.Type is UnitType.BASIC_INFANTRY or UnitType.RPG_TROOPER)
+			unit.ApplyHealthBonus(25 * GetResearchLevel("support_equipment"));
+	}
+	internal int GetAttackDamage(UnitType type) => UnitCatalog.GetAttackDamage(type)
+		+ (type == UnitType.BASIC_INFANTRY && Research.ContainsKey("better_weapons") ? 2 : 0);
 	/*
 	Marks an ability id as available for this player.
 	*/

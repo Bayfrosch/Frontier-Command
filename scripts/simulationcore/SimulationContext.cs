@@ -118,7 +118,7 @@ public sealed class SimulationContext
 				if (project.Advance(player.EnergyConsumed <= player.EnergyProduced))
 				{
 					player.RemoveEnergyConsumption(technology.Energy);
-					player.AddResearch(project.ResearchId);
+					player.AddResearch(project.ResearchId, project.Level);
 					player.RemoveResearchProject(project.ResearchId);
 				}
 			}
@@ -708,6 +708,9 @@ public sealed class SimulationContext
 	{
 		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building) || building is null)
 			return false;
+		if (!TryGetPlayer(msg.PlayerId, out var player)
+			|| msg.UnitDefinitionId == UnitType.RPG_TROOPER && !player.HasUnlockedAbility("spawn_rocket_troops"))
+			return false;
 
 		building.QueueProduction(msg.UnitDefinitionId, msg.quantity);
 
@@ -754,15 +757,16 @@ public sealed class SimulationContext
 		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.research_structure_id, out var host)
 			|| host is null || host.Type != BuildingType.COMMAND_CENTER || host.Health <= 0)
 			return false;
-		if (player.Research.ContainsKey(technology.Id)
+		var level = player.GetResearchLevel(technology.Id) + 1;
+		if (level > technology.MaxLevel
 			|| player.ResearchProjects.Values.Any(project => project.Chapter == technology.Chapter)
 			|| ResearchCatalog.LockReason(player, technology).Length > 0
-			|| player.Virelium < technology.MaterialCost)
+			|| player.Virelium < technology.GetMaterialCost(level))
 			return false;
 
 		player.AddEnergyConsumption(technology.Energy);
-		player.RemoveMaterials(technology.MaterialCost);
-		player.AddResearchProject(new ResearchProjectState(technology, msg.research_structure_id));
+		player.RemoveMaterials(technology.GetMaterialCost(level));
+		player.AddResearchProject(new ResearchProjectState(technology, msg.research_structure_id, level));
 		return true;
 	}
 	private bool HandleCancelResearch(CancelResearchMessage msg)

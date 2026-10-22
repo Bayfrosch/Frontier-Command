@@ -6,7 +6,11 @@ public enum ResearchChapter { Military, Civilian, Fleet }
 
 public sealed record ResearchDefinition(
 	string Id, string Name, ResearchChapter Chapter, string Tree, int Generation,
-	int MaterialCost, int Energy, int Seconds, string Description, string[] Prerequisites);
+	int MaterialCost, int Energy, int Seconds, string Description, string[] Prerequisites, int[] UpgradeCosts = null)
+{
+	public int MaxLevel => 1 + (UpgradeCosts?.Length ?? 0);
+	public int GetMaterialCost(int level) => level == 1 ? MaterialCost : UpgradeCosts[level - 2];
+}
 
 public static class ResearchCatalog
 {
@@ -16,9 +20,11 @@ public static class ResearchCatalog
 		new("infantry_training", "Better Recruitment", ResearchChapter.Military, "Infantry", 1, 1000, 5, 60,
 			"Improve recruitment for infantry leading to +1 spawning infantry unit.", []),
 		new("anti_armor_infantry", "Anti-armor squads", ResearchChapter.Military, "Infantry", 1, 1200, 10, 60,
-			"Unlock infantry equipped to counter tanks and other armored threats.", ["infantry_training"]),
-		new("support_infantry", "Support infantry", ResearchChapter.Military, "Infantry", 1, 1400, 10, 75,
-			"Unlock infantry support teams to sustain a mixed frontline army.", ["anti_armor_infantry"]),
+			"Unlock RPG Troopers for production in the Barracks to counter tanks and other armored threats.", ["infantry_training"]),
+		new("better_weapons", "Better Weapons", ResearchChapter.Military, "Infantry", 1, 1400, 10, 75,
+			"Increase attack damage of all existing and newly trained basic infantry by 2.", ["infantry_training"]),
+		new("support_equipment", "Support Equipment", ResearchChapter.Military, "Infantry", 1, 1400, 10, 75,
+			"Add 25 current and maximum health to all existing and newly trained basic infantry and RPG Troopers per level. Two levels grant up to +50 health.", ["anti_armor_infantry"], [1800]),
 		new("light_tanks", "Light tanks", ResearchChapter.Military, "Tanks", 1, 1000, 10, 60,
 			"Unlock a basic tank for frontline fighting and engagements against light vehicles.", []),
 		new("air_defense", "Air defense", ResearchChapter.Military, "Tanks", 1, 1200, 10, 60,

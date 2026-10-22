@@ -101,17 +101,20 @@ public partial class ResearchOverlay : Control
 			var canvas = new ResearchTreeCanvas { Name = chapter + "Tree", Chapter = chapter, MouseFilter = MouseFilterEnum.Pass };
 			treeScroll.GetNode<CenterContainer>("TreeCenter").AddChild(canvas);
 			canvases.Add(chapter, canvas);
-			float y = 70;
+			var canvasWidth = (chapter == ResearchChapter.Military ? 4 : 3) * CardStep.X;
+			float y = 76;
 			for (var generation = 1; generation <= 3; generation++)
 			{
-				AddTierBoundary(canvas, generation, generation == 1 ? 12 : y - 24);
+				AddTierBoundary(canvas, generation, generation == 1 ? 12 : y - 40, canvasWidth);
 				var rows = 0;
 				for (var column = 0; column < Trees[chapter].Length; column++)
 				{
 					var tree = Trees[chapter][column];
 					var nodes = technologies.Where(technology => technology.Tree == tree && technology.Generation == generation).ToArray();
-					rows = Math.Max(rows, nodes.Length);
-					var x = 152 + column * CardStep.X + (chapter == ResearchChapter.Fleet ? CardStep.X / 2 : 0);
+					var mainNodes = nodes.Where(technology => technology.Id != "better_weapons").ToArray();
+					rows = Math.Max(rows, mainNodes.Length);
+					var x = 24 + column * CardStep.X + (chapter == ResearchChapter.Military ? CardStep.X
+						: chapter == ResearchChapter.Fleet ? CardStep.X / 2 : 0);
 					if (generation == 1)
 					{
 						var heading = new Label
@@ -126,7 +129,9 @@ public partial class ResearchOverlay : Control
 					for (var row = 0; row < nodes.Length; row++)
 					{
 						var technology = nodes[row];
-						var position = new Vector2(x, y + row * CardStep.Y);
+						var position = technology.Id == "better_weapons"
+							? new Vector2(x - CardStep.X, y)
+							: new Vector2(x, y + Array.IndexOf(mainNodes, technology) * CardStep.Y);
 						canvas.Positions.Add(technology.Id, position);
 						var card = new Button
 						{
@@ -151,31 +156,31 @@ public partial class ResearchOverlay : Control
 				{
 					var eitherOr = new Label
 					{
-						Name = "DoctrineEitherOr", Position = new Vector2(396, y + 18), Size = new Vector2(40, 28),
+						Name = "DoctrineEitherOr", Position = new Vector2(556, y + 18), Size = new Vector2(40, 28),
 						Text = "OR", HorizontalAlignment = HorizontalAlignment.Center, MouseFilter = MouseFilterEnum.Ignore
 					};
 					eitherOr.AddThemeColorOverride("font_color", new Color("e3a76a"));
 					eitherOr.AddThemeFontSizeOverride("font_size", 20);
 					canvas.AddChild(eitherOr);
 				}
-				y += rows * CardStep.Y + 32;
+				y += rows * CardStep.Y + 40;
 			}
-			canvas.CustomMinimumSize = new Vector2(992, y);
+			canvas.CustomMinimumSize = new Vector2(canvasWidth, y);
 		}
 	}
 
-	private static void AddTierBoundary(Control canvas, int generation, float y)
+	private static void AddTierBoundary(Control canvas, int generation, float y, float width)
 	{
 		canvas.AddChild(new ColorRect
 		{
 			Name = $"Generation{generation}Divider",
-			Position = new Vector2(128, y), Size = new Vector2(864, 2),
+			Position = new Vector2(152, y + 13), Size = new Vector2(width - 176, 2),
 			Color = new Color("777052"), MouseFilter = MouseFilterEnum.Ignore
 		});
 		var number = generation switch { 1 => "I", 2 => "II", _ => "III" };
 		var label = new Label
 		{
-			Name = $"Generation{generation}Label", Position = new Vector2(0, y - 12), Size = new Vector2(120, 26),
+			Name = $"Generation{generation}Label", Position = new Vector2(24, y), Size = new Vector2(120, 26),
 			Text = $"Generation {number}", HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center, MouseFilter = MouseFilterEnum.Ignore
 		};
@@ -192,7 +197,6 @@ public partial class ResearchOverlay : Control
 		category.Text = $"{technology.Chapter.ToString().ToUpperInvariant()}  /  {technology.Tree}";
 		category.AddThemeColorOverride("font_color", ChapterColor(technology.Chapter));
 		description.Text = technology.Description;
-		cost.Text = $"{technology.MaterialCost:N0} Materials\nPlanned power: +{technology.Energy}\nDuration: {technology.Seconds} seconds";
 		var prerequisites = technology.Prerequisites.Select(id => ResearchCatalog.All.First(item => item.Id == id).Name);
 		requirements.Text = "Prerequisites\n" + (technology.Prerequisites.Length == 0
 			? "No earlier technology required." : string.Join(", ", prerequisites));
@@ -233,15 +237,21 @@ public partial class ResearchOverlay : Control
 		foreach (var (label, technologies) in treeProgress)
 			label.Text = $"{technologies[0].Tree}  {technologies.Count(technology => player.Research.ContainsKey(technology.Id))}/{technologies.Length}";
 		player.ResearchProjects.TryGetValue(selected.Id, out var project);
-		var completed = player.Research.ContainsKey(selected.Id);
+		var selectedLevel = player.GetResearchLevel(selected.Id);
+		var completed = selectedLevel >= selected.MaxLevel;
+		var nextLevel = Math.Min(selectedLevel + 1, selected.MaxLevel);
+		var materialCost = selected.GetMaterialCost(nextLevel);
+		cost.Text = completed && selected.MaxLevel > 1 ? $"All {selected.MaxLevel} levels researched."
+			: $"{(selected.MaxLevel > 1 ? $"Level {nextLevel}/{selected.MaxLevel}\n" : "")}{materialCost:N0} Materials\nPlanned power: +{selected.Energy}\nDuration: {selected.Seconds} seconds";
 		var busy = player.ResearchProjects.Values.FirstOrDefault(item => item.Chapter == selected.Chapter);
 		var locked = ResearchCatalog.LockReason(player, selected);
 		var excluded = IsOtherDoctrinePath(selected, chosenDoctrine);
 		var selectingDoctrine = selected.Id is "infantry_doctrine" or "tank_doctrine";
 		startButton.Visible = project is null;
-		startButton.Text = completed ? "Research complete" : selectingDoctrine ? $"Choose {selected.Tree} doctrine" : "Start research";
+		startButton.Text = completed ? "Research complete" : selectingDoctrine ? $"Choose {selected.Tree} doctrine"
+			: selected.MaxLevel > 1 ? $"Research level {nextLevel}" : "Start research";
 		startButton.Disabled = completed || busy is not null || locked.Length > 0 || excluded
-			|| player.Virelium < selected.MaterialCost || ResearchHost(player) is null;
+			|| player.Virelium < materialCost || ResearchHost(player) is null;
 		cancelButton.Visible = project is not null;
 		progress.Visible = project is not null;
 		if (project is not null)
@@ -256,19 +266,20 @@ public partial class ResearchOverlay : Control
 		}
 		else
 		{
-			status.Text = completed ? "Research complete. No gameplay unlocks in this outline."
+			status.Text = completed ? "Research complete."
 				: excluded ? doctrinePending ? $"Unavailable while {chosenDoctrine.Name} is researching. Cancel it to reopen this path."
 					: $"Permanently excluded by {chosenDoctrine.Name}."
 				: busy is not null ? $"{selected.Chapter} is busy with {ResearchCatalog.All.First(item => item.Id == busy.ResearchId).Name}. Select that project to cancel."
 				: locked.Length > 0 ? locked
 				: ResearchHost(player) is null ? "A Command Center is needed to start research in this outline."
-				: player.Virelium < selected.MaterialCost ? "Not enough Materials."
+				: player.Virelium < materialCost ? "Not enough Materials."
 				: "One active project per chapter. Cancel before completion for a full refund.";
 		}
 		foreach (var technology in ResearchCatalog.All)
 		{
 			var card = cards[technology.Id];
-			var cardCompleted = player.Research.ContainsKey(technology.Id);
+			var cardLevel = player.GetResearchLevel(technology.Id);
+			var cardCompleted = cardLevel >= technology.MaxLevel;
 			var cardResearching = player.ResearchProjects.ContainsKey(technology.Id);
 			var cardLocked = !cardCompleted && !cardResearching && ResearchCatalog.LockReason(player, technology).Length > 0;
 			if (cardCompleted && completedCards.Add(technology.Id))
@@ -285,6 +296,8 @@ public partial class ResearchOverlay : Control
 			var doctrine = technology.Id is "infantry_doctrine" or "tank_doctrine";
 			if (doctrine && chosenDoctrine is null)
 				state = technology.Tree == "Infantry" ? "EXCLUDES TANKS" : "EXCLUDES INFANTRY";
+			if (technology.MaxLevel > 1)
+				state = $"{cardLevel}/{technology.MaxLevel}" + (state.Length > 0 ? $"  |  {state}" : "");
 			card.Text = state.Length == 0
 				? technology.Name
 				: $"{technology.Name}\n{state}";
@@ -344,14 +357,22 @@ public partial class ResearchOverlay : Control
 		{
 			foreach (var technology in ResearchCatalog.All.Where(technology => technology.Chapter == Chapter))
 			{
-				var end = Positions[technology.Id] + new Vector2(CardSize.X / 2, 0);
 				foreach (var prerequisite in technology.Prerequisites)
 				{
+					var end = Positions[technology.Id] + new Vector2(CardSize.X / 2, 0);
 					var start = Positions[prerequisite] + new Vector2(CardSize.X / 2, CardSize.Y);
-					var middleY = (start.Y + end.Y) / 2;
 					var color = IsOtherDoctrinePath(technology, ChosenDoctrine) ? new Color("32352f") : new Color("666952");
-					DrawPolyline([start, new(start.X, middleY), new(end.X, middleY), end],
-						color, 2, true);
+					if (Positions[technology.Id].Y == Positions[prerequisite].Y)
+					{
+						start = Positions[prerequisite] + new Vector2(0, CardSize.Y / 2);
+						end = Positions[technology.Id] + new Vector2(CardSize.X, CardSize.Y / 2);
+						DrawLine(start, end, color, 2, true);
+					}
+					else
+					{
+						var middleY = (start.Y + end.Y) / 2;
+						DrawPolyline([start, new(start.X, middleY), new(end.X, middleY), end], color, 2, true);
+					}
 					DrawCircle(end, 4, color.Lightened(0.2f));
 				}
 			}

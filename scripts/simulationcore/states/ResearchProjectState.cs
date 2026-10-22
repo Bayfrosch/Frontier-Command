@@ -1,15 +1,17 @@
 public sealed class ResearchProjectState
 {
-	public ResearchProjectState(ResearchDefinition technology, string structureId)
+	public ResearchProjectState(ResearchDefinition technology, string structureId, int level)
 	{
 		ResearchId = technology.Id;
 		StructureId = structureId;
 		Chapter = technology.Chapter;
-		PaidMaterials = technology.MaterialCost;
+		Level = level;
+		PaidMaterials = technology.GetMaterialCost(level);
 		DurationTicks = technology.Seconds * (int)TimeTickSystem.TICK_TIMER_MAX;
 	}
 
 	public string ResearchId { get; }
+	public int Level { get; }
 	public string StructureId { get; }
 	public ResearchChapter Chapter { get; }
 	public int PaidMaterials { get; }

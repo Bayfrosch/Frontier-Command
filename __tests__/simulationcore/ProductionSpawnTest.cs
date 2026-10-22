@@ -18,6 +18,7 @@ public class ProductionSpawnTest
 		context.AdvanceTick();
 		AssertThat(player.Entities.Values.OfType<UnitState>().Count()).IsEqual(1);
 		AssertThat(barracks.ProductionQueue).IsEmpty();
+		player.AddResearch("anti_armor_infantry");
 		AssertThat(context.Push(new TrainUnitsMessage(UnitType.RPG_TROOPER, player.PlayerId, 20, barracks.EntityId))).IsTrue();
 
 		for (var tick = 1; tick <= 6; tick++)
