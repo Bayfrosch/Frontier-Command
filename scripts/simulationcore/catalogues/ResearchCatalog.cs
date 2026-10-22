@@ -13,8 +13,8 @@ public static class ResearchCatalog
 	// shortcut: costs and effects are provisional; generation gates belong to the future outpost upgrade ability.
 	public static IReadOnlyList<ResearchDefinition> All { get; } = Array.AsReadOnly(new ResearchDefinition[]
 	{
-		new("infantry_training", "Combat training", ResearchChapter.Military, "Infantry", 1, 1000, 5, 60,
-			"Improve basic infantry weapons and training. Establish the foundation for infantry specialists.", []),
+		new("infantry_training", "Better Recruitment", ResearchChapter.Military, "Infantry", 1, 1000, 5, 60,
+			"Improve recruitment for infantry leading to +1 spawning infantry unit.", []),
 		new("anti_armor_infantry", "Anti-armor squads", ResearchChapter.Military, "Infantry", 1, 1200, 10, 60,
 			"Unlock infantry equipped to counter tanks and other armored threats.", ["infantry_training"]),
 		new("support_infantry", "Support infantry", ResearchChapter.Military, "Infantry", 1, 1400, 10, 75,

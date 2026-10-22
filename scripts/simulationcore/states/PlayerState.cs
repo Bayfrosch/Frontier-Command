@@ -95,6 +95,16 @@ public sealed class PlayerState
 	public IReadOnlySet<string> UnlockedAbilities => _unlockedAbilities;
 	public int AbilityUnlockRevision { get; private set; }
 	/*
+	Return the integer value of how many troops spawn on one click based on the base quantity and research
+	*/
+	internal int GetProductionQuantity(UnitType type)
+	{
+		int quantity = UnitCatalog.GetBaseQuantity(type);
+		if (Research.ContainsKey("infantry_training"))
+			quantity++;
+		return quantity;
+	}
+	/*
 	Marks research as unlocked for this player.
 	*/
 	internal void AddResearch(string research)

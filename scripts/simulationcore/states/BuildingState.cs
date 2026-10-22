@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Godot;
 public sealed class BuildingState : EntityState
 {
+	public sealed record ProductionBatch(UnitType unitType, int quantity);
+	private const float SPAWN_INTERVAL_SECONDS = 0.4f;
+	private readonly Queue<UnitType> _pendingSpawns = new();
+	private int _spawnDelayTicks;
 	/*
 	New buildings start as construction sites and transform when construction completes.
 	*/
@@ -33,27 +38,43 @@ public sealed class BuildingState : EntityState
 		}
 	}
 	/*
-	Advances the first production queue item and returns the finished unit type.
+	Advances the first production queue item and returns the finished batch.
 	*/
-	internal UnitType? AdvanceProduction(int amount)
+	internal ProductionBatch? AdvanceProduction(int amount)
 	{
-		if (ProductionQueue.Length <= 0)
+		if (ProductionQueue.Count <= 0)
 			return null;
-		var currentUnit = ProductionQueue[0];
+		var currentUnit = ProductionQueue[0].unitType;
 		var productionTime = UnitCatalog.GetProductionTime(currentUnit);
 		ProductionProgress = Math.Min(productionTime, ProductionProgress + amount);
 
 		if (ProductionProgress == productionTime)
 		{
-			var finishedUnit = ProductionQueue[0];
-			ProductionQueue = ProductionQueue.Skip(1).ToArray();
+			var finishedBatch = ProductionQueue[0];
+			_productionQueue.RemoveAt(0);
 			ProductionProgress = 0;
-			return finishedUnit;
+			return finishedBatch;
 		}
 		return null;
 	}
+	internal UnitType? AdvanceSpawn(ProductionBatch? completedBatch)
+	{
+		if (completedBatch is not null)
+		{
+			for (var i = 0; i < completedBatch.quantity; i++)
+				_pendingSpawns.Enqueue(completedBatch.unitType);
+		}
+
+		_spawnDelayTicks = Math.Max(0, _spawnDelayTicks - 1);
+		if (_spawnDelayTicks > 0 || _pendingSpawns.Count == 0)
+			return null;
+
+		_spawnDelayTicks = (int)Math.Ceiling(SPAWN_INTERVAL_SECONDS / TimeTickSystem.TICK_DELTA);
+		return _pendingSpawns.Dequeue();
+	}
 	public BuildingType Type;
-	public UnitType[] ProductionQueue { get; private set; } = [];
+	private readonly List<ProductionBatch> _productionQueue = new ();
+	public List<ProductionBatch> ProductionQueue => _productionQueue;
 	public int ProductionProgress { get; private set; }
 	public Vector2 RallyPoint { get; private set; }
 	public string ConstructionUnitId { get; private set; }
@@ -86,16 +107,16 @@ public sealed class BuildingState : EntityState
 	/*
 	Removes matching unit types from the production queue.
 	*/
-	internal void CancelProduction(UnitType entityId)
+	internal void CancelProduction(UnitType unitType)
 	{
-		ProductionQueue = ProductionQueue.Where(x => !x.Equals(entityId)).ToArray();
+		_productionQueue.RemoveAll(batch => batch.unitType == unitType);
 	}
 	/*
 	Adds a unit type to the end of the production queue.
 	*/
-	internal void QueueProduction(UnitType unitType)
+	internal void QueueProduction(UnitType unitType, int quantity)
 	{
-		ProductionQueue = ProductionQueue.Append(unitType).ToArray();
+		_productionQueue.Add(new ProductionBatch(unitType, quantity));
 	}
 	/*
 	Tracks resources spawned by this building.

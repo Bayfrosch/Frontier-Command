@@ -47,7 +47,7 @@ public abstract partial class ClientBuilding : Node2D, ClientEntity
 
 	protected static void ApplyProductionProgress(ProgressBar productionProgressBar, BuildingState state)
 	{
-		if (state.ProductionQueue.Length <= 0)
+		if (state.ProductionQueue.Count <= 0)
 		{
 			productionProgressBar.Visible = false;
 			productionProgressBar.Value = 0;
@@ -55,7 +55,7 @@ public abstract partial class ClientBuilding : Node2D, ClientEntity
 			return;
 		}
 
-		productionProgressBar.MaxValue = UnitCatalog.GetProductionTime(state.ProductionQueue[0]);
+		productionProgressBar.MaxValue = UnitCatalog.GetProductionTime(state.ProductionQueue[0].unitType);
 		productionProgressBar.Value = state.ProductionProgress;
 		productionProgressBar.Visible = true;
 	}

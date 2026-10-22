@@ -1084,14 +1084,14 @@ public class SimulationCoreTest
 			p_ability_id: "spawn_light_tank"
 		))).IsTrue();
 
-		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(new BuildingState.ProductionBatch(UnitType.LIGHT_TANK, 1));
 		AssertThat(player.EnergyProduced).IsEqual(0);
 		AssertThat(player.EnergyConsumed).IsEqual(2);
 
 		context.AdvanceTick();
 
 		AssertThat(warFactory.ProductionProgress).IsEqual(0);
-		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(new BuildingState.ProductionBatch(UnitType.LIGHT_TANK, 1));
 
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(
 			"player-1",
@@ -1103,7 +1103,7 @@ public class SimulationCoreTest
 		context.AdvanceTick();
 
 		AssertThat(warFactory.ProductionProgress).IsEqual(5);
-		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(new BuildingState.ProductionBatch(UnitType.LIGHT_TANK, 1));
 
 		var powerPlant = player.Entities.Values
 			.OfType<BuildingState>()
@@ -1119,7 +1119,7 @@ public class SimulationCoreTest
 		context.AdvanceTick();
 
 		AssertThat(warFactory.ProductionProgress).IsEqual(5);
-		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(new BuildingState.ProductionBatch(UnitType.LIGHT_TANK, 1));
 
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(
 			"player-1",
@@ -1131,7 +1131,7 @@ public class SimulationCoreTest
 		context.AdvanceTick();
 
 		AssertThat(warFactory.ProductionProgress).IsEqual(10);
-		AssertThat(warFactory.ProductionQueue).ContainsExactly(UnitType.LIGHT_TANK);
+		AssertThat(warFactory.ProductionQueue).ContainsExactly(new BuildingState.ProductionBatch(UnitType.LIGHT_TANK, 1));
 	}
 
 	[TestCase]

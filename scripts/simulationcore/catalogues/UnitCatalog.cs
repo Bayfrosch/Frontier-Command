@@ -158,4 +158,17 @@ public static class UnitCatalog
     {
         return type == UnitType.LIGHT_TANK;
     }
+
+    /*
+    Used to get base quantity in which unit type spawns
+    */
+    public static int GetBaseQuantity(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.BASIC_INFANTRY => 3,
+            UnitType.RPG_TROOPER => 2,
+            _ => 1
+        };
+    }
 }

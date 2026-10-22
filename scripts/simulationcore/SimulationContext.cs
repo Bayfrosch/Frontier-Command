@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks.Dataflow;
 using Godot;
 
 public sealed class SimulationContext
@@ -123,25 +124,33 @@ public sealed class SimulationContext
 			}
 			foreach (var entity in player.Entities.Values)
 			{
+				if (entity.Health <= 0)
+				{
+					entitiesToRemove.Add(entity.EntityId);
+					continue;
+				}
 				if (entity is BuildingState building)
 				{
 					HandleAdvanceConstruction(player.PlayerId, building);
 					HandleAdvanceResourceSpawner(building);
 
-					var unit = CanAdvanceProduction(player, building)
+					var batch = CanAdvanceProduction(player, building)
 						? building.AdvanceProduction(PRODUCTION_ADVANCE)
 						: null;
-					if (unit is null)
+
+					var unitToSpawn = building.AdvanceSpawn(batch);
+					if (unitToSpawn is null)
 						continue;
 
 					var spawnPoint = BuildingCatalog.GetFootprintRect(building).End + new Vector2(5, 5);
+
 					unitsToSpawn.Add(new DebugSpawnUnitsMessage(
 						player.PlayerId,
 						_matchState.Tick,
-						unit.Value,
+						unitToSpawn.Value,
 						building.RallyPoint,
 						spawnPoint,
-						UnitCatalog.GetMovementSpeed(unit.Value)
+						UnitCatalog.GetMovementSpeed(unitToSpawn.Value)
 					));
 				} else if (entity is UnitState unit)
 				{
@@ -154,12 +163,6 @@ public sealed class SimulationContext
 						ResolveArrivalOverlap(unit);
 					if (unit is ResourceCollectorState collector)
 						HandleAdvanceGatherResources(collector);
-				}
-				
-				if (entity.Health <= 0)
-				{
-					entitiesToRemove.Add(entity.EntityId);
-					continue;
 				}
 			}
 		}
@@ -187,6 +190,7 @@ public sealed class SimulationContext
 
 		foreach (var spawnMessage in unitsToSpawn)
 		{
+			spawnMessage.SpawnPoint = GetOccupiedOffsetPosition(spawnMessage.SpawnPoint);
 			Push(spawnMessage);
 		}
 	}
@@ -705,8 +709,7 @@ public sealed class SimulationContext
 		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building) || building is null)
 			return false;
 
-		for (var i = 0; i < msg.quantity; i++)
-			building.QueueProduction(msg.UnitDefinitionId);
+		building.QueueProduction(msg.UnitDefinitionId, msg.quantity);
 
 		return true;
 	}
@@ -721,7 +724,7 @@ public sealed class SimulationContext
 		if (building is null)
 			return false;
 
-		if (!building.ProductionQueue.Contains(msg.QueueItem))
+		if (!building.ProductionQueue.Any(batch => batch.unitType == msg.QueueItem))
 			return false;
 
 		building.CancelProduction(msg.QueueItem);
@@ -976,7 +979,7 @@ public sealed class SimulationContext
 				msg.player_id,
 				_matchState.Tick,
 				building.EntityId,
-				1
+				player.GetProductionQuantity(unitType)
 			));
 		}
 		return true;
@@ -987,10 +990,10 @@ public sealed class SimulationContext
 	*/
 	private static bool CanAdvanceProduction(PlayerState player, BuildingState building)
 	{
-		if (building.ProductionQueue.Length <= 0)
+		if (building.ProductionQueue.Count <= 0)
 			return true;
 
-		var unitType = building.ProductionQueue[0];
+		var unitType = building.ProductionQueue[0].unitType;
 		return !UnitCatalog.RequiresEnergyForProduction(unitType)
 			|| player.EnergyProduced >= player.EnergyConsumed;
 	}
