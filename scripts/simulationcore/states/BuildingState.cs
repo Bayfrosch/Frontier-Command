@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Godot;
-public sealed class BuildingState : EntityState
+public sealed class BuildingState : EntityState, ICollisionState
 {
 	public sealed record ProductionBatch(UnitType unitType, int quantity);
 	private const float SPAWN_INTERVAL_SECONDS = 0.4f;
@@ -72,7 +72,7 @@ public sealed class BuildingState : EntityState
 		_spawnDelayTicks = (int)Math.Ceiling(SPAWN_INTERVAL_SECONDS / TimeTickSystem.TICK_DELTA);
 		return _pendingSpawns.Dequeue();
 	}
-	public BuildingType Type;
+	public BuildingType Type {get; set;}
 	private readonly List<ProductionBatch> _productionQueue = new ();
 	public List<ProductionBatch> ProductionQueue => _productionQueue;
 	public int ProductionProgress { get; private set; }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-public sealed class ResourceState : EntityState
+public sealed class ResourceState : EntityState, ICollisionState
 {
 	/*
 	Neutral map resource that collectors can extract from.
@@ -22,6 +22,8 @@ public sealed class ResourceState : EntityState
 		CurrentAmount = MaxAmount;
 	}
 	public ResourceType ResourceType { get; private set; }
+	public BuildingType Type { get; } = BuildingType.RESOURCE;
+	public BuildingType pendingBuilding { get; } = BuildingType.RESOURCE;
 	public string SpawnerEntityId { get; private set; }
 	public int MaxAmount { get; private set; }
 	public int CurrentAmount { get; private set; }

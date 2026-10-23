@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Godot;
 public static class BuildingCatalog
 {
@@ -16,6 +17,7 @@ public static class BuildingCatalog
 			BuildingType.COMMAND_CENTER => new Vector2(320, 304),
 			BuildingType.POWER_PLANT => new Vector2(183, 86),
 			BuildingType.WAR_FACTORY => new Vector2(276, 150),
+			BuildingType.RESOURCE => new Vector2(32, 32),
 			_ => new Vector2(0, 0)
 		};
 	}
@@ -100,7 +102,7 @@ public static class BuildingCatalog
 	Construction sites reserve the footprint of the building they will become.
 	Completed buildings use their own type directly.
 	*/
-	public static BuildingType GetFootprintType(BuildingState building)
+	public static BuildingType GetFootprintType(ICollisionState building)
 	{
 		return building.Type == BuildingType.CONSTRUCTION_SITE
 			? building.pendingBuilding
@@ -119,5 +121,16 @@ public static class BuildingCatalog
 	{
 		return GetFootprintRect(firstType, firstPosition)
 			.Intersects(GetFootprintRect(secondType, secondPosition));
+	}
+
+	public static bool IsPlacementValid(IMatchStateView state, BuildingType buildingType, Vector2 position)
+	{
+		return !state.Players.Values
+			.SelectMany(player => player.Entities.Values)
+			.OfType<BuildingState>()
+			.Any(building => building.Health > 0 && FootprintsOverlap(
+				buildingType, position, GetFootprintType(building), building.CurrentPosition))
+			&& !state.Resources.Values.Any(resource => !resource.IsDepleted && FootprintsOverlap(
+				buildingType, position, GetFootprintType(resource), resource.CurrentPosition));
 	}
 }

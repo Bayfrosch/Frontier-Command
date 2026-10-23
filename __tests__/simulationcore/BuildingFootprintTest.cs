@@ -75,6 +75,42 @@ public class BuildingFootprintTest
 	}
 
 	[TestCase]
+	public void Placement_RejectsNeutralResources_WithoutSpendingOrAssigningOrders()
+	{
+		var context = new SimulationContext("match");
+		var player = new PlayerState("player", 2000);
+		var builder = new UnitState("builder", "player", Vector2.Zero, 100f, UnitType.CONSTRUCTION_UNIT);
+		player.AddEntity(builder);
+		context.AddPlayer(player);
+		var position = new Vector2(400, 300);
+		((MatchState)context.get()).AddResource(new ResourceState("resource", ResourceType.VIRELIUM, "spawner", position, 2500));
+
+		AssertThat(context.Push(new UseAbilityMessage("player", 0, new[] { "builder" },
+			"spawn_power_plant", p_target_position: position))).IsFalse();
+		AssertThat(context.Push(new BuildStructureMessage(BuildingType.POWER_PLANT, "player", 0, "builder", position))).IsFalse();
+		AssertThat(player.Virelium).IsEqual(2000);
+		AssertThat(player.Entities.Values.OfType<BuildingState>().Any()).IsFalse();
+		AssertThat(builder.HasConstructionOrder).IsFalse();
+	}
+
+	[TestCase]
+	public void Placement_ResourceEdgesAndDepletion_AllowBuilding()
+	{
+		var context = new SimulationContext("match");
+		var player = new PlayerState("player");
+		player.AddEntity(new UnitState("builder", "player", new Vector2(500, 500), 100f, UnitType.CONSTRUCTION_UNIT));
+		context.AddPlayer(player);
+		var resource = new ResourceState("resource", ResourceType.VIRELIUM, "spawner", Vector2.Zero, 2500);
+		((MatchState)context.get()).AddResource(resource);
+
+		// The power plant's left edge is 92 units left of its origin; the resource ends at x = 16.
+		AssertThat(BuildingCatalog.IsPlacementValid(context.get(), BuildingType.POWER_PLANT, new Vector2(107, 0))).IsFalse();
+		AssertThat(BuildingCatalog.IsPlacementValid(context.get(), BuildingType.POWER_PLANT, new Vector2(108, 0))).IsTrue();
+		resource.Extract(resource.MaxAmount);
+		AssertThat(context.Push(new BuildStructureMessage(BuildingType.POWER_PLANT, "player", 0, "builder", Vector2.Zero))).IsTrue();
+	}
+
+	[TestCase]
 	public void Placement_UsesOffsets_AndAllowsTouchingEdges()
 	{
 		// Command Center spans x = -90..230; Barracks spans x = -119..120.

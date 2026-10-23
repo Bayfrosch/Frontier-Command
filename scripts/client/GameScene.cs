@@ -364,16 +364,7 @@ public partial class GameScene : Node2D
 
 	private bool IsConstructionPlacementValid(BuildingType buildingType, Vector2 position)
 	{
-		return !simulationCore.GetState()
-			.Players.Values
-			.SelectMany(player => player.Entities.Values)
-			.OfType<BuildingState>()
-			.Where(building => building.Health > 0)
-			.Any(building => BuildingCatalog.FootprintsOverlap(
-				buildingType,
-				position,
-				BuildingCatalog.GetFootprintType(building),
-				building.CurrentPosition));
+		return BuildingCatalog.IsPlacementValid(simulationCore.GetState(), buildingType, position);
 	}
 
 	private void ClearAbilityTargetSelection()
