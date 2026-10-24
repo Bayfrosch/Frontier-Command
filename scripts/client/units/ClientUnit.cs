@@ -17,6 +17,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
     public bool HasMoveOrder { get; protected set; }
     private ProgressBar HealthBar;
     private Control BodyRender;
+    public string? SquadId { get; private set; }
 
     public override void _Ready()
     {
@@ -38,6 +39,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
         Position = state.CurrentPosition;
         Abilities = state.Abilities;
         HealthBar.MaxValue = MaxHealth;
+        SquadId = state.SquadId;
     }
     /*
     Called on every Tick

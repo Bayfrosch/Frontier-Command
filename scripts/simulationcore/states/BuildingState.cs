@@ -6,8 +6,9 @@ using Godot;
 public sealed class BuildingState : EntityState, ICollisionState
 {
 	public sealed record ProductionBatch(UnitType unitType, int quantity);
+	internal sealed record PendingSpawn(UnitType UnitType, string? SquadId);
 	private const float SPAWN_INTERVAL_SECONDS = 0.4f;
-	private readonly Queue<UnitType> _pendingSpawns = new();
+	private readonly Queue<PendingSpawn> _pendingSpawns = new();
 	private int _spawnDelayTicks;
 	/*
 	New buildings start as construction sites and transform when construction completes.
@@ -57,12 +58,12 @@ public sealed class BuildingState : EntityState, ICollisionState
 		}
 		return null;
 	}
-	internal UnitType? AdvanceSpawn(ProductionBatch? completedBatch)
+	internal PendingSpawn? AdvanceSpawn(ProductionBatch? completedBatch, string? squadId)
 	{
 		if (completedBatch is not null)
 		{
 			for (var i = 0; i < completedBatch.quantity; i++)
-				_pendingSpawns.Enqueue(completedBatch.unitType);
+				_pendingSpawns.Enqueue(new PendingSpawn(completedBatch.unitType, squadId));
 		}
 
 		_spawnDelayTicks = Math.Max(0, _spawnDelayTicks - 1);

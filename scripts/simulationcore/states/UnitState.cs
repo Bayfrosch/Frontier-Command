@@ -6,7 +6,7 @@ public class UnitState : EntityState
 	/*
 	Stores movement, combat, construction, and ability state for units.
 	*/
-	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType = UnitType.BASIC_INFANTRY)
+	public UnitState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, UnitType unitType, string? squadId = null)
 		: base(entityId, ownerPlayerId, currentPos, UnitCatalog.GetMaxHealth(unitType), UnitCatalog.GetArmorClass(unitType))
 	{
 		Type = unitType;
@@ -17,6 +17,7 @@ public class UnitState : EntityState
 		AttackWindupTime = UnitCatalog.GetAttackWindupTime(unitType);
 		AttackCooldownTime = UnitCatalog.GetAttackCooldownTime(unitType);
 		Abilities = AbilityCatalog.ForUnit(unitType);
+		SquadId = squadId;
 	}
 	public UnitType Type { get; private set; }
 	public Vector2 TargetPosition { get; private set; }
@@ -39,6 +40,7 @@ public class UnitState : EntityState
 	public bool IsAttackCoolingDown => AttackCooldownRemaining > 0f;
 	public float MovementSpeed { get; private set; }
 	public int ProductionTime { get; private set; }
+	public string? SquadId { get; private set; }
 
 	/*
 	Sets a movement target and clears incompatible orders unless told to preserve them.
@@ -61,7 +63,7 @@ public class UnitState : EntityState
 		SetMoveTarget(targetPosition);
 	}
 
-	private void SetMoveTarget(Vector2 targetPosition)
+	internal void SetMoveTarget(Vector2 targetPosition)
 	{
 		TargetPosition = targetPosition;
 		CurrentMoveTarget = targetPosition;

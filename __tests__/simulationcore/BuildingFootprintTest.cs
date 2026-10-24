@@ -160,7 +160,7 @@ public class BuildingFootprintTest
 		var player = new PlayerState("player");
 		var building = new BuildingState("building", "player", Vector2.Zero, BuildingType.COMMAND_CENTER, "");
 		building.AdvanceConstruction(100);
-		var unit = new UnitState("unit", "player", new Vector2(500, 100), 100f);
+		var unit = new UnitState("unit", "player", new Vector2(500, 100), 100f, UnitType.BASIC_INFANTRY);
 		player.AddEntity(building);
 		player.AddEntity(unit);
 		context.AddPlayer(player);

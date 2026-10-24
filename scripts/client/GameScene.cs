@@ -93,7 +93,7 @@ public partial class GameScene : Node2D
 		simulationCore.StateChanged += UpdateResourceUi;
 		UpdateResourceUi();
 
-		// Debuging 
+		// Debugging 
 		// Spawn Command Center
 		var commandCenterPosition = new Vector2(100, 100);
 		simulationCore.Push(new DebugSpawnBuildingMessage(
@@ -195,7 +195,7 @@ public partial class GameScene : Node2D
 
 		if (!simulationCore.Push(command))
 		{
-			GD.Print("Ability command coulnd't be processed.");
+			GD.Print("Ability command couldn't be processed.");
 		}
 	}
 
@@ -322,7 +322,17 @@ public partial class GameScene : Node2D
 
 			if (rect.HasPoint(unit.GlobalPosition))
 			{
-				EntitySelectionIds.Add(unit.EntityId);
+				if (unit.SquadId != null)
+				{
+					var squadMemberIds = GetSquadMemberIds(unit.SquadId);
+
+					foreach (var memberId in squadMemberIds)
+					{
+						EntitySelectionIds.Add(memberId);
+					}
+				} else {
+					EntitySelectionIds.Add(unit.EntityId);
+				}
 			}
 		}
 
@@ -435,7 +445,20 @@ public partial class GameScene : Node2D
 			EntitySelectionIds.Clear();
 		}
 
-		EntitySelectionIds.Add(CurrentEntity.EntityId);
+		// If selected entity is in a squad, add all entities in squad to selection
+		// Else add just the selected one
+		if (CurrentEntity is ClientUnit u && u.SquadId != null)
+		{
+			var squadMemberIds = GetSquadMemberIds(u.SquadId);
+
+			foreach (var memberId in squadMemberIds)
+			{
+				EntitySelectionIds.Add(memberId);
+			}
+		} else {
+			EntitySelectionIds.Add(CurrentEntity.EntityId);
+		}
+
 		EmitSignal(SignalName.UnitSelection);
 	}
 
@@ -548,6 +571,18 @@ public partial class GameScene : Node2D
 			.Where(entity => entity is not null)
 			.OrderBy(entity => GetSelectionPriority(entity))
 			.FirstOrDefault();
+	}
+
+	private IReadOnlyList<string> GetSquadMemberIds(string squadId)
+	{
+		if (!simulationCore.GetState().Players.TryGetValue("player_1", out var player))
+			return Array.Empty<string>();
+
+		return player.Entities.Values
+			.OfType<UnitState>()
+			.Where(unit => unit.SquadId == squadId)
+			.Select(unit => unit.EntityId)
+			.ToArray();
 	}
 
 	private int GetSelectionPriority(ClientEntity entity)

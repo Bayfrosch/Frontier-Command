@@ -10,6 +10,7 @@ public partial class DebugSpawnUnitsMessage : MessageBase, CommandInterface
     public string PlayerId = "";
     public int IssuedAtTick = -1;
     public UnitType UnitType;
+    public string? SquadId;
     public Vector2 MoveOrder = Vector2.Zero;
     public Vector2 SpawnPoint = Vector2.Zero;
     public float MovementSpeed = 10f;
@@ -19,7 +20,8 @@ public partial class DebugSpawnUnitsMessage : MessageBase, CommandInterface
         UnitType p_unit_type,
         Vector2 p_move_order,
         Vector2 p_spawn_position,
-        float p_movement_speed
+        float p_movement_speed,
+        string? p_squad_id = null
     ) {
         PlayerId = p_player_id;
         IssuedAtTick = p_issued_at_tick;
@@ -27,6 +29,7 @@ public partial class DebugSpawnUnitsMessage : MessageBase, CommandInterface
         MoveOrder = p_move_order;
         SpawnPoint = p_spawn_position;
         MovementSpeed = p_movement_speed;
+        SquadId = p_squad_id;
     }
     public override Dictionary to_payload() => D(
         ("player_id", PlayerId),
@@ -34,7 +37,8 @@ public partial class DebugSpawnUnitsMessage : MessageBase, CommandInterface
         ("unit_type", Variant.From(UnitType)),
         ("move_order", MoveOrder),
         ("spawn_point", SpawnPoint),
-        ("movement_speed", MovementSpeed)
+        ("movement_speed", MovementSpeed),
+        ("squad_id", SquadId ?? "")
     );
     public override void from_payload(Dictionary payload)
     {
@@ -43,6 +47,8 @@ public partial class DebugSpawnUnitsMessage : MessageBase, CommandInterface
         MoveOrder = V2(payload, "move_order");
         SpawnPoint = V2(payload, "spawn_point");
         MovementSpeed = F(payload, "movement_speed", 10f);
+        var squadId = S(payload, "squad_id");
+        SquadId = string.IsNullOrEmpty(squadId) ? null : squadId;
         var raw = S(payload, "unit_type");
         if (Enum.TryParse<UnitType>(raw, ignoreCase: true, out var parsed))
             UnitType = parsed;

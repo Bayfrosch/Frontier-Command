@@ -88,7 +88,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var unit = new UnitState("unit-1", "player-1", Vector2.Zero, 10f);
+		var unit = new UnitState("unit-1", "player-1", Vector2.Zero, 10f, UnitType.BASIC_INFANTRY);
 		player.AddEntity(unit);
 		context.AddPlayer(player);
 
@@ -105,8 +105,8 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var unitA = new UnitState("unit-a", "player-1", Vector2.Zero, 10f);
-		var unitB = new UnitState("unit-b", "player-1", Vector2.Zero, 10f);
+		var unitA = new UnitState("unit-a", "player-1", Vector2.Zero, 10f, UnitType.BASIC_INFANTRY);
+		var unitB = new UnitState("unit-b", "player-1", Vector2.Zero, 10f, UnitType.BASIC_INFANTRY);
 		player.AddEntity(unitA);
 		player.AddEntity(unitB);
 		context.AddPlayer(player);
@@ -131,8 +131,8 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var movingUnit = new UnitState("moving-unit", "player-1", Vector2.Zero, 10f);
-		var occupyingUnit = new UnitState("occupying-unit", "player-1", new Vector2(30, 40), 10f);
+		var movingUnit = new UnitState("moving-unit", "player-1", Vector2.Zero, 10f, UnitType.BASIC_INFANTRY);
+		var occupyingUnit = new UnitState("occupying-unit", "player-1", new Vector2(30, 40), 10f, UnitType.BASIC_INFANTRY);
 		player.AddEntity(movingUnit);
 		player.AddEntity(occupyingUnit);
 		context.AddPlayer(player);
@@ -148,14 +148,14 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var movingUnit = new UnitState("moving-unit", "player-1", Vector2.Zero, 100f);
+		var movingUnit = new UnitState("moving-unit", "player-1", Vector2.Zero, 100f, UnitType.BASIC_INFANTRY);
 		player.AddEntity(movingUnit);
 		context.AddPlayer(player);
 
 		var destination = new Vector2(20, 0);
 		AssertThat(context.Push(CreateMoveMessage("player-1", "moving-unit", destination))).IsTrue();
 
-		var occupyingUnit = new UnitState("occupying-unit", "player-1", destination, 10f);
+		var occupyingUnit = new UnitState("occupying-unit", "player-1", destination, 10f, UnitType.BASIC_INFANTRY);
 		player.AddEntity(occupyingUnit);
 
 		context.AdvanceTick();
@@ -1263,7 +1263,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var unit = new UnitState("unit-1", "player-1", start, 100f);
+		var unit = new UnitState("unit-1", "player-1", start, 100f , UnitType.BASIC_INFANTRY);
 		var building = new BuildingState("building-1", "player-1", new Vector2(100, 0), BuildingType.BARRACKS, "");
 		building.AdvanceConstruction(100);
 		player.AddEntity(unit);

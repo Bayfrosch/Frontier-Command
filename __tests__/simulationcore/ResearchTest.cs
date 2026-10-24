@@ -40,7 +40,7 @@ public class ResearchTest
 		player.AddResearch("infantry_training");
 		player.AddResearch("anti_armor_infantry");
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
-		var infantry = new UnitState("infantry", "player", new Vector2(500, 0), 100f);
+		var infantry = new UnitState("infantry", "player", new Vector2(500, 0), 100f, UnitType.BASIC_INFANTRY);
 		var rpg = new UnitState("rpg", "player", new Vector2(600, 0), 80f, UnitType.RPG_TROOPER);
 		var tank = new UnitState("tank", "player", new Vector2(700, 0), 70f, UnitType.LIGHT_TANK);
 		player.AddEntity(infantry);
@@ -48,7 +48,7 @@ public class ResearchTest
 		player.AddEntity(tank);
 		infantry.TakeDamage(60);
 		var opponent = new PlayerState("opponent");
-		var enemy = new UnitState("enemy", "opponent", new Vector2(800, 0), 100f);
+		var enemy = new UnitState("enemy", "opponent", new Vector2(800, 0), 100f, UnitType.BASIC_INFANTRY);
 		opponent.AddEntity(enemy);
 		context.AddPlayer(opponent);
 
@@ -179,7 +179,7 @@ public class ResearchTest
 			player.AddEntity(new UnitState(type.ToString(), "player", new Vector2(500, 0), 100f, type));
 		var infantry = (UnitState)player.Entities[UnitType.BASIC_INFANTRY.ToString()];
 		var opponent = new PlayerState("opponent");
-		var target = new UnitState("target", "opponent", new Vector2(550, 0), 100f);
+		var target = new UnitState("target", "opponent", new Vector2(550, 0), 100f, UnitType.BASIC_INFANTRY);
 		opponent.AddEntity(target);
 		context.AddPlayer(opponent);
 		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "better_weapons"))).IsTrue();

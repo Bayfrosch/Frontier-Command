@@ -7,8 +7,8 @@ public sealed class ResourceCollectorState : UnitState
 	/*
 	Unit state for harvesters that can carry Virelium between resources and dropoffs.
 	*/
-	public ResourceCollectorState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed)
-		: base(entityId, ownerPlayerId, currentPos, movementSpeed, UnitType.RESOURCE_COLLECTOR)
+	public ResourceCollectorState(string entityId, string ownerPlayerId, Vector2 currentPos, float movementSpeed, string? squadId = null)
+		: base(entityId, ownerPlayerId, currentPos, movementSpeed, UnitType.RESOURCE_COLLECTOR, squadId)
 	{
 	}
 

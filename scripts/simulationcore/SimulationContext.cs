@@ -138,7 +138,10 @@ public sealed class SimulationContext
 						? building.AdvanceProduction(PRODUCTION_ADVANCE)
 						: null;
 
-					var unitToSpawn = building.AdvanceSpawn(batch);
+					var squadId = batch is { quantity: > 1 }
+						? NewId("squad")
+						: null;
+					var unitToSpawn = building.AdvanceSpawn(batch, squadId);
 					if (unitToSpawn is null)
 						continue;
 
@@ -147,10 +150,11 @@ public sealed class SimulationContext
 					unitsToSpawn.Add(new DebugSpawnUnitsMessage(
 						player.PlayerId,
 						_matchState.Tick,
-						unitToSpawn.Value,
+						unitToSpawn.UnitType,
 						building.RallyPoint,
 						spawnPoint,
-						UnitCatalog.GetMovementSpeed(unitToSpawn.Value)
+						UnitCatalog.GetMovementSpeed(unitToSpawn.UnitType),
+						unitToSpawn.SquadId
 					));
 				} else if (entity is UnitState unit)
 				{
@@ -433,8 +437,8 @@ public sealed class SimulationContext
 	}
 	/*
 	Message handlers for reacting to every pre defined message in Messages.cs
-	Message types get linked in the constructor to their coresponding handler
-	All handlers return true or false regarding wether the message was succesfully parsed
+	Message types get linked in the constructor to their corresponding handler
+	All handlers return true or false regarding wether the message was successfully parsed
 	*/
 	/*
 	Orders selected units to move in a simple rectangular formation.
@@ -442,7 +446,7 @@ public sealed class SimulationContext
 	private bool HandleMoveUnit(MoveUnitsMessage msg)
 	{
 		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null) {
-			GD.Print(units is null);
+			GD.Print("units is null");
 			return false;
 		}
 
@@ -470,7 +474,7 @@ public sealed class SimulationContext
 		if (!BuildingCatalog.IsPlacementValid(_matchState, msg.building_type, msg.position))
 			return false;
 
-		var id = NewEntityId(msg.building_type.ToString());
+		var id = NewId(msg.building_type.ToString());
 		BuildingState building = new BuildingState(
 			id,
 			msg.player_id,
@@ -506,7 +510,7 @@ public sealed class SimulationContext
 				(float)Math.Sin(angle) * resourceRadius
 			);
 			var resource = new ResourceState(
-				NewEntityId(resourceType.ToString()),
+				NewId(resourceType.ToString()),
 				resourceType,
 				building.EntityId,
 				building.CurrentPosition + offset,
@@ -975,7 +979,7 @@ public sealed class SimulationContext
 			
 			if (player.Virelium < ability.Cost)
 			{
-				GD.Print("Not enougth Virelium");
+				GD.Print("Not enough Virelium");
 				return false;
 			}
 			
@@ -1266,12 +1270,12 @@ public sealed class SimulationContext
 		if (player is null)
 			return false;
 
-		var unitId = NewEntityId(msg.UnitType.ToString());
+		var unitId = NewId(msg.UnitType.ToString());
 		var spawnPosition = msg.SpawnPoint;
 		var targetPosition = msg.MoveOrder == spawnPosition
 			? GetOccupiedOffsetPosition(spawnPosition)
 			: msg.MoveOrder;
-		UnitState newUnit = CreateUnitState(unitId, msg.PlayerId, spawnPosition, msg.MovementSpeed, msg.UnitType);
+		UnitState newUnit = CreateUnitState(unitId, msg.PlayerId, spawnPosition, msg.MovementSpeed, msg.UnitType, msg.SquadId);
 
 		player.AddEntity(newUnit);
 
@@ -1284,12 +1288,12 @@ public sealed class SimulationContext
 	/*
 	Creates the correct UnitState subtype for a unit type.
 	*/
-	private static UnitState CreateUnitState(string entityId, string playerId, Vector2 position, float movementSpeed, UnitType unitType)
+	private static UnitState CreateUnitState(string entityId, string playerId, Vector2 position, float movementSpeed, UnitType unitType, string squadId = null)
 	{
 		return unitType switch
 		{
-			UnitType.RESOURCE_COLLECTOR => new ResourceCollectorState(entityId, playerId, position, movementSpeed),
-			_ => new UnitState(entityId, playerId, position, movementSpeed, unitType)
+			UnitType.RESOURCE_COLLECTOR => new ResourceCollectorState(entityId, playerId, position, movementSpeed, squadId),
+			_ => new UnitState(entityId, playerId, position, movementSpeed, unitType, squadId)
 		};
 	}
 
@@ -1304,7 +1308,7 @@ public sealed class SimulationContext
 		if (player is null)
 			return false;
 
-		var buildingId = NewEntityId(msg.BuildingType.ToString());
+		var buildingId = NewId(msg.BuildingType.ToString());
 		var building = new BuildingState(
 			buildingId,
 			msg.PlayerId,
@@ -1675,13 +1679,12 @@ public sealed class SimulationContext
 	}
 
 	/*
-	Creates unique entity ids with a readable type prefix.
+	Creates unique ids with a readable type prefix.
 	*/
-	private static string NewEntityId(string prefix)
+	private static string NewId(string prefix)
 	{
 		return $"{prefix}-{Guid.NewGuid():N}";
 	}
-
 	/*
 	TODO: Setup Method which can later be replaced by a message handler
 	*/

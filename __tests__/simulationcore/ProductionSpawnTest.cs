@@ -32,6 +32,17 @@ public class ProductionSpawnTest
 				foreach (var existing in units.Where(unit => existingIds.Contains(unit.EntityId)))
 					AssertThat(spawned.CurrentPosition.DistanceTo(existing.CurrentPosition) >= 20f).IsTrue();
 		}
+
+		var completedBatch = player.Entities.Values.OfType<UnitState>().ToArray();
+		if (quantity > 1)
+		{
+			AssertThat(completedBatch[0].SquadId is not null).IsTrue();
+			AssertThat(completedBatch.All(unit => unit.SquadId == completedBatch[0].SquadId)).IsTrue();
+		}
+		else
+		{
+			AssertThat(completedBatch[0].SquadId is null).IsTrue();
+		}
 	}
 
 	[TestCase]
@@ -55,7 +66,7 @@ public class ProductionSpawnTest
 	{
 		var (context, player, barracks) = CreateProduction(3);
 		var exit = BuildingCatalog.GetFootprintRect(barracks).End + new Vector2(5, 5);
-		player.AddEntity(new UnitState("blocker", player.PlayerId, exit, 0f));
+		player.AddEntity(new UnitState("blocker", player.PlayerId, exit, 0f, UnitType.BASIC_INFANTRY));
 		for (var tick = 0; tick < UnitCatalog.GetProductionTime(UnitType.BASIC_INFANTRY) / 5; tick++)
 			context.AdvanceTick();
 
