@@ -26,8 +26,7 @@ Do not add `--headless` to the test command. HTML and JUnit reports appear under
 
 ## Require CI before merging
 
-[CI](.github/workflows/ci.yml) runs on every branch push and on pull requests targeting `main`.
-A push checks the latest commit in that push. A branch with an open pull request gets both workflow runs.
+[CI](.github/workflows/ci.yml) runs only on pull requests targeting `main`, including new commits pushed to those pull requests.
 The workflow compiles the project, runs every test under `__tests__`, and checks lint.
 The `Tests` job uploads its reports for 14 days, including reports from failed tests.
 
