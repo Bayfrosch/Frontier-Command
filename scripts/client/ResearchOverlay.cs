@@ -119,7 +119,8 @@ public partial class ResearchOverlay : Control
 					{
 						var heading = new Label
 						{
-							Position = new Vector2(x, y - 32), Text = tree,
+							Position = new Vector2(x, y - 32),
+							Text = tree,
 							MouseFilter = MouseFilterEnum.Ignore
 						};
 						heading.AddThemeColorOverride("font_color", ChapterColor(chapter));
@@ -135,9 +136,14 @@ public partial class ResearchOverlay : Control
 						canvas.Positions.Add(technology.Id, position);
 						var card = new Button
 						{
-							Name = technology.Id, Position = position, Size = CardSize,
-							ToggleMode = true, ButtonGroup = group, Text = technology.Name,
-							TooltipText = technology.Description, MouseDefaultCursorShape = CursorShape.PointingHand
+							Name = technology.Id,
+							Position = position,
+							Size = CardSize,
+							ToggleMode = true,
+							ButtonGroup = group,
+							Text = technology.Name,
+							TooltipText = technology.Description,
+							MouseDefaultCursorShape = CursorShape.PointingHand
 						};
 						var doctrine = technology.Id is "infantry_doctrine" or "tank_doctrine";
 						var accent = doctrine ? new Color("e3a76a") : ChapterColor(chapter);
@@ -156,8 +162,12 @@ public partial class ResearchOverlay : Control
 				{
 					var eitherOr = new Label
 					{
-						Name = "DoctrineEitherOr", Position = new Vector2(556, y + 18), Size = new Vector2(40, 28),
-						Text = "OR", HorizontalAlignment = HorizontalAlignment.Center, MouseFilter = MouseFilterEnum.Ignore
+						Name = "DoctrineEitherOr",
+						Position = new Vector2(556, y + 18),
+						Size = new Vector2(40, 28),
+						Text = "OR",
+						HorizontalAlignment = HorizontalAlignment.Center,
+						MouseFilter = MouseFilterEnum.Ignore
 					};
 					eitherOr.AddThemeColorOverride("font_color", new Color("e3a76a"));
 					eitherOr.AddThemeFontSizeOverride("font_size", 20);
@@ -174,15 +184,21 @@ public partial class ResearchOverlay : Control
 		canvas.AddChild(new ColorRect
 		{
 			Name = $"Generation{generation}Divider",
-			Position = new Vector2(152, y + 13), Size = new Vector2(width - 176, 2),
-			Color = new Color("777052"), MouseFilter = MouseFilterEnum.Ignore
+			Position = new Vector2(152, y + 13),
+			Size = new Vector2(width - 176, 2),
+			Color = new Color("777052"),
+			MouseFilter = MouseFilterEnum.Ignore
 		});
 		var number = generation switch { 1 => "I", 2 => "II", _ => "III" };
 		var label = new Label
 		{
-			Name = $"Generation{generation}Label", Position = new Vector2(24, y), Size = new Vector2(120, 26),
-			Text = $"Generation {number}", HorizontalAlignment = HorizontalAlignment.Center,
-			VerticalAlignment = VerticalAlignment.Center, MouseFilter = MouseFilterEnum.Ignore
+			Name = $"Generation{generation}Label",
+			Position = new Vector2(24, y),
+			Size = new Vector2(120, 26),
+			Text = $"Generation {number}",
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Center,
+			MouseFilter = MouseFilterEnum.Ignore
 		};
 		label.AddThemeColorOverride("font_color", new Color("b8b7a7"));
 		label.AddThemeFontSizeOverride("font_size", 14);
@@ -341,10 +357,16 @@ public partial class ResearchOverlay : Control
 
 	private static StyleBoxFlat CardStyle(Color background, Color border) => new()
 	{
-		BgColor = background, BorderColor = border, BorderWidthLeft = 4,
-		BorderWidthRight = 1, BorderWidthTop = 1, BorderWidthBottom = 1,
-		CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4,
-		CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4
+		BgColor = background,
+		BorderColor = border,
+		BorderWidthLeft = 4,
+		BorderWidthRight = 1,
+		BorderWidthTop = 1,
+		BorderWidthBottom = 1,
+		CornerRadiusTopLeft = 4,
+		CornerRadiusTopRight = 4,
+		CornerRadiusBottomLeft = 4,
+		CornerRadiusBottomRight = 4
 	};
 
 	private partial class ResearchTreeCanvas : Control

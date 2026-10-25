@@ -395,14 +395,14 @@ public class ResearchTest
 	{
 		var militaryPairs = new[] { new[] { "Infantry", "Tanks" }, new[] { "Infantry", "Aircraft" }, new[] { "Tanks", "Aircraft" } };
 		foreach (var pair in militaryPairs)
-		foreach (var civilian in new[] { "Extraction", "Energy", "Infrastructure" })
-		{
-			var (context, player, _) = CreateGame();
-			foreach (var tree in pair)
-				CompleteCoreTree(player, ResearchChapter.Military, tree);
-			CompleteCoreTree(player, ResearchChapter.Civilian, civilian);
-			AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "tank_doctrine"))).IsTrue();
-		}
+			foreach (var civilian in new[] { "Extraction", "Energy", "Infrastructure" })
+			{
+				var (context, player, _) = CreateGame();
+				foreach (var tree in pair)
+					CompleteCoreTree(player, ResearchChapter.Military, tree);
+				CompleteCoreTree(player, ResearchChapter.Civilian, civilian);
+				AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "tank_doctrine"))).IsTrue();
+			}
 	}
 
 	[TestCase]

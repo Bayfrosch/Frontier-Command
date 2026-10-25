@@ -51,25 +51,32 @@ public partial class GameMessages : RefCounted
 	public static readonly StringName RESYNC_RESPONSE = "resync_response";
 	public static readonly StringName SIMULATION_EVENTS = "simulation_events";
 	public static readonly StringName GENERIC_ERROR = "generic_error";
-	public enum MatchMode {
+	public enum MatchMode
+	{
 		ONE_VS_ONE, FREE_FOR_ALL, TEAM
 	}
-	public enum QueueMode {
+	public enum QueueMode
+	{
 		REPLACE, APPEND
 	}
-	public enum UnitStance {
+	public enum UnitStance
+	{
 		AGGRESSIVE, DEFENSIVE, HOLD_FIRE
 	}
-	public enum OutpostSpecialization {
+	public enum OutpostSpecialization
+	{
 		INDUSTRIAL, MILITARY, RESEARCH
 	}
-	public enum MatchPhase {
+	public enum MatchPhase
+	{
 		LOBBY, RUNNING, PAUSED, ENDED
 	}
-	public enum VisibilityState {
+	public enum VisibilityState
+	{
 		HIDDEN, FOGGED, VISIBLE
 	}
-	public enum MovementCategory {
+	public enum MovementCategory
+	{
 		GROUND, AIR, NAVAL
 	}
 }

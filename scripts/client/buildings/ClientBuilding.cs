@@ -21,7 +21,7 @@ public abstract partial class ClientBuilding : Node2D, ClientEntity
 	{
 		ClientWorldInput.IgnoreGuiMouse(this);
 	}
-	
+
 	/*
 	Called once on spawning Building
 	*/

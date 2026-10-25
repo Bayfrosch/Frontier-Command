@@ -60,14 +60,18 @@ public sealed class PlayerState
 		if (GetCompleteBuildingCount(BuildingType.POWER_PLANT) > 0)
 		{
 			UnlockAbility("spawn_resource_gatherer");
-		} else {
+		}
+		else
+		{
 			LockAbility("spawn_resource_gatherer");
 		}
 
 		if (GetCompleteBuildingCount(BuildingType.RESOURCE_GATHERER) > 0)
 		{
 			UnlockAbility("spawn_war_factory");
-		} else {
+		}
+		else
+		{
 			LockAbility("spawn_war_factory");
 		}
 	}

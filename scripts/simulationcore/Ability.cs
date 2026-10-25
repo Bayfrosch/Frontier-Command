@@ -6,11 +6,11 @@ The Id is used by UseAbilityMessage to route the command.
 */
 public class Ability
 {
-    public string Id;
-    public string Name;
-    public int Cost;
-    public bool RequiresTarget;
-    public bool UnlockedFromStart;
-    public Image? Preview;
-    public Vector2? TargetPosition;
+	public string Id;
+	public string Name;
+	public int Cost;
+	public bool RequiresTarget;
+	public bool UnlockedFromStart;
+	public Image? Preview;
+	public Vector2? TargetPosition;
 }

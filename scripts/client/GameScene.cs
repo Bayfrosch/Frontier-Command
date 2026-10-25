@@ -332,7 +332,9 @@ public partial class GameScene : Node2D
 					{
 						EntitySelectionIds.Add(memberId);
 					}
-				} else {
+				}
+				else
+				{
 					EntitySelectionIds.Add(unit.EntityId);
 				}
 			}
@@ -469,7 +471,9 @@ public partial class GameScene : Node2D
 			{
 				EntitySelectionIds.Add(memberId);
 			}
-		} else {
+		}
+		else
+		{
 			EntitySelectionIds.Add(CurrentEntity.EntityId);
 		}
 

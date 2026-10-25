@@ -50,7 +50,7 @@ public class SimulationCoreTest
 		var msg = new MoveUnitsMessage(
 			p_player_id: "1",
 			p_issued_at_tick: 0,
-			p_unit_ids: new[] {"unit_1"},
+			p_unit_ids: new[] { "unit_1" },
 			p_destination: new Vector2(1, 2)
 		);
 
@@ -1263,7 +1263,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
-		var unit = new UnitState("unit-1", "player-1", start, 100f , UnitType.BASIC_INFANTRY);
+		var unit = new UnitState("unit-1", "player-1", start, 100f, UnitType.BASIC_INFANTRY);
 		var building = new BuildingState("building-1", "player-1", new Vector2(100, 0), BuildingType.BARRACKS, "");
 		building.AdvanceConstruction(100);
 		player.AddEntity(unit);

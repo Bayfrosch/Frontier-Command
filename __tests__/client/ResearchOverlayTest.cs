@@ -17,12 +17,18 @@ public class ResearchOverlayTest
 		viewport.PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point }, true);
 		viewport.PushInput(new InputEventMouseButton
 		{
-			Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left,
-			Pressed = true, ButtonMask = MouseButtonMask.Left
+			Position = point,
+			GlobalPosition = point,
+			ButtonIndex = MouseButton.Left,
+			Pressed = true,
+			ButtonMask = MouseButtonMask.Left
 		}, true);
 		viewport.PushInput(new InputEventMouseButton
 		{
-			Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false
+			Position = point,
+			GlobalPosition = point,
+			ButtonIndex = MouseButton.Left,
+			Pressed = false
 		}, true);
 	}
 
@@ -81,11 +87,17 @@ public class ResearchOverlayTest
 		var point = scroll.GetGlobalRect().GetCenter();
 		viewport.PushInput(new InputEventMouseButton
 		{
-			Position = point, GlobalPosition = point, ButtonIndex = MouseButton.WheelDown, Pressed = true
+			Position = point,
+			GlobalPosition = point,
+			ButtonIndex = MouseButton.WheelDown,
+			Pressed = true
 		}, true);
 		viewport.PushInput(new InputEventMouseButton
 		{
-			Position = point, GlobalPosition = point, ButtonIndex = MouseButton.WheelDown, Pressed = false
+			Position = point,
+			GlobalPosition = point,
+			ButtonIndex = MouseButton.WheelDown,
+			Pressed = false
 		}, true);
 		await runner.SimulateFrames(2);
 		AssertThat(scroll.ScrollVertical > 0).IsTrue();

@@ -88,12 +88,12 @@ public sealed class SimulationContext
 
 		foreach (var projectile in _matchState.Projectiles.Values)
 		{
-			if (!TryGetPlayerEntity<EntityState>(projectile.TargetPlayerId, projectile.TargetEntityId, out var target)) 
+			if (!TryGetPlayerEntity<EntityState>(projectile.TargetPlayerId, projectile.TargetEntityId, out var target))
 			{
 				projectilesToRemove.Add(projectile.ProjectileId);
 				continue;
 			}
-			
+
 			if (projectile.AdvanceMovement(target, TimeTickSystem.TICK_DELTA))
 			{
 				target.TakeDamage(CalculateDamage(
@@ -104,7 +104,7 @@ public sealed class SimulationContext
 				projectilesToRemove.Add(projectile.ProjectileId);
 			}
 		}
-		
+
 		foreach (var player in _matchState.Players.Values)
 		{
 			foreach (var project in player.ResearchProjects.Values.ToArray())
@@ -143,7 +143,8 @@ public sealed class SimulationContext
 						continue;
 
 					unitsToSpawn.Add(CreateProducedUnitSpawnMessage(player, building, unitToSpawn));
-				} else if (entity is UnitState unit)
+				}
+				else if (entity is UnitState unit)
 				{
 					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
 					HandleAdvanceAttack(unit);
@@ -204,11 +205,12 @@ public sealed class SimulationContext
 			return false;
 
 		var errors = msg.validate();
-		
-		if (errors.Length > 0) {
+
+		if (errors.Length > 0)
+		{
 			foreach (var err in errors)
 			{
-				Console.WriteLine(err);    
+				Console.WriteLine(err);
 			}
 			return false;
 		}
@@ -285,14 +287,14 @@ public sealed class SimulationContext
 
 		foreach (var unitId in unitIds)
 		{
-			if(!TryGetPlayerEntity<UnitState>(playerId, unitId, out var unit))
+			if (!TryGetPlayerEntity<UnitState>(playerId, unitId, out var unit))
 			{
 				units.Clear();
 				return false;
 			}
-			if (unit is null) 
+			if (unit is null)
 				return false;
-			units.Add(unit);   
+			units.Add(unit);
 		}
 		return true;
 	}
@@ -432,7 +434,8 @@ public sealed class SimulationContext
 	*/
 	private bool HandleMoveUnit(MoveUnitsMessage msg)
 	{
-		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null) {
+		if (!TryGetOwnedUnits(msg.player_id, msg.unit_ids, out var units) || units is null)
+		{
 			GD.Print("units is null");
 			return false;
 		}
@@ -528,8 +531,8 @@ public sealed class SimulationContext
 		direction = direction.Normalized();
 
 		var distanceToBuildingEdge = Math.Min(
-			Math.Abs(buildingSize.X/2f / direction.X),
-			Math.Abs(buildingSize.Y/2f / direction.Y)
+			Math.Abs(buildingSize.X / 2f / direction.X),
+			Math.Abs(buildingSize.Y / 2f / direction.Y)
 		);
 
 		return buildingCenter + direction * (distanceToBuildingEdge + GetConstructionRange(building.Type) / 2);
@@ -599,7 +602,7 @@ public sealed class SimulationContext
 			footprint.Position.Y,
 			footprint.End.Y
 		);
-		
+
 		return point.DistanceSquaredTo(new Vector2(closestX, closestY));
 	}
 	/*
@@ -619,7 +622,7 @@ public sealed class SimulationContext
 
 		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.construction_site_id, out var building) || building is null)
 			return false;
-		
+
 		if (building.BuildProgression >= 100)
 			return false;
 
@@ -748,7 +751,7 @@ public sealed class SimulationContext
 		building.CancelProduction(msg.QueueItem);
 		return true;
 	}
-	
+
 	/*
 	Updates where selected production buildings send finished units.
 	*/
@@ -913,7 +916,7 @@ public sealed class SimulationContext
 				break;
 
 			// Unit Spawns
-			case "spawn_infantry": 
+			case "spawn_infantry":
 				passed = HandleSpawnUnit(msg, UnitType.BASIC_INFANTRY);
 				break;
 
@@ -935,7 +938,7 @@ public sealed class SimulationContext
 
 			// Buildings
 			case "cancel_construction":
-				var cmsg = new CancelConstructionMessage (
+				var cmsg = new CancelConstructionMessage(
 					msg.player_id,
 					msg.issued_at_tick,
 					msg.caster_entity_ids[0]
@@ -977,7 +980,7 @@ public sealed class SimulationContext
 		{
 			if (!TryGetPlayer(msg.player_id, out var player) || player is null)
 				return false;
-			
+
 			if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var building) || building is null)
 				continue;
 
@@ -1000,14 +1003,14 @@ public sealed class SimulationContext
 	*/
 	private bool HandleSpawnUnit(UseAbilityMessage msg, UnitType unitType)
 	{
-		foreach(string entityId in msg.caster_entity_ids)
+		foreach (string entityId in msg.caster_entity_ids)
 		{
 			if (!TryGetPlayerEntity<BuildingState>(msg.player_id, entityId, out var building))
 				return false;
 
 			if (!TryGetPlayer(msg.player_id, out var player))
 				return false;
-			
+
 			var abilities = AbilityCatalog.ForBuilding(building.Type);
 			var ability = abilities.FirstOrDefault(a => a.Id == msg.ability_id);
 			if (ability is null)
@@ -1015,13 +1018,13 @@ public sealed class SimulationContext
 				GD.Print("Ability not found");
 				return false;
 			}
-			
+
 			if (player.Virelium < ability.Cost)
 			{
 				GD.Print("Not enough Virelium");
 				return false;
 			}
-			
+
 			player.RemoveMaterials(ability.Cost);
 
 			HandleTrainUnits(new TrainUnitsMessage(
@@ -1102,15 +1105,15 @@ public sealed class SimulationContext
 
 		if (!BuildingCatalog.IsPlacementValid(_matchState, pendingBuilding, msg.target_position.Value))
 			return false;
-		
+
 		var abilities = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT);
 		var ability = abilities.FirstOrDefault(a => a.Id == msg.ability_id);
 		if (ability is null)
 			return false;
-		
+
 		if (player.Virelium < ability.Cost)
 			return false;
-		
+
 		player.RemoveMaterials(ability.Cost);
 
 		var buildStructureMessage = new BuildStructureMessage(
@@ -1462,12 +1465,12 @@ public sealed class SimulationContext
 		if (count <= 1)
 			return Vector2.Zero;
 
-		int columns = (int) Math.Ceiling(Math.Sqrt(count));
+		int columns = (int)Math.Ceiling(Math.Sqrt(count));
 		int row = index / columns;
 		int column = index % columns;
 
 		float offsetX = (column - (columns - 1) / 2f) * UNIT_SPACING;
-		int rows = (int) Math.Ceiling(count / (float)columns);
+		int rows = (int)Math.Ceiling(count / (float)columns);
 		float offsetY = (row - (rows - 1) / 2f) * UNIT_SPACING;
 
 		return new Vector2(offsetX, offsetY);

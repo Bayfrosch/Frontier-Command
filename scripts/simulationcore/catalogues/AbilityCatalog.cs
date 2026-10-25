@@ -83,7 +83,7 @@ public static class AbilityCatalog
 					UnlockedFromStart = true
 				});
 				break;
-			
+
 			case BuildingType.COMMAND_CENTER:
 				abilities.Add(new Ability
 				{

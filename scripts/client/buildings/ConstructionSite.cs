@@ -5,25 +5,25 @@ public partial class ConstructionSite : ClientBuilding
 	private ProgressBar BuildProgressBar = null;
 	private BuildingType? footprintType;
 
-    public override void _Ready()
-    {
+	public override void _Ready()
+	{
 		base._Ready();
 
 		BuildProgressBar = GetNode<ProgressBar>("BodyRender/BuildProgressBar");
 		BuildProgressBar.MaxValue = 100;
 		BuildProgressBar.Value = 0;
-    }
+	}
 
-    public override void ApplyState(BuildingState state)
-    {
-        base.ApplyState(state);
+	public override void ApplyState(BuildingState state)
+	{
+		base.ApplyState(state);
 
 		ApplyFootprint(state.pendingBuilding);
 		BuildProgressBar.Value = state.BuildProgression;
 		if (state.BuildProgression >= 100)
 			BuildProgressBar.Visible = false;
 
-    }
+	}
 
 	// Also used by placement previews before the node enters the scene tree.
 	public void ApplyFootprint(BuildingType pendingBuildingType)

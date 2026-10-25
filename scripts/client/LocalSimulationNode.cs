@@ -9,40 +9,40 @@ This makes it the connection between client and simulation
 */
 public partial class LocalSimulationNode : Node
 {
-    [Signal]
-    public delegate void StateChangedEventHandler();
+	[Signal]
+	public delegate void StateChangedEventHandler();
 
-    public SimulationContext Context { get; private set; } = null!;
+	public SimulationContext Context { get; private set; } = null!;
 
-    public override void _Ready()
-    {
-        Context = new SimulationContext("test_match");
-        Context.AddPlayer(new PlayerState("player_1"));
-        Context.AddPlayer(new PlayerState("player_2"));
-        Context.AddPlayer(new PlayerState("neutral"));
+	public override void _Ready()
+	{
+		Context = new SimulationContext("test_match");
+		Context.AddPlayer(new PlayerState("player_1"));
+		Context.AddPlayer(new PlayerState("player_2"));
+		Context.AddPlayer(new PlayerState("neutral"));
 
-        var gameLoop = GetNode<TimeTickSystem>("../GameLoop");
-        gameLoop.Tick += OnTick;
-    }
+		var gameLoop = GetNode<TimeTickSystem>("../GameLoop");
+		gameLoop.Tick += OnTick;
+	}
 
-    public bool Push(MessageBase msg)
-    {
-        bool accepted = Context.Push(msg);
+	public bool Push(MessageBase msg)
+	{
+		bool accepted = Context.Push(msg);
 
-        if (accepted)
-            EmitSignal(SignalName.StateChanged);
+		if (accepted)
+			EmitSignal(SignalName.StateChanged);
 
-        return accepted;
-    }
+		return accepted;
+	}
 
-    public IMatchStateView GetState()
-    {
-        return Context.get();
-    }
+	public IMatchStateView GetState()
+	{
+		return Context.get();
+	}
 
-    private void OnTick(int tick)
-    {
-        Context.AdvanceTick();
-        EmitSignal(SignalName.StateChanged);
-    }
+	private void OnTick(int tick)
+	{
+		Context.AdvanceTick();
+		EmitSignal(SignalName.StateChanged);
+	}
 }

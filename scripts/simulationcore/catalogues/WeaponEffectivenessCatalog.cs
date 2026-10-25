@@ -15,7 +15,7 @@ public static class WeaponEffectivenessCatalog
 			[(WeaponClass.SMALL_ARMS, ArmorClass.HEAVY)] = 0.40f,
 			[(WeaponClass.SMALL_ARMS, ArmorClass.STRUCTURE)] = 0.30f,
 			[(WeaponClass.SMALL_ARMS, ArmorClass.AIR)] = 0.00f,
-			
+
 			[(WeaponClass.CANNON, ArmorClass.LIGHT)] = 1.00f,
 			[(WeaponClass.CANNON, ArmorClass.MEDIUM)] = 1.00f,
 			[(WeaponClass.CANNON, ArmorClass.HEAVY)] = 0.85f,

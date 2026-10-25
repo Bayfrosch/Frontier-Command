@@ -81,7 +81,7 @@ public sealed class ProjectileState
 	{
 		if (TargetEntity is null)
 			return true;
-		
+
 		var toTarget = TargetEntity.CurrentPosition - CurrentPosition;
 		var distance = toTarget.Length();
 		var travelDistance = WeaponDefinition.ProjectileSpeed * deltaSeconds;
@@ -91,12 +91,12 @@ public sealed class ProjectileState
 			CurrentPosition = TargetEntity.CurrentPosition;
 			return true;
 		}
-		
+
 		CurrentPosition += toTarget.Normalized() * travelDistance;
 		return false;
 	}
 
-		
+
 }
 
 public enum WeaponDeliveryType

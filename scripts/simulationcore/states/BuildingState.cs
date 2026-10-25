@@ -86,8 +86,8 @@ public sealed class BuildingState : EntityState, ICollisionState
 		_spawnDelayTicks = (int)Math.Ceiling(SPAWN_INTERVAL_SECONDS / TimeTickSystem.TICK_DELTA);
 		return _pendingSpawns.Dequeue();
 	}
-	public BuildingType Type {get; set;}
-	private readonly List<ProductionBatch> _productionQueue = new ();
+	public BuildingType Type { get; set; }
+	private readonly List<ProductionBatch> _productionQueue = new();
 	public List<ProductionBatch> ProductionQueue => _productionQueue;
 	public int ProductionProgress { get; private set; }
 	public Vector2 RallyPoint { get; private set; }

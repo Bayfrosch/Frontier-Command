@@ -4,16 +4,16 @@ using GDictionary = Godot.Collections.Dictionary;
 [GlobalClass]
 public partial class MoveUnitsMessage : UnitDestinationCommandBase
 {
-    public StringName message_type = GameMessages.MOVE_UNITS;
-    public MoveUnitsMessage(string p_player_id = "", int p_issued_at_tick = -1, string[] p_unit_ids = default, Vector2 p_destination = default, int p_queue_mode = (int)GameMessages.QueueMode.REPLACE, StringName p_formation = default)
-    {
-        player_id = p_player_id;
-        issued_at_tick = p_issued_at_tick;
-        unit_ids = p_unit_ids ?? System.Array.Empty<string>();
-        destination = p_destination;
-        queue_mode = p_queue_mode;
-        formation = Empty(p_formation) ? new StringName("rectangle"):  p_formation;
-    }
-    public override GDictionary to_payload() => UnitDestinationPayload();
-    public override void from_payload(GDictionary payload) => UnitDestinationFromPayload(payload);
+	public StringName message_type = GameMessages.MOVE_UNITS;
+	public MoveUnitsMessage(string p_player_id = "", int p_issued_at_tick = -1, string[] p_unit_ids = default, Vector2 p_destination = default, int p_queue_mode = (int)GameMessages.QueueMode.REPLACE, StringName p_formation = default)
+	{
+		player_id = p_player_id;
+		issued_at_tick = p_issued_at_tick;
+		unit_ids = p_unit_ids ?? System.Array.Empty<string>();
+		destination = p_destination;
+		queue_mode = p_queue_mode;
+		formation = Empty(p_formation) ? new StringName("rectangle") : p_formation;
+	}
+	public override GDictionary to_payload() => UnitDestinationPayload();
+	public override void from_payload(GDictionary payload) => UnitDestinationFromPayload(payload);
 }
