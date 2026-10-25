@@ -212,19 +212,27 @@ public class ResearchOverlayTest
 		overlay.Show();
 		overlay.GetNode<Button>("ResearchPanel/Margin/Layout/Body/TreeScroll/TreeCenter/MilitaryTree/infantry_doctrine")
 			.EmitSignal(Button.SignalName.Pressed);
+		var status = overlay.GetNode<Label>("ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/Status");
 		AssertThat(overlay.GetNode<Button>(StartPath).Disabled).IsTrue();
+		AssertThat(status.Text.Contains("Current: 0/2 Military, 0/1 Civilian")).IsTrue();
 		foreach (var technology in ResearchCatalog.All)
 		{
-			if (technology.Generation == 1 && (technology.Chapter == ResearchChapter.Military && technology.Tree != "Tanks"
-				|| technology.Chapter == ResearchChapter.Civilian && technology.Tree == "Extraction"))
+			if (technology.Generation == 1 && technology.Chapter == ResearchChapter.Military && technology.Tree != "Tanks")
+				player.AddResearch(technology.Id);
+		}
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(overlay.GetNode<Button>(StartPath).Disabled).IsTrue();
+		AssertThat(status.Text.Contains("Current: 2/2 Military, 0/1 Civilian")).IsTrue();
+		foreach (var technology in ResearchCatalog.All)
+		{
+			if (technology.Generation == 1 && technology.Chapter == ResearchChapter.Civilian && technology.Tree == "Extraction")
 				player.AddResearch(technology.Id);
 		}
 		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
 		AssertThat(overlay.GetNode<Button>(StartPath).Disabled).IsFalse();
-		var banner = overlay.GetNode<Label>("ResearchPanel/Margin/Layout/DoctrinePanel/DoctrineProgress").Text;
-		AssertThat(banner.Contains("Military 2/2")).IsTrue();
-		AssertThat(banner.Contains("Civilian 1/1")).IsTrue();
-		AssertThat(banner.Contains("permanently excludes the other")).IsTrue();
+		var requirements = overlay.GetNode<Label>("ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/Requirements").Text;
+		AssertThat(requirements.Contains("Any 2 Military core trees and any 1 Civilian core tree.")).IsTrue();
+		AssertThat(requirements.Contains("permanently excludes the Tanks doctrine")).IsTrue();
 	}
 
 	[TestCase]
@@ -276,6 +284,8 @@ public class ResearchOverlayTest
 		AssertThat(tree.GetNode<Button>("light_tanks").Modulate).IsEqual(originalColor);
 		infantry.EmitSignal(Button.SignalName.Pressed);
 		AssertThat(overlay.GetNode<Button>(StartPath).Disabled).IsTrue();
-		AssertThat(overlay.GetNode<Label>("ResearchPanel/Margin/Layout/DoctrinePanel/DoctrineProgress").Text.Contains("TANK DOCTRINE CHOSEN")).IsTrue();
+		AssertThat(tanks.Text).IsEqual("Tank doctrine\nCOMPLETE");
+		AssertThat(overlay.GetNode<Label>("ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/Status").Text)
+			.IsEqual("Permanently excluded by Tank doctrine.");
 	}
 }
