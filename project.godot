@@ -11,8 +11,25 @@ config_version=5
 [application]
 
 config/name="Frontier Command"
-config/features=PackedStringArray("4.6", "Forward Plus")
+run/main_scene="uid://dgflsx4r61iot"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/resizable=false
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="Frontier Command"
+
+[editor_plugins]
+
+enabled=PackedStringArray()
 
 [physics]
 
@@ -20,4 +37,5 @@ config/icon="res://icon.svg"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"

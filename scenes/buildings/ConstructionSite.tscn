@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://bjuy1evb2ki6b"]
+
+[ext_resource type="Script" uid="uid://dtjnammminfb8" path="res://scripts/client/buildings/ConstructionSite.cs" id="1_2d6vy"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exy5l"]
+bg_color = Color(0, 0.59552544, 0.08755032, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2d6vy"]
+size = Vector2(80, 60)
+
+[node name="BarracksConstruct" type="Node2D" unique_id=1041780528]
+script = ExtResource("1_2d6vy")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=2084360261]
+offset_left = -40.0
+offset_top = -30.0
+offset_right = 40.0
+offset_bottom = 30.0
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=1541957403]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "(B)"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuildProgressBar" type="ProgressBar" parent="BodyRender" unique_id=1373870559]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -35.0
+offset_top = -7.5
+offset_right = 35.0
+offset_bottom = -2.5
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_exy5l")
+show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1542274924]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=78414860]
+shape = SubResource("RectangleShape2D_2d6vy")

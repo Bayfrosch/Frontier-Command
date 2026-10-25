@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://tlht2nkjwmk7"]
+
+[ext_resource type="Script" uid="uid://d4jmyrk11g5jd" path="res://scripts/client/units/BasicInfantry.cs" id="1_jdc4a"]
+[ext_resource type="Shader" uid="uid://dir0o5xxjoi5i" path="res://scenes/units/unitCircle.gdshader" id="2_qba1x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8yuvl"]
+shader = ExtResource("2_qba1x")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8yuvl"]
+bg_color = Color(0.7074629, 0.03584842, 3.85046e-07, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qba1x"]
+bg_color = Color(0.21854621, 0.7179883, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qba1x"]
+radius = 20.024984
+
+[node name="BasicInfantry" type="Node2D" unique_id=1169432479]
+script = ExtResource("1_jdc4a")
+
+[node name="BodyRender" type="ColorRect" parent="." unique_id=1963267321]
+material = SubResource("ShaderMaterial_8yuvl")
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.7169325, 0.3354848, 0.33498362, 1)
+
+[node name="Label" type="Label" parent="BodyRender" unique_id=1925582236]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Inf"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=1092368675]
+offset_left = -20.0
+offset_top = 15.0
+offset_right = 20.0
+offset_bottom = 19.0
+theme_override_styles/background = SubResource("StyleBoxFlat_8yuvl")
+theme_override_styles/fill = SubResource("StyleBoxFlat_qba1x")
+show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=892104924]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=2108000842]
+shape = SubResource("CircleShape2D_qba1x")

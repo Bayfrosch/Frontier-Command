@@ -1,0 +1,202 @@
+[gd_scene format=3 uid="uid://bwcm1j5icjh0c"]
+
+[ext_resource type="Script" uid="uid://c51ye7vd5y05a" path="res://scripts/client/ResearchOverlay.cs" id="1_research"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.075, 0.085, 0.078, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.47, 0.42, 0.3, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_size = 16
+
+[sub_resource type="StyleBoxFlat" id="DetailStyle"]
+bg_color = Color(0.11, 0.125, 0.115, 1)
+border_width_left = 1
+border_color = Color(0.32, 0.32, 0.26, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="Research" type="Control" unique_id=902422595]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_research")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=2074684360]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.02, 0.015, 0.8)
+
+[node name="ResearchPanel" type="PanelContainer" parent="." unique_id=427982158]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.08
+anchor_right = 0.96
+anchor_bottom = 0.92
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="Margin" type="MarginContainer" parent="ResearchPanel" unique_id=79296021]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Layout" type="VBoxContainer" parent="ResearchPanel/Margin" unique_id=1801477967]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="ResearchPanel/Margin/Layout" unique_id=780044977]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Titles" type="VBoxContainer" parent="ResearchPanel/Margin/Layout/Header" unique_id=62923838]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="ResearchPanel/Margin/Layout/Header/Titles" unique_id=18849459]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.83, 0.62, 1)
+theme_override_font_sizes/font_size = 30
+text = "Research"
+
+[node name="Subtitle" type="Label" parent="ResearchPanel/Margin/Layout/Header/Titles" unique_id=1644986786]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.69, 0.64, 1)
+text = "Human faction  /  First outline"
+
+[node name="Balance" type="Label" parent="ResearchPanel/Margin/Layout/Header" unique_id=184373832]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.78, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+text = "Materials: 0"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="ResearchPanel/Margin/Layout/Header" unique_id=785330618]
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Close [Esc]"
+
+[node name="Divider" type="HSeparator" parent="ResearchPanel/Margin/Layout" unique_id=2088976351]
+layout_mode = 2
+
+[node name="Chapters" type="TabBar" parent="ResearchPanel/Margin/Layout" unique_id=2144208666]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+
+[node name="Body" type="HBoxContainer" parent="ResearchPanel/Margin/Layout" unique_id=1911217020]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="TreeScroll" type="ScrollContainer" parent="ResearchPanel/Margin/Layout/Body" unique_id=1403359430]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="TreeCenter" type="CenterContainer" parent="ResearchPanel/Margin/Layout/Body/TreeScroll" unique_id=1494357544]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Details" type="PanelContainer" parent="ResearchPanel/Margin/Layout/Body" unique_id=280345708]
+custom_minimum_size = Vector2(330, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("DetailStyle")
+
+[node name="Margin" type="MarginContainer" parent="ResearchPanel/Margin/Layout/Body/Details" unique_id=1248809749]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Scroll" type="ScrollContainer" parent="ResearchPanel/Margin/Layout/Body/Details/Margin" unique_id=1831617242]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll" unique_id=157230135]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="Category" type="Label" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=17464153]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "MILITARY"
+
+[node name="TechnologyName" type="Label" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=1772432308]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 24
+text = "Light tanks"
+autowrap_mode = 3
+
+[node name="Description" type="Label" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=888594774]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="Cost" type="Label" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=625868476]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.78, 0.64, 1)
+
+[node name="Requirements" type="Label" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=786933988]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.69, 0.64, 1)
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=1932924108]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=1757419851]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.74, 0.47, 1)
+autowrap_mode = 3
+
+[node name="Progress" type="ProgressBar" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=756933629]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+show_percentage = false
+
+[node name="StartButton" type="Button" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=1771346512]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Start research"
+
+[node name="CancelButton" type="Button" parent="ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content" unique_id=1833838603]
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Cancel research"
+
+[node name="Footer" type="Label" parent="ResearchPanel/Margin/Layout" unique_id=391825337]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.69, 0.64, 1)
+text = "Outline: payments, timers, and prerequisites are active. Gameplay effects and power costs are a preview."
+autowrap_mode = 3

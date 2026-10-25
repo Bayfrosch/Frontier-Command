@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bfhbfr5u0wqlo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x7qbw"]
+bg_color = Color(0.14767182, 0.14767182, 0.14767176, 1)
+
+[node name="Settings" type="Control" unique_id=1860861315]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsPanel" type="PanelContainer" parent="." unique_id=479093934]
+custom_minimum_size = Vector2(380, 175)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -87.5
+offset_right = 190.0
+offset_bottom = 87.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_x7qbw")
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsPanel" unique_id=378172776]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingsPanel/MarginContainer" unique_id=1991806616]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=188549315]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="ResolutionRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=2071511221]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 16
+
+[node name="ResolutionLabel" type="Label" parent="SettingsPanel/MarginContainer/VBoxContainer/ResolutionRow" unique_id=835063751]
+layout_mode = 2
+text = "Resolution"
+
+[node name="ResolutionOptions" type="OptionButton" parent="SettingsPanel/MarginContainer/VBoxContainer/ResolutionRow" unique_id=1503089427]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CheatModeButton" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+toggle_mode = true
+text = "Cheat Mode: Disabled"
+tooltip_text = "Grants 1,000,000 Virelium and enables instant construction, research, and unit training for this match."
+
+[node name="ButtonRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=653787686]
+layout_mode = 2
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer/ButtonRow" unique_id=1783107557]
+custom_minimum_size = Vector2(96, 32)
+layout_mode = 2
+text = "Close"

@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://b8fbad8s4hhby"]
+
+[ext_resource type="Script" uid="uid://cxl1u640k8unh" path="res://scripts/client/buildings/ProductionBuilding.cs" id="1_qq3ig"]
+[ext_resource type="Texture2D" uid="uid://cufk8webjjxqu" path="res://assets/WarFactory.png" id="2_so480"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_production"]
+bg_color = Color(0, 0.6732143, 0.77275443, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s2vpm"]
+size = Vector2(276, 150)
+
+[node name="WarFactory" type="Node2D" unique_id=1412170836]
+script = ExtResource("1_qq3ig")
+
+[node name="BodyRender" type="TextureRect" parent="." unique_id=1117103477]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -90.0
+offset_right = 140.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_so480")
+expand_mode = 1
+
+[node name="ProductionProgressBar" type="ProgressBar" parent="BodyRender" unique_id=260695325]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -8.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_production")
+show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1667502411]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1254698119]
+position = Vector2(0, 3)
+shape = SubResource("RectangleShape2D_s2vpm")

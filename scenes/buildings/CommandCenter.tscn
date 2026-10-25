@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://dm8oecq2crkph"]
+
+[ext_resource type="Script" uid="uid://cxl1u640k8unh" path="res://scripts/client/buildings/ProductionBuilding.cs" id="1_ryskb"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_0wyj8"]
+load_path = "res://.godot/imported/CommandCenter.png-53bc28fdf9de8950f5482a128b1934df.ctex"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qkax1"]
+bg_color = Color(0, 0.6732143, 0.77275443, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0wyj8"]
+size = Vector2(320, 304)
+
+[node name="CommandCenter" type="Node2D" unique_id=682827733]
+script = ExtResource("1_ryskb")
+
+[node name="BodyRender" type="Control" parent="." unique_id=437463307]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -90.0
+offset_right = 230.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="BodyRender" unique_id=1866985406]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("CompressedTexture2D_0wyj8")
+expand_mode = 1
+
+[node name="ProductionProgressBar" type="ProgressBar" parent="BodyRender" unique_id=250577078]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -7.0
+offset_right = -31.370941
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2.4799995, 1)
+theme_override_styles/fill = SubResource("StyleBoxFlat_qkax1")
+show_percentage = false
+
+[node name="Area2D" type="Area2D" parent="." unique_id=2077934504]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1598415808]
+position = Vector2(70, 62)
+shape = SubResource("RectangleShape2D_0wyj8")
