@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Godot;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 public sealed class PlayerState
 {
+	private const int CHEAT_RESOURCE_MINIMUM = 1_000_000;
 	/*
 	Stores all state that belongs to one player.
 	Neutral is also represented as a player for neutral buildings.
@@ -21,6 +23,8 @@ public sealed class PlayerState
 	*/
 	private readonly Dictionary<string, EntityState> _entities = new();
 	public IReadOnlyDictionary<string, EntityState> Entities => _entities;
+	private readonly Dictionary<string, SquadState> _squads = new();
+	public IReadOnlyDictionary<string, SquadState> Squads => _squads;
 	/*
 	Count of all buildings a player owns
 	*/
@@ -73,7 +77,20 @@ public sealed class PlayerState
 	internal void AddEntity(EntityState entity)
 	{
 		if (entity is UnitState unit)
+		{
 			ApplyUnitResearch(unit);
+			if (unit.SquadId is { } squadId)
+			{
+				if (!_squads.TryGetValue(squadId, out var squad))
+				{
+					squad = new SquadState(squadId);
+					_squads.Add(squadId, squad);
+				}
+
+				squad.AddMember(unit);
+			}
+
+		}
 		_entities[entity.EntityId] = entity;
 	}
 	/*
@@ -81,6 +98,17 @@ public sealed class PlayerState
 	*/
 	internal bool RemoveEntity(string id)
 	{
+		if (!_entities.TryGetValue(id, out var entity))
+			return false;
+
+		if (entity is UnitState { SquadId: { } squadId } && _squads.TryGetValue(squadId, out var squad))
+		{
+			squad.RemoveMember(id);
+
+			if (squad.Soldiers.Count == 0)
+				_squads.Remove(squadId);
+		}
+
 		return _entities.Remove(id);
 	}
 	/*
@@ -152,6 +180,17 @@ public sealed class PlayerState
 	public int Virelium { get; private set; }
 	public int EnergyProduced { get; private set; }
 	public int EnergyConsumed { get; private set; }
+	public bool CheatModeEnabled { get; private set; }
+	private bool cheatResourcesGranted;
+	internal void SetCheatMode(bool enabled)
+	{
+		CheatModeEnabled = enabled;
+		if (!enabled || cheatResourcesGranted)
+			return;
+
+		Virelium = Math.Max(Virelium, CHEAT_RESOURCE_MINIMUM);
+		cheatResourcesGranted = true;
+	}
 	/*
 	Adds gathered material to the player's stockpile.
 	*/

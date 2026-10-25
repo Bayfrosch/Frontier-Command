@@ -5,6 +5,9 @@ public partial class GameUserInterface : Control
 	public ResearchOverlay Research { get; private set; }
 	private Control settings = null;
 	private OptionButton resolutionOptions;
+	private Button cheatModeButton = null;
+	private LocalSimulationNode cheatSimulation = null;
+	private string cheatPlayerId = "";
 	private readonly Vector2I[] resolutions =
 	{
 		new(1280, 720),
@@ -29,12 +32,24 @@ public partial class GameUserInterface : Control
 		settings = GetNode<Control>("Settings");
 		var closeButton = GetNode<Button>("Settings/SettingsPanel/MarginContainer/VBoxContainer/ButtonRow/CloseButton");
 		resolutionOptions = GetNode<OptionButton>("Settings/SettingsPanel/MarginContainer/VBoxContainer/ResolutionRow/ResolutionOptions");
+		cheatModeButton = GetNode<Button>("Settings/SettingsPanel/MarginContainer/VBoxContainer/CheatModeButton");
 		RefreshResolutions();
 		resolutionOptions.ItemSelected += ApplyResolution;
 		GetWindow().SizeChanged += RefreshResolutions;
 
 		settingsButton.Pressed += ToggleSettings;
 		closeButton.Pressed += HideSettings;
+		cheatModeButton.Pressed += ToggleCheatMode;
+	}
+	public void BindSimulation(LocalSimulationNode simulation, string playerId)
+	{
+		if (cheatSimulation is not null)
+			cheatSimulation.StateChanged -= RefreshCheatMode;
+
+		cheatSimulation = simulation;
+		cheatPlayerId = playerId;
+		cheatSimulation.StateChanged += RefreshCheatMode;
+		RefreshCheatMode();
 	}
 
 	public override void _UnhandledKeyInput(InputEvent @event)
@@ -49,8 +64,35 @@ public partial class GameUserInterface : Control
 	private void ToggleSettings()
 	{
 		if (!settings.Visible)
+		{
 			RefreshResolutions();
+			RefreshCheatMode();
+		}
 		settings.Visible = !settings.Visible;
+	}
+	private void ToggleCheatMode()
+	{
+		if (cheatSimulation is null
+			|| !cheatSimulation.GetState().Players.TryGetValue(cheatPlayerId, out var player))
+		{
+			RefreshCheatMode();
+			return;
+		}
+
+		cheatSimulation.Push(new SetCheatModeMessage(
+			cheatPlayerId,
+			cheatSimulation.GetState().Tick,
+			!player.CheatModeEnabled
+		));
+		RefreshCheatMode();
+	}
+	private void RefreshCheatMode()
+	{
+		var enabled = cheatSimulation is not null
+			&& cheatSimulation.GetState().Players.TryGetValue(cheatPlayerId, out var player)
+			&& player.CheatModeEnabled;
+		cheatModeButton.ButtonPressed = enabled;
+		cheatModeButton.Text = enabled ? "Cheat Mode: Enabled" : "Cheat Mode: Disabled";
 	}
 
 	private void RefreshResolutions()
@@ -76,6 +118,8 @@ public partial class GameUserInterface : Control
 	public override void _ExitTree()
 	{
 		GetWindow().SizeChanged -= RefreshResolutions;
+		if (cheatSimulation is not null)
+			cheatSimulation.StateChanged -= RefreshCheatMode;
 	}
 
 	private async void ApplyResolution(long index)

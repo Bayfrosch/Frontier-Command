@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="SettingsPanel" type="PanelContainer" parent="." unique_id=479093934]
-custom_minimum_size = Vector2(380, 120)
+custom_minimum_size = Vector2(380, 175)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -20,9 +20,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -190.0
-offset_top = -60.0
+offset_top = -87.5
 offset_right = 190.0
-offset_bottom = 60.0
+offset_bottom = 87.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_x7qbw")
@@ -56,6 +56,13 @@ text = "Resolution"
 [node name="ResolutionOptions" type="OptionButton" parent="SettingsPanel/MarginContainer/VBoxContainer/ResolutionRow" unique_id=1503089427]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="CheatModeButton" type="Button" parent="SettingsPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+toggle_mode = true
+text = "Cheat Mode: Disabled"
+tooltip_text = "Grants 1,000,000 Virelium and enables instant construction, research, and unit training for this match."
 
 [node name="ButtonRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/VBoxContainer" unique_id=653787686]
 layout_mode = 2

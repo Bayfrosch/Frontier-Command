@@ -51,6 +51,7 @@ public sealed class SimulationContext
 		Register<CancelResearchMessage>(HandleCancelResearch);
 		Register<ChooseCapitalUpgradeMessage>(HandleChooseCapitalUpgrade);
 		Register<SpecializeOutpostMessage>(HandleSpecializeOutpost);
+		Register<SetCheatModeMessage>(HandleSetCheatMode);
 
 		// units 
 		Register<MoveUnitsMessage>(HandleMoveUnit);
@@ -116,11 +117,7 @@ public sealed class SimulationContext
 					continue;
 
 				if (project.Advance(player.EnergyConsumed <= player.EnergyProduced))
-				{
-					player.RemoveEnergyConsumption(technology.Energy);
-					player.AddResearch(project.ResearchId, project.Level);
-					player.RemoveResearchProject(project.ResearchId);
-				}
+					CompleteResearch(player, project, technology);
 			}
 			foreach (var entity in player.Entities.Values)
 			{
@@ -145,17 +142,7 @@ public sealed class SimulationContext
 					if (unitToSpawn is null)
 						continue;
 
-					var spawnPoint = BuildingCatalog.GetFootprintRect(building).End + new Vector2(5, 5);
-
-					unitsToSpawn.Add(new DebugSpawnUnitsMessage(
-						player.PlayerId,
-						_matchState.Tick,
-						unitToSpawn.UnitType,
-						building.RallyPoint,
-						spawnPoint,
-						UnitCatalog.GetMovementSpeed(unitToSpawn.UnitType),
-						unitToSpawn.SquadId
-					));
+					unitsToSpawn.Add(CreateProducedUnitSpawnMessage(player, building, unitToSpawn));
 				} else if (entity is UnitState unit)
 				{
 					unit.AdvanceAttackCooldown(TimeTickSystem.TICK_DELTA);
@@ -486,6 +473,8 @@ public sealed class SimulationContext
 
 		player.AddEntity(building);
 		AssignConstructionUnitToSite(unit, building);
+		if (player.CheatModeEnabled)
+			CompleteConstruction(player, building);
 
 		return true;
 	}
@@ -568,12 +557,29 @@ public sealed class SimulationContext
 			return;
 
 		building.AdvanceConstruction(CONSTRUCTION_ADVANCE);
-		if (building.Type != BuildingType.CONSTRUCTION_SITE) {
-			if (!TryGetPlayer(playerId, out var player))
-				return;
-			player.AddCompletedBuilding(building.Type);
+		if (building.Type != BuildingType.CONSTRUCTION_SITE
+			&& TryGetPlayer(playerId, out var player) && player is not null)
+			FinalizeConstruction(player, building);
+	}
+	private void CompleteConstruction(PlayerState player, BuildingState building)
+	{
+		if (building.Type != BuildingType.CONSTRUCTION_SITE)
+			return;
+
+		building.AdvanceConstruction(100);
+		FinalizeConstruction(player, building);
+	}
+	private void FinalizeConstruction(PlayerState player, BuildingState building)
+	{
+		player.AddCompletedBuilding(building.Type);
+		if (TryGetPlayerEntity<UnitState>(player.PlayerId, building.ConstructionUnitId, out var constructionUnit)
+			&& constructionUnit is not null
+			&& constructionUnit.ConstructionTargetId == building.EntityId)
+		{
 			constructionUnit.ClearConstructionOrder();
+			constructionUnit.ClearMoveOrder();
 		}
+		HandleAdvanceResourceSpawner(building);
 	}
 	/*
 	Measures distance to the closest point on a building footprint.
@@ -720,6 +726,8 @@ public sealed class SimulationContext
 			return false;
 
 		building.QueueProduction(msg.UnitDefinitionId, msg.quantity);
+		if (player.CheatModeEnabled)
+			CompleteProduction(player, building);
 
 		return true;
 	}
@@ -773,7 +781,38 @@ public sealed class SimulationContext
 
 		player.AddEnergyConsumption(technology.Energy);
 		player.RemoveMaterials(technology.GetMaterialCost(level));
-		player.AddResearchProject(new ResearchProjectState(technology, msg.research_structure_id, level));
+		var project = new ResearchProjectState(technology, msg.research_structure_id, level);
+		player.AddResearchProject(project);
+		if (player.CheatModeEnabled)
+			CompleteResearch(player, project, technology);
+		return true;
+	}
+	private static void CompleteResearch(PlayerState player, ResearchProjectState project, ResearchDefinition technology)
+	{
+		player.RemoveEnergyConsumption(technology.Energy);
+		player.AddResearch(project.ResearchId, project.Level);
+		player.RemoveResearchProject(project.ResearchId);
+	}
+	private bool HandleSetCheatMode(SetCheatModeMessage msg)
+	{
+		if (!TryGetPlayer(msg.PlayerId, out var player) || player is null)
+			return false;
+
+		var wasEnabled = player.CheatModeEnabled;
+		player.SetCheatMode(msg.Enabled);
+		if (!msg.Enabled || wasEnabled)
+			return true;
+
+		foreach (var building in player.Entities.Values.OfType<BuildingState>().ToArray())
+			CompleteConstruction(player, building);
+
+		foreach (var project in player.ResearchProjects.Values.ToArray())
+			if (ResearchCatalog.TryGet(project.ResearchId, out var technology))
+				CompleteResearch(player, project, technology);
+
+		foreach (var building in player.Entities.Values.OfType<BuildingState>().ToArray())
+			CompleteProduction(player, building);
+
 		return true;
 	}
 	private bool HandleCancelResearch(CancelResearchMessage msg)
@@ -1007,6 +1046,42 @@ public sealed class SimulationContext
 		var unitType = building.ProductionQueue[0].unitType;
 		return !UnitCatalog.RequiresEnergyForProduction(unitType)
 			|| player.EnergyProduced >= player.EnergyConsumed;
+	}
+	private void CompleteProduction(PlayerState player, BuildingState building)
+	{
+		var completedBatches = building.CompleteProduction();
+		if (completedBatches.Length == 0)
+			return;
+
+		foreach (var batch in completedBatches)
+		{
+			var squadId = batch.quantity > 1 ? NewId("squad") : null;
+			building.EnqueueSpawn(batch, squadId);
+		}
+
+		var unitToSpawn = building.TakeReadySpawn();
+		if (unitToSpawn is null)
+			return;
+
+		var spawnMessage = CreateProducedUnitSpawnMessage(player, building, unitToSpawn);
+		spawnMessage.SpawnPoint = GetOccupiedOffsetPosition(spawnMessage.SpawnPoint);
+		HandleDebugSpawnUnit(spawnMessage);
+	}
+	private DebugSpawnUnitsMessage CreateProducedUnitSpawnMessage(
+		PlayerState player,
+		BuildingState building,
+		BuildingState.PendingSpawn unitToSpawn)
+	{
+		var spawnPoint = BuildingCatalog.GetFootprintRect(building).End + new Vector2(5, 5);
+		return new DebugSpawnUnitsMessage(
+			player.PlayerId,
+			_matchState.Tick,
+			unitToSpawn.UnitType,
+			building.RallyPoint,
+			spawnPoint,
+			UnitCatalog.GetMovementSpeed(unitToSpawn.UnitType),
+			unitToSpawn.SquadId
+		);
 	}
 
 	/*

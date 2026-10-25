@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://c1iub0r10480t"]
+
+[ext_resource type="Texture2D" uid="uid://vbtj318ef4pg" path="res://assets/SquadIcon.png" id="1_wgist"]
+[ext_resource type="Script" uid="uid://dmqsdxq0c3kis" path="res://scripts/client/units/ClientSquadState.cs" id="2_squad"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w81ou"]
+size = Vector2(61, 63)
+
+[node name="SquadIcon" type="Node2D" unique_id=93308768]
+script = ExtResource("2_squad")
+
+[node name="Icon" type="TextureRect" parent="." unique_id=1929692516]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -30.0
+offset_top = -30.0
+offset_right = 30.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_wgist")
+expand_mode = 1
+
+[node name="Area2D" type="Area2D" parent="." unique_id=677017947]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1363581555]
+position = Vector2(0.5, -0.5)
+shape = SubResource("RectangleShape2D_w81ou")

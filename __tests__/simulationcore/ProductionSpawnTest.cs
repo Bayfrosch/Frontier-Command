@@ -38,10 +38,14 @@ public class ProductionSpawnTest
 		{
 			AssertThat(completedBatch[0].SquadId is not null).IsTrue();
 			AssertThat(completedBatch.All(unit => unit.SquadId == completedBatch[0].SquadId)).IsTrue();
+			AssertThat(player.Squads.Count).IsEqual(1);
+			AssertThat(player.Squads[completedBatch[0].SquadId].Soldiers.Keys.ToHashSet()
+				.SetEquals(completedBatch.Select(unit => unit.EntityId))).IsTrue();
 		}
 		else
 		{
 			AssertThat(completedBatch[0].SquadId is null).IsTrue();
+			AssertThat(player.Squads.Count).IsEqual(0);
 		}
 	}
 

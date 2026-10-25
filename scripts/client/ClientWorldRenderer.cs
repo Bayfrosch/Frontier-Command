@@ -23,6 +23,7 @@ public partial class ClientWorldRenderer : Node
 	public PackedScene LightTankScene { get; } = GD.Load<PackedScene>("res://scenes/units/LightTank.tscn");
 	public PackedScene ConstructionUnitScene { get; } = GD.Load<PackedScene>("res://scenes/units/constructionUnit.tscn");
 	public PackedScene ResourceCollectorScene { get; } = GD.Load<PackedScene>("res://scenes/units/ResourceCollector.tscn");
+	public PackedScene SquadIcon { get; } = GD.Load<PackedScene>("res://scenes/units/SquadIcon.tscn");
 
 	private static readonly Color DefaultUnitColor = new(0.7169325f, 0.3354848f, 0.33498362f, 1f);
 	private static readonly Color SelectedUnitColor = new(0.2f, 0.8f, 1f, 1f);
@@ -30,6 +31,7 @@ public partial class ClientWorldRenderer : Node
 	private GameScene Scene = null;
 	private readonly Dictionary<string, ClientBuilding> buildingsById = new();
 	private readonly Dictionary<string, ClientUnit> unitsById = new();
+	private readonly Dictionary<string, ClientSquadState> squadsById = new();
 	private readonly Dictionary<string, ClientResource> resourcesById = new();
 
 	private PackedScene GetBuildingScene(BuildingType type)
@@ -115,6 +117,7 @@ public partial class ClientWorldRenderer : Node
 		var state = simulation.GetState();
 		var existingBuildingIds = new HashSet<string>();
 		var existingUnitIds = new HashSet<string>();
+		var existingSquadIds = new HashSet<string>();
 		var existingResourceIds = new HashSet<string>();
 
 		// Build
@@ -132,6 +135,11 @@ public partial class ClientWorldRenderer : Node
 					existingUnitIds.Add(unitState.EntityId);
 					SyncUnit(unitState);
 				}
+			}
+			foreach (var squadState in player.Squads.Values)
+			{
+				existingSquadIds.Add(squadState.SquadId);
+				SyncSquadIcon(squadState);
 			}
 		}
 
@@ -157,6 +165,14 @@ public partial class ClientWorldRenderer : Node
 			{
 				unitsById[entityId].QueueFree();
 				unitsById.Remove(entityId);
+			}
+		}
+		foreach (var squadId in squadsById.Keys.ToArray())
+		{
+			if (!existingSquadIds.Contains(squadId))
+			{
+				squadsById[squadId].QueueFree();
+				squadsById.Remove(squadId);
 			}
 		}
 		// Remove Resources that no longer exist
@@ -194,18 +210,31 @@ public partial class ClientWorldRenderer : Node
 
 	private void SyncUnit(UnitState unitState)
 	{
-		if (!unitsById.TryGetValue(unitState.EntityId, out var unit))
+		if (unitsById.TryGetValue(unitState.EntityId, out var unit))
 		{
-			var scene = GetUnitScene(unitState.Type);
-			unit = scene.Instantiate<ClientUnit>();
-			AddChild(unit);
-			unitsById[unitState.EntityId] = unit;
-
-			unit.ApplySpawnState(unitState);
+			unit.ApplyState(unitState);
 			return;
 		}
 
-		unit.ApplyState(unitState);
+		var scene = GetUnitScene(unitState.Type);
+		unit = scene.Instantiate<ClientUnit>();
+		AddChild(unit);
+		unitsById[unitState.EntityId] = unit;
+
+		unit.ApplySpawnState(unitState);
+	}
+
+	private void SyncSquadIcon(SquadState squadState)
+	{
+		if (squadsById.TryGetValue(squadState.SquadId, out var squad))
+		{
+			squad.ApplyState(squadState);
+			return;
+		}
+		squad = SquadIcon.Instantiate<ClientSquadState>();
+		AddChild(squad);
+		squad.ApplySpawnState(squadState);
+		squadsById[squadState.SquadId] = squad;
 	}
 
 	private void SyncResource(ResourceState resourceState)

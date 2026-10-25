@@ -51,7 +51,8 @@ public partial class GameScene : Node2D
 			ZAsRelative = false
 		};
 		AddChild(selectionBoxOverlay);
-		var research = GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
+		var gameUserInterface = GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface");
+		var research = gameUserInterface.Research;
 		research.BindSimulation(simulationCore);
 		research.VisibilityChanged += () =>
 		{
@@ -68,6 +69,7 @@ public partial class GameScene : Node2D
 			GD.PushError("SimulationCore node was not found or has the wrong script");
 			return;
 		}
+		gameUserInterface.BindSimulation(simulationCore, "player_1");
 		simulationCore.StateChanged += PruneDeletedSelectedEntities;
 
 		SelectedEntityUI selectedEntityUI = GetNodeOrNull<SelectedEntityUI>("Camera2D/Screen/GameUserInterface/MainLayout/VBoxContainer/BottomBar/VBoxContainer/SelectedEntityUi");
@@ -432,8 +434,15 @@ public partial class GameScene : Node2D
 			return;
 		}
 
-		var CurrentEntity = GetEntityUnderMouse(GetGlobalMousePosition());
-		if (CurrentEntity is null)
+		SelectAtWorldPosition(GetGlobalMousePosition(), shiftHeld);
+	}
+
+	private void SelectAtWorldPosition(Vector2 worldPosition, bool shiftHeld)
+	{
+		var squad = GetSquadUnderMouse(worldPosition);
+		var iconMemberIds = squad is null ? Array.Empty<string>() : GetSquadMemberIds(squad.SquadId);
+		var CurrentEntity = iconMemberIds.Count > 0 ? null : GetEntityUnderMouse(worldPosition);
+		if (CurrentEntity is null && iconMemberIds.Count == 0)
 		{
 			EntitySelectionIds.Clear();
 			EmitSignal(SignalName.UnitSelection);
@@ -447,7 +456,12 @@ public partial class GameScene : Node2D
 
 		// If selected entity is in a squad, add all entities in squad to selection
 		// Else add just the selected one
-		if (CurrentEntity is ClientUnit u && u.SquadId != null)
+		if (iconMemberIds.Count > 0)
+		{
+			foreach (var memberId in iconMemberIds)
+				EntitySelectionIds.Add(memberId);
+		}
+		else if (CurrentEntity is ClientUnit u && u.SquadId != null)
 		{
 			var squadMemberIds = GetSquadMemberIds(u.SquadId);
 
@@ -571,6 +585,21 @@ public partial class GameScene : Node2D
 			.Where(entity => entity is not null)
 			.OrderBy(entity => GetSelectionPriority(entity))
 			.FirstOrDefault();
+	}
+
+	private ClientSquadState? GetSquadUnderMouse(Vector2 worldPosition)
+	{
+		var query = new PhysicsPointQueryParameters2D
+		{
+			Position = worldPosition,
+			CollideWithAreas = true,
+			CollideWithBodies = false
+		};
+
+		return GetWorld2D().DirectSpaceState.IntersectPoint(query)
+			.Select(result => result["collider"].AsGodotObject() as Area2D)
+			.Select(area => area?.GetParent() as ClientSquadState)
+			.FirstOrDefault(squad => squad is not null && GetSquadMemberIds(squad.SquadId).Count > 0);
 	}
 
 	private IReadOnlyList<string> GetSquadMemberIds(string squadId)

@@ -43,6 +43,7 @@ public partial class GameMessages : RefCounted
 	public static readonly StringName CANCEL_RESEARCH = "cancel_research";
 	public static readonly StringName CHOOSE_CAPITAL_UPGRADE = "choose_capital_upgrade";
 	public static readonly StringName SPECIALIZE_OUTPOST = "specialize_outpost";
+	public static readonly StringName SET_CHEAT_MODE = "set_cheat_mode";
 	public static readonly StringName COMMAND_RESULT = "command_result";
 	public static readonly StringName STATE_SNAPSHOT = "state_snapshot";
 	public static readonly StringName STATE_DELTA = "state_delta";

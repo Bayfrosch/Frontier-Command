@@ -58,15 +58,28 @@ public sealed class BuildingState : EntityState, ICollisionState
 		}
 		return null;
 	}
+	internal ProductionBatch[] CompleteProduction()
+	{
+		var completedBatches = _productionQueue.ToArray();
+		_productionQueue.Clear();
+		ProductionProgress = 0;
+		return completedBatches;
+	}
+	internal void EnqueueSpawn(ProductionBatch completedBatch, string? squadId)
+	{
+		for (var i = 0; i < completedBatch.quantity; i++)
+			_pendingSpawns.Enqueue(new PendingSpawn(completedBatch.unitType, squadId));
+	}
 	internal PendingSpawn? AdvanceSpawn(ProductionBatch? completedBatch, string? squadId)
 	{
 		if (completedBatch is not null)
-		{
-			for (var i = 0; i < completedBatch.quantity; i++)
-				_pendingSpawns.Enqueue(new PendingSpawn(completedBatch.unitType, squadId));
-		}
+			EnqueueSpawn(completedBatch, squadId);
 
 		_spawnDelayTicks = Math.Max(0, _spawnDelayTicks - 1);
+		return TakeReadySpawn();
+	}
+	internal PendingSpawn? TakeReadySpawn()
+	{
 		if (_spawnDelayTicks > 0 || _pendingSpawns.Count == 0)
 			return null;
 
