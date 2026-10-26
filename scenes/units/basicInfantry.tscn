@@ -1,10 +1,193 @@
 [gd_scene format=3 uid="uid://tlht2nkjwmk7"]
 
 [ext_resource type="Script" uid="uid://d4jmyrk11g5jd" path="res://scripts/client/units/BasicInfantry.cs" id="1_jdc4a"]
-[ext_resource type="Shader" uid="uid://dir0o5xxjoi5i" path="res://scenes/units/unitCircle.gdshader" id="2_qba1x"]
+[ext_resource type="Texture2D" uid="uid://bvc3innqqe4is" path="res://assets/animation_sheets/infantry_animation2.png" id="3_infantry"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8yuvl"]
-shader = ExtResource("2_qba1x")
+[sub_resource type="AtlasTexture" id="AtlasTexture_back_0"]
+atlas = ExtResource("3_infantry")
+region = Rect2(12, 124, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_back_1"]
+atlas = ExtResource("3_infantry")
+region = Rect2(72, 124, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_back_2"]
+atlas = ExtResource("3_infantry")
+region = Rect2(132, 124, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_back_3"]
+atlas = ExtResource("3_infantry")
+region = Rect2(192, 124, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_back_4"]
+atlas = ExtResource("3_infantry")
+region = Rect2(252, 124, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_back_5"]
+atlas = ExtResource("3_infantry")
+region = Rect2(312, 124, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_front_0"]
+atlas = ExtResource("3_infantry")
+region = Rect2(12, 64, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_front_1"]
+atlas = ExtResource("3_infantry")
+region = Rect2(72, 64, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_front_2"]
+atlas = ExtResource("3_infantry")
+region = Rect2(132, 64, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_front_3"]
+atlas = ExtResource("3_infantry")
+region = Rect2(192, 64, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_front_4"]
+atlas = ExtResource("3_infantry")
+region = Rect2(252, 64, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_front_5"]
+atlas = ExtResource("3_infantry")
+region = Rect2(312, 64, 64, 60)
+margin = Rect2(0, 0, 0, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle_0"]
+atlas = ExtResource("3_infantry")
+region = Rect2(12, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle_1"]
+atlas = ExtResource("3_infantry")
+region = Rect2(72, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle_2"]
+atlas = ExtResource("3_infantry")
+region = Rect2(132, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_right_0"]
+atlas = ExtResource("3_infantry")
+region = Rect2(12, 184, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_right_1"]
+atlas = ExtResource("3_infantry")
+region = Rect2(72, 184, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_right_2"]
+atlas = ExtResource("3_infantry")
+region = Rect2(132, 184, 64, 64)
+margin = Rect2(0, 0, 21, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_right_3"]
+atlas = ExtResource("3_infantry")
+region = Rect2(192, 184, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_right_4"]
+atlas = ExtResource("3_infantry")
+region = Rect2(252, 184, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_right_5"]
+atlas = ExtResource("3_infantry")
+region = Rect2(312, 184, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_infantry"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_back_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_back_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_back_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_back_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_back_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_back_5")
+}],
+"loop": 1,
+"name": &"back",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_front_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_front_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_front_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_front_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_front_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_front_5")
+}],
+"loop": 1,
+"name": &"front",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle_1")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_right_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_right_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_right_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_right_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_right_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_right_5")
+}],
+"loop": 1,
+"name": &"right",
+"speed": 8.0
+}]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8yuvl"]
 bg_color = Color(0.7074629, 0.03584842, 3.85046e-07, 1)
@@ -26,31 +209,10 @@ radius = 20.024984
 [node name="BasicInfantry" type="Node2D" unique_id=1169432479]
 script = ExtResource("1_jdc4a")
 
-[node name="BodyRender" type="ColorRect" parent="." unique_id=1963267321]
-material = SubResource("ShaderMaterial_8yuvl")
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-color = Color(0.7169325, 0.3354848, 0.33498362, 1)
-
-[node name="Label" type="Label" parent="BodyRender" unique_id=1925582236]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -11.5
-offset_right = 20.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "Inf"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1799924324]
+scale = Vector2(0.625, 0.625)
+sprite_frames = SubResource("SpriteFrames_infantry")
+animation = &"idle"
 
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=1092368675]
 offset_left = -20.0
