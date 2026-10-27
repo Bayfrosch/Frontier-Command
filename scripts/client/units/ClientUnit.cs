@@ -16,7 +16,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
 	public float MovementSpeed { get; protected set; }
 	public bool HasMoveOrder { get; protected set; }
 	private ProgressBar HealthBar;
-	private Control BodyRender;
+	private Control? BodyRender;
 	public string? SquadId { get; private set; }
 
 	public override void _Ready()
@@ -24,9 +24,10 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
 		ClientWorldInput.IgnoreGuiMouse(this);
 
 		HealthBar = GetNode<ProgressBar>("HealthBar");
-		BodyRender = GetNode<Control>("BodyRender");
+		BodyRender = GetNodeOrNull<Control>("BodyRender");
 
-		BodyRender.PivotOffset = BodyRender.Size / 2f;
+		if (BodyRender is not null)
+			BodyRender.PivotOffset = BodyRender.Size / 2f;
 	}
 
 	/*
@@ -68,7 +69,7 @@ public abstract partial class ClientUnit : Node2D, ClientEntity
 			return;
 		}
 
-		if (HasMoveOrder)
+		if (HasMoveOrder && BodyRender is not null)
 			BodyRender.Rotation = (RenderPosition - GlobalPosition).Angle();
 
 		GlobalPosition = GlobalPosition.MoveToward(RenderPosition, (float)(MovementSpeed * delta));

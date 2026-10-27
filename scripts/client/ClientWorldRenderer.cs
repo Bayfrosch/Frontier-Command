@@ -100,10 +100,12 @@ public partial class ClientWorldRenderer : Node
 	{
 		foreach (var unit in unitsById.Values)
 		{
-			var bodyRender = unit.GetNode<ColorRect>("BodyRender");
-			bodyRender.Color = Scene.SelectedEntityIds.Contains(unit.EntityId)
-				? SelectedUnitColor
-				: GetDefaultUnitColor(unit.Type);
+			var selected = Scene.SelectedEntityIds.Contains(unit.EntityId);
+			var bodyRender = unit.GetNodeOrNull<ColorRect>("BodyRender");
+			if (bodyRender is not null)
+				bodyRender.Color = selected ? SelectedUnitColor : GetDefaultUnitColor(unit.Type);
+			else
+				unit.GetNode<AnimatedSprite2D>("AnimatedSprite2D").Modulate = selected ? SelectedUnitColor : Colors.White;
 		}
 	}
 

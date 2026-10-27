@@ -8,6 +8,38 @@ using static GdUnit4.Assertions;
 [RequireGodotRuntime]
 public class ClientWorldRendererTest
 {
+	[TestCase(UnitType.BASIC_INFANTRY)]
+	[TestCase(UnitType.RPG_TROOPER)]
+	[TestCase(UnitType.LIGHT_TANK)]
+	[TestCase(UnitType.CONSTRUCTION_UNIT)]
+	[TestCase(UnitType.RESOURCE_COLLECTOR)]
+	public async Task SelectingAndDeselectingRestoresUnitAppearance(UnitType type)
+	{
+		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
+		await runner.SimulateFrames(2);
+		var scene = (GameScene)runner.Scene();
+		scene.GetNode<TimeTickSystem>("GameLoop").SetProcess(false);
+		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
+		var renderer = scene.GetNode<ClientWorldRenderer>("WorldRenderer");
+		var position = new Vector2(600, 600);
+		AssertThat(simulation.Push(new DebugSpawnUnitsMessage(
+			"player_1", 0, type, position, position, 100f))).IsTrue();
+		await runner.SimulateFrames(2);
+		var unit = renderer.GetChildren().OfType<ClientUnit>().Single(unit => unit.GlobalPosition == position);
+		var body = unit.GetNodeOrNull<ColorRect>("BodyRender");
+		var sprite = unit.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
+		var originalColor = body is not null ? body.Color : sprite.Modulate;
+
+		scene.Call("SelectAtWorldPosition", position, false);
+		AssertThat(scene.SelectedEntityIds.Contains(unit.EntityId)).IsTrue();
+		AssertThat(body is not null ? body.Color : sprite.Modulate).IsEqual(new Color(0.2f, 0.8f, 1f));
+		AssertThat(unit.GetNode<ProgressBar>("HealthBar").Modulate).IsEqual(Colors.White);
+
+		scene.Call("SelectAtWorldPosition", new Vector2(2000, 2000), false);
+		AssertThat(scene.SelectedEntityIds).IsEmpty();
+		AssertThat((body is not null ? body.Color : sprite.Modulate).ToHtml()).IsEqual(originalColor.ToHtml());
+	}
+
 	[TestCase]
 	public async Task SquadIconSpawnsAboveCenterAndMovesSmoothly()
 	{

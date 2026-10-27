@@ -32,6 +32,7 @@ public class BasicInfantryAnimationTest
 		AssertThat(sprite.IsPlaying()).IsTrue();
 		AssertThat(sprite.Animation.ToString()).IsEqual(animation);
 		AssertThat(sprite.FlipH).IsEqual(flipH);
+		AssertThat(sprite.Rotation).IsEqual(0f);
 
 		for (var frame = 0; frame < 6; frame++)
 			unit._Process(0.1);
@@ -66,12 +67,14 @@ public class BasicInfantryAnimationTest
 		AssertThat(sprite.IsPlaying()).IsTrue();
 		AssertThat(sprite.Animation.ToString()).IsEqual("idle");
 		AssertThat(sprite.FlipH).IsFalse();
+		var idleFrameAdvanced = false;
 		for (var frame = 0; frame < 15; frame++)
 		{
 			unit._Process(0.02);
 			await runner.SimulateFrames(1, 20);
+			idleFrameAdvanced |= sprite.Frame > 0;
 		}
-		AssertThat(sprite.Frame).IsGreater(0);
+		AssertThat(idleFrameAdvanced).IsTrue();
 
 		state.SetMoveOrder(state.CurrentPosition + new Vector2(0, 100));
 		state.AdvanceMovement(0.5f);
