@@ -1218,7 +1218,7 @@ public class SimulationCoreTest
 		AssertThat(player.Virelium).IsEqual(startingVirelium);
 		AssertThat(player.Entities.Values.OfType<BuildingState>().Any()).IsFalse();
 
-		player.UnlockAbility("spawn_resource_gatherer");
+		player.AddResearch("refining");
 
 		AssertThat(player.AbilityUnlockRevision).IsEqual(1);
 		AssertThat(context.Push(msg)).IsTrue();

@@ -64,7 +64,7 @@ public static class ResearchCatalog
 		new("heavy_bombers", "Heavy bombers", ResearchChapter.Military, "Aircraft", 3, 3400, 25, 150,
 			"Unlock aircraft that threaten fortified positions while remaining vulnerable to fighters and anti-air weapons.", ["air_transports"]),
 		new("refining", "Efficient refining", ResearchChapter.Civilian, "Extraction", 1, 800, 5, 45,
-			"Improve the supply center's Material processing to support expansion.", []),
+			"Unlock construction of Supply Centers to gather and process Materials.", []),
 		new("improved_extractors", "Improved extractors", ResearchChapter.Civilian, "Extraction", 1, 1200, 10, 60,
 			"Unlock more efficient extractors and increase the economy's harvesting capability.", ["refining"]),
 		new("deep_extraction", "Deep extraction", ResearchChapter.Civilian, "Extraction", 1, 1600, 15, 75,

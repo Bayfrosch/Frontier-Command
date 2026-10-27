@@ -444,9 +444,11 @@ Completed buildings automatically get:
 
 Do not add `sell_building` manually to each completed building case. `AbilityCatalog.ForBuilding` adds it once for every building type except `CONSTRUCTION_SITE`.
 
-For construction abilities with building prerequisites, set `UnlockedFromStart = false` and
-update `PlayerState.UpdateAbilityUnlocks`. For example, `spawn_war_factory` is unlocked while
-the player has at least one completed `RESOURCE_GATHERER` (Supply Center).
+For construction abilities that require research, set `UnlockedFromStart = false` and unlock
+the ability in `PlayerState.AddResearch` when its technology completes. Efficient refining
+unlocks `spawn_resource_gatherer`; War Factory research unlocks `spawn_war_factory`.
+Completed buildings do not unlock or relock construction abilities. Keep research checks in
+both the ability handler and the direct construction command.
 
 Completed buildings can also get:
 

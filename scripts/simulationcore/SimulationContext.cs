@@ -461,7 +461,8 @@ public sealed class SimulationContext
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
 			return false;
-		if (msg.building_type == BuildingType.WAR_FACTORY && !player.HasUnlockedAbility("spawn_war_factory"))
+		if (msg.building_type == BuildingType.WAR_FACTORY && !player.HasUnlockedAbility("spawn_war_factory")
+			|| msg.building_type == BuildingType.RESOURCE_GATHERER && !player.HasUnlockedAbility("spawn_resource_gatherer"))
 			return false;
 
 		if (!TryGetConstructionUnit(msg.player_id, msg.construction_unit_id, out var unit))

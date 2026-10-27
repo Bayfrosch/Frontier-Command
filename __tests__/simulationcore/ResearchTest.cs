@@ -7,6 +7,57 @@ using static GdUnit4.Assertions;
 public class ResearchTest
 {
 	[TestCase]
+	public void BuildingCompletionAndRemovalDoNotChangeResearchUnlocks()
+	{
+		var locked = new PlayerState("locked");
+		var researched = new PlayerState("researched");
+		researched.AddResearch("refining");
+		researched.AddResearch("light_tanks");
+		foreach (var player in new[] { locked, researched })
+		{
+			var abilities = player.UnlockedAbilities.ToHashSet();
+			var revision = player.AbilityUnlockRevision;
+			foreach (var type in System.Enum.GetValues<BuildingType>())
+			{
+				player.AddCompletedBuilding(type);
+				AssertThat(player.UnlockedAbilities.SetEquals(abilities)).IsTrue();
+				player.RemoveCompletedBuilding(type);
+				AssertThat(player.UnlockedAbilities.SetEquals(abilities)).IsTrue();
+				AssertThat(player.AbilityUnlockRevision).IsEqual(revision);
+			}
+		}
+	}
+
+	[TestCase]
+	public void SupplyCenterRequiresCompletedResearchInsteadOfPowerPlants()
+	{
+		var (context, player, _) = CreateGame();
+		var opponent = new PlayerState("opponent");
+		context.AddPlayer(opponent);
+		player.AddEntity(new UnitState("builder", "player", new Vector2(500, 500), 100f, UnitType.CONSTRUCTION_UNIT));
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		AssertThat(player.UnlockedAbilities.Contains("spawn_resource_gatherer")).IsFalse();
+		var build = new UseAbilityMessage("player", 0, new[] { "builder" }, "spawn_resource_gatherer",
+			p_target_position: new Vector2(500, 500));
+		AssertThat(context.Push(build)).IsFalse();
+		AssertThat(context.Push(new BuildStructureMessage(BuildingType.RESOURCE_GATHERER, "player", 0,
+			"builder", new Vector2(500, 500)))).IsFalse();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "refining"))).IsTrue();
+		AssertThat(context.Push(build)).IsFalse();
+		AssertThat(context.Push(new CancelResearchMessage("player", 0, "center", "refining"))).IsTrue();
+		AssertThat(context.Push(build)).IsFalse();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "refining"))).IsTrue();
+		for (var tick = 0; tick < 224; tick++)
+			context.AdvanceTick();
+		AssertThat(context.Push(build)).IsFalse();
+		context.AdvanceTick();
+		AssertThat(player.UnlockedAbilities.Contains("spawn_resource_gatherer")).IsTrue();
+		AssertThat(opponent.UnlockedAbilities.Contains("spawn_resource_gatherer")).IsFalse();
+		player.RemoveCompletedBuilding(BuildingType.POWER_PLANT);
+		AssertThat(context.Push(build)).IsTrue();
+	}
+
+	[TestCase]
 	public void CommandCenterCannotHostResearch()
 	{
 		var context = new SimulationContext("research-facility-test");

@@ -25,16 +25,10 @@ public sealed class PlayerState
 	public IReadOnlyDictionary<string, EntityState> Entities => _entities;
 	private readonly Dictionary<string, SquadState> _squads = new();
 	public IReadOnlyDictionary<string, SquadState> Squads => _squads;
-	/*
-	Count of all buildings a player owns
-	*/
-	private readonly Dictionary<BuildingType, int> _completeBuildingCount = new();
 	internal void AddCompletedBuilding(BuildingType type)
 	{
-		_completeBuildingCount[type] = GetCompleteBuildingCount(type) + 1;
 		EnergyProduced += BuildingCatalog.GetPowerProduction(type);
 		EnergyConsumed += BuildingCatalog.GetPowerConsumption(type);
-		UpdateAbilityUnlocks();
 	}
 	internal void AddEnergyConsumption(int val)
 	{
@@ -46,25 +40,8 @@ public sealed class PlayerState
 	}
 	internal void RemoveCompletedBuilding(BuildingType type)
 	{
-		_completeBuildingCount[type] = Math.Max(0, GetCompleteBuildingCount(type) - 1);
 		EnergyProduced = Math.Max(0, EnergyProduced - BuildingCatalog.GetPowerProduction(type));
 		EnergyConsumed = Math.Max(0, EnergyConsumed - BuildingCatalog.GetPowerConsumption(type));
-		UpdateAbilityUnlocks();
-	}
-	private int GetCompleteBuildingCount(BuildingType type)
-	{
-		return _completeBuildingCount.TryGetValue(type, out var count) ? count : 0;
-	}
-	private void UpdateAbilityUnlocks()
-	{
-		if (GetCompleteBuildingCount(BuildingType.POWER_PLANT) > 0)
-		{
-			UnlockAbility("spawn_resource_gatherer");
-		}
-		else
-		{
-			LockAbility("spawn_resource_gatherer");
-		}
 	}
 	/*
 	Adds a unit or building owned by this player.
@@ -136,6 +113,8 @@ public sealed class PlayerState
 	internal void AddResearch(string research, int level = 1)
 	{
 		_research[research] = Math.Max(GetResearchLevel(research), level);
+		if (research == "refining")
+			UnlockAbility("spawn_resource_gatherer");
 		if (research == "anti_armor_infantry")
 			UnlockAbility("spawn_rocket_troops");
 		if (research == "light_tanks")
@@ -160,14 +139,9 @@ public sealed class PlayerState
 	/*
 	Marks an ability id as available for this player.
 	*/
-	internal void UnlockAbility(string abilityId)
+	private void UnlockAbility(string abilityId)
 	{
 		if (!string.IsNullOrEmpty(abilityId) && _unlockedAbilities.Add(abilityId))
-			AbilityUnlockRevision++;
-	}
-	internal void LockAbility(string abilityId)
-	{
-		if (!string.IsNullOrEmpty(abilityId) && _unlockedAbilities.Remove(abilityId))
 			AbilityUnlockRevision++;
 	}
 	/*

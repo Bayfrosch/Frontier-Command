@@ -221,4 +221,6 @@ A completed Research Facility hosts research projects. Construction units can bu
 
 The Tanks tree starts with War Factory research, which unlocks War Factory construction and Light Tank production. Supply Centers do not unlock the factory. Better armor follows, with two levels that reduce incoming damage to all existing and newly produced tanks by 5% per level, up to 10%. Its levels cost 1,200 and 1,600 Materials. Each level takes 60 seconds and consumes 10 additional energy while active. Field artillery requires the first level of Better armor.
 
+Building construction unlocks come only from completed research. Efficient refining unlocks Supply Centers. Completing, selling, or losing buildings does not change these unlocks.
+
 The outline's nodes, costs, durations, and tier assignments are placeholders. They do not settle the remaining questions about the final research tree.
