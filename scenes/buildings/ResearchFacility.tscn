@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/client/buildings/SimpleBuilding.cs" id="1_building"]
+[ext_resource type="Texture2D" path="res://assets/ResearchFacility.png" id="2_texture"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_facility"]
+size = Vector2(220, 140)
+
+[node name="ResearchFacility" type="Node2D"]
+script = ExtResource("1_building")
+
+[node name="BodyRender" type="TextureRect" parent="."]
+offset_left = -140.0
+offset_top = -120.0
+offset_right = 140.0
+offset_bottom = 90.0
+texture = ExtResource("2_texture")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, 20)
+shape = SubResource("RectangleShape2D_facility")

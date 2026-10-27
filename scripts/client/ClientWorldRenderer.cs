@@ -13,6 +13,7 @@ public partial class ClientWorldRenderer : Node
 	public PackedScene ResourceSpawnerScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ResourceSpawner.tscn");
 	public PackedScene ResourceGathererScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/Resource_Gatherer.tscn");
 	public PackedScene WarFactoryScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/WarFactory.tscn");
+	public PackedScene ResearchFacilityScene { get; } = GD.Load<PackedScene>("res://scenes/buildings/ResearchFacility.tscn");
 
 	// Resource Scenes
 	public PackedScene ResourceSourceScene { get; } = GD.Load<PackedScene>("res://scenes/resources/ResourceSource.tscn");
@@ -44,6 +45,7 @@ public partial class ClientWorldRenderer : Node
 			BuildingType.RESOURCE_SPAWNER => ResourceSpawnerScene,
 			BuildingType.RESOURCE_GATHERER => ResourceGathererScene,
 			BuildingType.WAR_FACTORY => WarFactoryScene,
+			BuildingType.RESEARCH_FACILITY => ResearchFacilityScene,
 			BuildingType.CONSTRUCTION_SITE => ConstructionSiteScene,
 			_ => throw new Exception("BuildingScene does not exist")
 		};

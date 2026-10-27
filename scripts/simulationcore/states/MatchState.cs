@@ -157,6 +157,7 @@ public enum BuildingType
 	COMMAND_CENTER,
 	POWER_PLANT,
 	WAR_FACTORY,
+	RESEARCH_FACILITY,
 }
 
 public enum ResourceType

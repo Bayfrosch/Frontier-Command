@@ -13,6 +13,7 @@ public class BuildingFootprintTest
 		(BuildingType.POWER_PLANT, "PowerPlant"),
 		(BuildingType.RESOURCE_GATHERER, "Resource_Gatherer"),
 		(BuildingType.WAR_FACTORY, "WarFactory"),
+		(BuildingType.RESEARCH_FACILITY, "ResearchFacility"),
 		(BuildingType.RESOURCE_SPAWNER, "ResourceSpawner")
 	};
 

@@ -1034,8 +1034,9 @@ public class SimulationCoreTest
 		AssertThat(building.Abilities.Any(ability => ability.Id == "spawn_light_tank")).IsTrue();
 	}
 
-	[TestCase]
-	public void Push_UseAbilityMessage_SellWarFactory_RemovesConsumedEnergy()
+	[TestCase(BuildingType.WAR_FACTORY, 2)]
+	[TestCase(BuildingType.RESEARCH_FACILITY, 15)]
+	public void Push_UseAbilityMessage_SellBuilding_RemovesConsumedEnergy(BuildingType type, int energy)
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
@@ -1044,10 +1045,11 @@ public class SimulationCoreTest
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(
 			"player-1",
 			0,
-			BuildingType.WAR_FACTORY,
+			type,
 			Vector2.Zero
 		))).IsTrue();
 		var building = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(player.EnergyConsumed).IsEqual(energy);
 
 		AssertThat(context.Push(new UseAbilityMessage(
 			p_player_id: "player-1",

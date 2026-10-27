@@ -16,13 +16,13 @@ public class CheatModeTest
 		context.AddPlayer(opponent);
 		var builder = new UnitState("builder", player.PlayerId, new Vector2(800, 0), 100f, UnitType.CONSTRUCTION_UNIT);
 		player.AddEntity(builder);
-		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.COMMAND_CENTER, Vector2.Zero))).IsTrue();
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.RESEARCH_FACILITY, Vector2.Zero))).IsTrue();
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.BARRACKS, new Vector2(400, 0)))).IsTrue();
 		var barracks = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.BARRACKS);
 		AssertThat(context.Push(new BuildStructureMessage(BuildingType.POWER_PLANT, player.PlayerId, 0, builder.EntityId, new Vector2(1000, 0)))).IsTrue();
 		var constructionSite = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.CONSTRUCTION_SITE);
 		AssertThat(context.Push(new StartResearchMessage(player.PlayerId, 0,
-			player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.COMMAND_CENTER).EntityId,
+			player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.RESEARCH_FACILITY).EntityId,
 			"light_tanks"))).IsTrue();
 		AssertThat(context.Push(new TrainUnitsMessage(UnitType.BASIC_INFANTRY, player.PlayerId, 0, barracks.EntityId, 3))).IsTrue();
 
@@ -35,7 +35,7 @@ public class CheatModeTest
 		AssertThat(builder.HasMoveOrder).IsFalse();
 		AssertThat(player.GetResearchLevel("light_tanks")).IsEqual(1);
 		AssertThat(player.ResearchProjects.Count).IsEqual(0);
-		AssertThat(player.EnergyConsumed).IsEqual(0);
+		AssertThat(player.EnergyConsumed).IsEqual(15);
 		AssertThat(barracks.ProductionQueue).IsEmpty();
 		AssertThat(player.Entities.Values.OfType<UnitState>().Count(unit => unit.Type == UnitType.BASIC_INFANTRY)).IsEqual(1);
 		AssertThat(opponent.CheatModeEnabled).IsFalse();
@@ -55,9 +55,9 @@ public class CheatModeTest
 		context.AddPlayer(player);
 		var builder = new UnitState("builder", player.PlayerId, new Vector2(800, 0), 100f, UnitType.CONSTRUCTION_UNIT);
 		player.AddEntity(builder);
-		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.COMMAND_CENTER, Vector2.Zero))).IsTrue();
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.RESEARCH_FACILITY, Vector2.Zero))).IsTrue();
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.WAR_FACTORY, new Vector2(400, 0)))).IsTrue();
-		var commandCenter = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.COMMAND_CENTER);
+		var researchFacility = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.RESEARCH_FACILITY);
 		var warFactory = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.WAR_FACTORY);
 		AssertThat(context.Push(new SetCheatModeMessage(player.PlayerId, 0, true))).IsTrue();
 
@@ -70,7 +70,7 @@ public class CheatModeTest
 
 		balance = player.Virelium;
 		var researchCost = ResearchCatalog.All.Single(technology => technology.Id == "light_tanks").GetMaterialCost(1);
-		AssertThat(context.Push(new StartResearchMessage(player.PlayerId, 0, commandCenter.EntityId, "light_tanks"))).IsTrue();
+		AssertThat(context.Push(new StartResearchMessage(player.PlayerId, 0, researchFacility.EntityId, "light_tanks"))).IsTrue();
 		AssertThat(player.GetResearchLevel("light_tanks")).IsEqual(1);
 		AssertThat(player.ResearchProjects.Count).IsEqual(0);
 		AssertThat(player.Virelium).IsEqual(balance - researchCost);
@@ -91,9 +91,9 @@ public class CheatModeTest
 		context.AddPlayer(player);
 		var builder = new UnitState("builder", player.PlayerId, new Vector2(800, 0), 100f, UnitType.CONSTRUCTION_UNIT);
 		player.AddEntity(builder);
-		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.COMMAND_CENTER, Vector2.Zero))).IsTrue();
+		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.RESEARCH_FACILITY, Vector2.Zero))).IsTrue();
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(player.PlayerId, 0, BuildingType.BARRACKS, new Vector2(400, 0)))).IsTrue();
-		var commandCenter = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.COMMAND_CENTER);
+		var researchFacility = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.RESEARCH_FACILITY);
 		var barracks = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.BARRACKS);
 
 		AssertThat(context.Push(new SetCheatModeMessage(player.PlayerId, 0, true))).IsTrue();
@@ -106,7 +106,7 @@ public class CheatModeTest
 
 		AssertThat(context.Push(new BuildStructureMessage(BuildingType.POWER_PLANT, player.PlayerId, 0, builder.EntityId, new Vector2(1000, 0)))).IsTrue();
 		AssertThat(player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.CONSTRUCTION_SITE).BuildProgression).IsEqual(0);
-		AssertThat(context.Push(new StartResearchMessage(player.PlayerId, 0, commandCenter.EntityId, "light_tanks"))).IsTrue();
+		AssertThat(context.Push(new StartResearchMessage(player.PlayerId, 0, researchFacility.EntityId, "light_tanks"))).IsTrue();
 		AssertThat(player.ResearchProjects.ContainsKey("light_tanks")).IsTrue();
 		AssertThat(context.Push(new TrainUnitsMessage(UnitType.BASIC_INFANTRY, player.PlayerId, 0, barracks.EntityId))).IsTrue();
 		AssertThat(barracks.ProductionQueue.Count).IsEqual(1);

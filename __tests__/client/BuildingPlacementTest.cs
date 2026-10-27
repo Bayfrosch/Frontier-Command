@@ -8,8 +8,9 @@ using static GdUnit4.Assertions;
 [RequireGodotRuntime]
 public class BuildingPlacementTest
 {
-	[TestCase]
-	public async Task Preview_TurnsRedOverNeutralResource_AndClearsWhenDepleted()
+	[TestCase("spawn_power_plant")]
+	[TestCase("spawn_research_facility")]
+	public async Task Preview_TurnsRedOverNeutralResource_AndClearsWhenDepleted(string abilityId)
 	{
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
 		await runner.SimulateFrames(2);
@@ -17,7 +18,7 @@ public class BuildingPlacementTest
 		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
 		var resource = new ResourceState("preview-resource", ResourceType.VIRELIUM, "spawner", new Vector2(-1000, -1000), 2500);
 		((MatchState)simulation.GetState()).AddResource(resource);
-		scene.Call("ShowConstructionPreview", "spawn_power_plant");
+		scene.Call("ShowConstructionPreview", abilityId);
 		var preview = scene.GetChildren().OfType<ConstructionSite>().Single();
 		preview.GlobalPosition = resource.CurrentPosition;
 		scene.Call("UpdateConstructionPreviewAppearance");

@@ -17,6 +17,7 @@ public static class BuildingCatalog
 			BuildingType.COMMAND_CENTER => new Vector2(320, 304),
 			BuildingType.POWER_PLANT => new Vector2(183, 86),
 			BuildingType.WAR_FACTORY => new Vector2(276, 150),
+			BuildingType.RESEARCH_FACILITY => new Vector2(220, 140),
 			BuildingType.RESOURCE => new Vector2(32, 32),
 			_ => new Vector2(0, 0)
 		};
@@ -31,6 +32,7 @@ public static class BuildingCatalog
 			BuildingType.COMMAND_CENTER => new Vector2(70, 62),
 			BuildingType.POWER_PLANT => new Vector2(-0.5f, -2),
 			BuildingType.WAR_FACTORY => new Vector2(0, 3),
+			BuildingType.RESEARCH_FACILITY => new Vector2(0, 20),
 			_ => Vector2.Zero
 		};
 	}
@@ -61,6 +63,7 @@ public static class BuildingCatalog
 			BuildingType.COMMAND_CENTER => 2000,
 			BuildingType.POWER_PLANT => 400,
 			BuildingType.WAR_FACTORY => 650,
+			BuildingType.RESEARCH_FACILITY => 600,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}
@@ -94,6 +97,7 @@ public static class BuildingCatalog
 		return type switch
 		{
 			BuildingType.WAR_FACTORY => 2,
+			BuildingType.RESEARCH_FACILITY => 15,
 			_ => 0
 		};
 	}

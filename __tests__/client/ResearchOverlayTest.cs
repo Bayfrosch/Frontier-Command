@@ -1,5 +1,6 @@
 using Godot;
 using GdUnit4;
+using System.Linq;
 using System.Threading.Tasks;
 using static GdUnit4.Assertions;
 
@@ -9,6 +10,80 @@ public class ResearchOverlayTest
 {
 	private const string StartPath = "ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/StartButton";
 	private const string CancelPath = "ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/CancelButton";
+	private const string WarningPath = "ResearchPanel/Margin/Layout/FacilityWarning";
+
+	private static void AddResearchFacility(Node scene)
+	{
+		AssertThat(scene.GetNode<LocalSimulationNode>("SimulationCore").Push(new DebugSpawnBuildingMessage(
+			"player_1", 0, BuildingType.RESEARCH_FACILITY, new Vector2(1000, -1000)))).IsTrue();
+	}
+
+	[TestCase]
+	public async Task MissingFacilityWarnsWithoutBlockingBrowsingAndCompletionUnlocksResearch()
+	{
+		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
+		await runner.SimulateFrames(2);
+		var scene = runner.Scene();
+		scene.GetNode<TimeTickSystem>("GameLoop").SetProcess(false);
+		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
+		var player = simulation.GetState().Players["player_1"];
+		var ui = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface");
+		var overlay = ui.Research;
+		ui.GetNode<Button>("MainLayout/VBoxContainer/TopBar/HBoxContainer/ResearchButton")
+			.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(overlay.Visible).IsTrue();
+		var warning = overlay.GetNode<Label>(WarningPath);
+		var start = overlay.GetNode<Button>(StartPath);
+		AssertThat(warning.IsVisibleInTree()).IsTrue();
+		AssertThat(warning.Text.Contains("Build a Research Facility")).IsTrue();
+		AssertThat(start.Disabled).IsTrue();
+		var balance = player.Virelium;
+		start.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(player.ResearchProjects.Count).IsEqual(0);
+		AssertThat(player.Virelium).IsEqual(balance);
+
+		var tabs = overlay.GetNode<TabBar>("ResearchPanel/Margin/Layout/Chapters");
+		tabs.CurrentTab = 1;
+		overlay.GetNode<Button>("ResearchPanel/Margin/Layout/Body/TreeScroll/TreeCenter/CivilianTree/refining")
+			.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(overlay.GetNode<Label>("ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content/TechnologyName").Text)
+			.IsEqual("Efficient refining");
+		AssertThat(start.Disabled).IsTrue();
+		tabs.CurrentTab = 0;
+		overlay.GetNode<Button>("ResearchPanel/Margin/Layout/Body/TreeScroll/TreeCenter/MilitaryTree/light_tanks")
+			.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(simulation.Push(new DebugSpawnBuildingMessage("player_2", 0,
+			BuildingType.RESEARCH_FACILITY, new Vector2(1400, -1000)))).IsTrue();
+		AssertThat(warning.Visible).IsTrue();
+		AssertThat(start.Disabled).IsTrue();
+
+		var facility = new BuildingState("lab", "player_1", new Vector2(1000, -1000), BuildingType.RESEARCH_FACILITY, "");
+		player.AddEntity(facility);
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(warning.Visible).IsTrue();
+		AssertThat(start.Disabled).IsTrue();
+		facility.AdvanceConstruction(100);
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(warning.Visible).IsFalse();
+		AssertThat(start.Disabled).IsFalse();
+		var rendered = scene.GetNode<ClientWorldRenderer>("WorldRenderer").GetChildren()
+			.OfType<ClientBuilding>().Single(building => building.EntityId == facility.EntityId && !building.IsQueuedForDeletion());
+		AssertThat(rendered.Type).IsEqual(BuildingType.RESEARCH_FACILITY);
+		AssertThat(rendered.GetNode<TextureRect>("BodyRender").Texture).IsNotNull();
+		start.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(player.ResearchProjects["light_tanks"].StructureId).IsEqual(facility.EntityId);
+
+		facility.TakeDamage(facility.MaxHealth);
+		simulation.Context.AdvanceTick();
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(warning.Visible).IsTrue();
+		AssertThat(player.ResearchProjects["light_tanks"].ElapsedTicks).IsEqual(0);
+		AssertThat(overlay.GetNode<Button>(CancelPath).Visible).IsTrue();
+		overlay.GetNode<Button>(CancelPath).EmitSignal(Button.SignalName.Pressed);
+		AssertThat(player.ResearchProjects.Count).IsEqual(0);
+		AssertThat(player.Virelium).IsEqual(balance);
+		AssertThat(start.Disabled).IsTrue();
+	}
 
 	private static void Click(Viewport viewport, Control control) => Click(viewport, control.GetGlobalRect().GetCenter());
 
@@ -38,6 +113,7 @@ public class ResearchOverlayTest
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
 		await runner.SimulateFrames(2);
 		var scene = runner.Scene();
+		AddResearchFacility(scene);
 		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
 		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
 		var player = simulation.GetState().Players["player_1"];
@@ -53,6 +129,14 @@ public class ResearchOverlayTest
 		AssertThat(status.Text).IsEqual("Paused: insufficient energy (60s remaining)");
 		AssertThat(player.ResearchProjects["light_tanks"].ElapsedTicks).IsEqual(0);
 
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		simulation.Context.AdvanceTick();
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(status.Text).IsEqual("Paused: insufficient energy (60s remaining)");
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		simulation.Context.AdvanceTick();
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(status.Text).IsEqual("Paused: insufficient energy (60s remaining)");
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		for (var tick = 0; tick < 5; tick++)
 			simulation.Context.AdvanceTick();
@@ -147,6 +231,7 @@ public class ResearchOverlayTest
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
 		await runner.SimulateFrames(2);
 		var scene = runner.Scene();
+		AddResearchFacility(scene);
 		var ui = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface");
 		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
 		var player = simulation.GetState().Players["player_1"];
@@ -178,6 +263,7 @@ public class ResearchOverlayTest
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
 		await runner.SimulateFrames(2);
 		var scene = runner.Scene();
+		AddResearchFacility(scene);
 		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
 		var player = scene.GetNode<LocalSimulationNode>("SimulationCore").GetState().Players["player_1"];
 		var balance = player.Virelium;
@@ -206,6 +292,7 @@ public class ResearchOverlayTest
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
 		await runner.SimulateFrames(2);
 		var scene = runner.Scene();
+		AddResearchFacility(scene);
 		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
 		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
 		var player = simulation.GetState().Players["player_1"];
@@ -241,6 +328,7 @@ public class ResearchOverlayTest
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
 		await runner.SimulateFrames(2);
 		var scene = runner.Scene();
+		AddResearchFacility(scene);
 		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
 		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
 		var player = simulation.GetState().Players["player_1"];
@@ -273,6 +361,8 @@ public class ResearchOverlayTest
 		AssertThat(tanks.Modulate).IsEqual(originalColor);
 		tanks.EmitSignal(Button.SignalName.Pressed);
 		overlay.GetNode<Button>(StartPath).EmitSignal(Button.SignalName.Pressed);
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		for (var tick = 0; tick < 600; tick++)

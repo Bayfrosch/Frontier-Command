@@ -31,6 +31,7 @@ public partial class ResearchOverlay : Control
 	private Label requirements;
 	private Label status;
 	private Label balance;
+	private Label facilityWarning;
 	private TabBar chapters;
 	private ScrollContainer treeScroll;
 	private Button startButton;
@@ -48,6 +49,7 @@ public partial class ResearchOverlay : Control
 		requirements = GetNode<Label>(DetailPath + "Requirements");
 		status = GetNode<Label>(DetailPath + "Status");
 		balance = GetNode<Label>("ResearchPanel/Margin/Layout/Header/Balance");
+		facilityWarning = GetNode<Label>("ResearchPanel/Margin/Layout/FacilityWarning");
 		chapters = GetNode<TabBar>("ResearchPanel/Margin/Layout/Chapters");
 		treeScroll = GetNode<ScrollContainer>("ResearchPanel/Margin/Layout/Body/TreeScroll");
 		startButton = GetNode<Button>(DetailPath + "StartButton");
@@ -228,11 +230,13 @@ public partial class ResearchOverlay : Control
 	private PlayerState LocalPlayer => simulation?.GetState().Players.GetValueOrDefault("player_1");
 
 	private static BuildingState ResearchHost(PlayerState player) => player.Entities.Values
-		.OfType<BuildingState>().FirstOrDefault(building => building.Type == BuildingType.COMMAND_CENTER && building.Health > 0);
+		.OfType<BuildingState>().FirstOrDefault(building => building.Type == BuildingType.RESEARCH_FACILITY && building.Health > 0);
 
 	private void RefreshProjects()
 	{
 		var player = LocalPlayer;
+		var researchHost = player is null ? null : ResearchHost(player);
+		facilityWarning.Visible = player is not null && researchHost is null;
 		if (player is null || selected is null)
 		{
 			startButton.Disabled = true;
@@ -267,15 +271,16 @@ public partial class ResearchOverlay : Control
 		startButton.Text = completed ? "Research complete" : selectingDoctrine ? $"Choose {selected.Tree} doctrine"
 			: selected.MaxLevel > 1 ? $"Research level {nextLevel}" : "Start research";
 		startButton.Disabled = completed || busy is not null || locked.Length > 0 || excluded
-			|| player.Virelium < materialCost || ResearchHost(player) is null;
+			|| player.Virelium < materialCost || researchHost is null;
 		cancelButton.Visible = project is not null;
 		progress.Visible = project is not null;
 		if (project is not null)
 		{
 			progress.Value = 100.0 * project.ElapsedTicks / project.DurationTicks;
 			var remaining = Mathf.CeilToInt((project.DurationTicks - project.ElapsedTicks) * TimeTickSystem.TICK_DELTA);
-			var hostAlive = player.Entities.TryGetValue(project.StructureId, out var host) && host.Health > 0;
-			status.Text = !hostAlive ? "Paused: research host lost"
+			var hostAlive = player.Entities.TryGetValue(project.StructureId, out var host)
+				&& host is BuildingState building && building.Type == BuildingType.RESEARCH_FACILITY && host.Health > 0;
+			status.Text = !hostAlive ? "Paused: research facility lost. Cancel for a full refund."
 				: player.EnergyConsumed > player.EnergyProduced ? $"Paused: insufficient energy ({remaining}s remaining)"
 				: $"Researching: {remaining}s remaining";
 			cancelButton.Text = "Cancel";
@@ -287,7 +292,7 @@ public partial class ResearchOverlay : Control
 					: $"Permanently excluded by {chosenDoctrine.Name}."
 				: busy is not null ? $"{selected.Chapter} is busy with {ResearchCatalog.All.First(item => item.Id == busy.ResearchId).Name}. Select that project to cancel."
 				: locked.Length > 0 ? locked
-				: ResearchHost(player) is null ? "A Command Center is needed to start research in this outline."
+				: researchHost is null ? "Build a Research Facility to start research."
 				: player.Virelium < materialCost ? "Not enough Materials."
 				: "One active project per chapter. Cancel before completion for a full refund.";
 		}

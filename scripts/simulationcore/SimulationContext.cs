@@ -110,7 +110,7 @@ public sealed class SimulationContext
 			foreach (var project in player.ResearchProjects.Values.ToArray())
 			{
 				if (!TryGetPlayerEntity<BuildingState>(player.PlayerId, project.StructureId, out var host)
-					|| host is null || host.Health <= 0)
+					|| host is null || host.Type != BuildingType.RESEARCH_FACILITY || host.Health <= 0)
 					continue;
 
 				if (!ResearchCatalog.TryGet(project.ResearchId, out var technology))
@@ -771,9 +771,8 @@ public sealed class SimulationContext
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null
 			|| !ResearchCatalog.TryGet(msg.research_id, out var technology))
 			return false;
-		// shortcut: the Command Center hosts outline research until a research-center building exists.
 		if (!TryGetPlayerEntity<BuildingState>(msg.player_id, msg.research_structure_id, out var host)
-			|| host is null || host.Type != BuildingType.COMMAND_CENTER || host.Health <= 0)
+			|| host is null || host.Type != BuildingType.RESEARCH_FACILITY || host.Health <= 0)
 			return false;
 		var level = player.GetResearchLevel(technology.Id) + 1;
 		if (level > technology.MaxLevel
@@ -965,6 +964,10 @@ public sealed class SimulationContext
 
 			case "spawn_war_factory":
 				passed = HandleSpawnBuilding(msg, BuildingType.WAR_FACTORY);
+				break;
+
+			case "spawn_research_facility":
+				passed = HandleSpawnBuilding(msg, BuildingType.RESEARCH_FACILITY);
 				break;
 		}
 		return passed;

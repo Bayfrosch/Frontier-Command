@@ -16,10 +16,13 @@ public class ResearchBranchTest
 		var scene = runner.Scene();
 		scene.GetNode<TimeTickSystem>("GameLoop").SetProcess(false);
 		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
+		AssertThat(simulation.Push(new DebugSpawnBuildingMessage("player_1", 0,
+			BuildingType.RESEARCH_FACILITY, new Vector2(1000, -1000)))).IsTrue();
 		var player = simulation.GetState().Players["player_1"];
 		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
 		player.AddResearch("infantry_training");
 		player.AddResearch("anti_armor_infantry");
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
 		overlay.Show();

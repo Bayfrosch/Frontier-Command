@@ -167,6 +167,14 @@ public static class AbilityCatalog
 					RequiresTarget = true,
 					UnlockedFromStart = false
 				});
+				abilities.Add(new Ability
+				{
+					Id = "spawn_research_facility",
+					Name = "Research Facility",
+					Cost = 1200,
+					RequiresTarget = true,
+					UnlockedFromStart = true
+				});
 				break;
 
 			case UnitType.BASIC_INFANTRY:

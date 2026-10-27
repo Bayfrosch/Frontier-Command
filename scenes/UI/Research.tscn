@@ -100,6 +100,14 @@ text = "Close [Esc]"
 [node name="Divider" type="HSeparator" parent="ResearchPanel/Margin/Layout" unique_id=2088976351]
 layout_mode = 2
 
+[node name="FacilityWarning" type="Label" parent="ResearchPanel/Margin/Layout"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.35, 1)
+theme_override_font_sizes/font_size = 18
+text = "Research locked: Build a Research Facility with a construction unit to start research. You can still browse the research tree."
+autowrap_mode = 2
+
 [node name="Chapters" type="TabBar" parent="ResearchPanel/Margin/Layout" unique_id=2144208666]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2

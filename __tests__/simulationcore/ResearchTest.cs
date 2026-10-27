@@ -6,15 +6,77 @@ using static GdUnit4.Assertions;
 [TestSuite]
 public class ResearchTest
 {
+	[TestCase]
+	public void CommandCenterCannotHostResearch()
+	{
+		var context = new SimulationContext("research-facility-test");
+		var player = new PlayerState("player");
+		var center = new BuildingState("command-center", "player", Vector2.Zero, BuildingType.COMMAND_CENTER, "");
+		center.AdvanceConstruction(100);
+		player.AddEntity(center);
+		context.AddPlayer(player);
+		var balance = player.Virelium;
+		AssertThat(context.Push(new StartResearchMessage("player", 0, center.EntityId, "light_tanks"))).IsFalse();
+		AssertThat(player.Virelium).IsEqual(balance);
+		AssertThat(player.ResearchProjects.Count).IsEqual(0);
+	}
+
 	private static (SimulationContext Context, PlayerState Player, BuildingState Host) CreateGame(int materials = 10000)
 	{
 		var context = new SimulationContext("research-test");
 		var player = new PlayerState("player", materials);
-		var host = new BuildingState("center", "player", Vector2.Zero, BuildingType.COMMAND_CENTER, "");
+		var host = new BuildingState("center", "player", Vector2.Zero, BuildingType.RESEARCH_FACILITY, "");
 		host.AdvanceConstruction(100);
 		player.AddEntity(host);
 		context.AddPlayer(player);
 		return (context, player, host);
+	}
+
+	[TestCase]
+	public void FacilityMustBeCompletedAliveAndOwnedByTheResearchingPlayer()
+	{
+		var context = new SimulationContext("research-facility-test");
+		var player = new PlayerState("player");
+		context.AddPlayer(player);
+		context.AddPlayer(new PlayerState("opponent"));
+		var facility = new BuildingState("lab", "player", Vector2.Zero, BuildingType.RESEARCH_FACILITY, "");
+		player.AddEntity(facility);
+		var start = new StartResearchMessage("player", 0, facility.EntityId, "light_tanks");
+		AssertThat(context.Push(start)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(20000);
+		facility.AdvanceConstruction(100);
+		AssertThat(context.Push(new StartResearchMessage("opponent", 0, facility.EntityId, "light_tanks"))).IsFalse();
+		AssertThat(context.Push(start)).IsTrue();
+		AssertThat(context.Push(new CancelResearchMessage("player", 0, facility.EntityId, "light_tanks"))).IsTrue();
+		facility.TakeDamage(facility.MaxHealth);
+		AssertThat(context.Push(start)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(20000);
+		AssertThat(player.ResearchProjects.Count).IsEqual(0);
+	}
+
+	[TestCase]
+	public void ConstructionUnitBuildsFacilityBeforeResearchCanStart()
+	{
+		var context = new SimulationContext("research-facility-test");
+		var player = new PlayerState("player");
+		context.AddPlayer(player);
+		var position = new Vector2(500, 500);
+		player.AddEntity(new UnitState("builder", "player", position, 100f, UnitType.CONSTRUCTION_UNIT));
+		var ability = AbilityCatalog.ForUnit(UnitType.CONSTRUCTION_UNIT).Single(item => item.Id == "spawn_research_facility");
+		AssertThat(player.UnlockedAbilities.Contains(ability.Id)).IsTrue();
+		AssertThat(context.Push(new UseAbilityMessage("player", 0, new[] { "builder" }, ability.Id,
+			p_target_position: position))).IsTrue();
+		var facility = player.Entities.Values.OfType<BuildingState>().Single();
+		AssertThat(facility.pendingBuilding).IsEqual(BuildingType.RESEARCH_FACILITY);
+		AssertThat(player.EnergyConsumed).IsEqual(0);
+		AssertThat(player.Virelium).IsEqual(20000 - ability.Cost);
+		AssertThat(context.Push(new StartResearchMessage("player", 0, facility.EntityId, "light_tanks"))).IsFalse();
+		for (var tick = 0; tick < 100 && facility.Type == BuildingType.CONSTRUCTION_SITE; tick++)
+			context.AdvanceTick();
+		AssertThat(facility.Type).IsEqual(BuildingType.RESEARCH_FACILITY);
+		AssertThat(facility.Health).IsEqual(BuildingCatalog.GetMaxHealth(BuildingType.RESEARCH_FACILITY));
+		AssertThat(player.EnergyConsumed).IsEqual(15);
+		AssertThat(context.Push(new StartResearchMessage("player", context.get().Tick, facility.EntityId, "light_tanks"))).IsTrue();
 	}
 
 	[TestCase]

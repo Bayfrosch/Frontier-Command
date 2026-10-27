@@ -217,6 +217,6 @@ The user requested real Material payments and refunds for this outline, followed
 - Starting a doctrine dims the other doctrine and its exclusive technologies. Cancelling restores that path. Completion marks the other path as excluded.
 - Power costs, gameplay effects, and outpost generation upgrades remain previews.
 
-The Command Center temporarily hosts these projects because a research-center building does not yet exist. Losing the host pauses its projects. Cancellation remains available for a full refund.
+A completed Research Facility hosts research projects. Construction units can build one for 1,200 Materials; the facility has 600 health and consumes 15 energy, equal to the output of 1.5 Power Plants. Active projects consume additional energy. Without an owned, living facility, the research window remains accessible and shows a warning, but new research cannot start. Losing a project's facility pauses that project. Cancellation remains available for a full refund.
 
 The outline's nodes, costs, durations, and tier assignments are placeholders. They do not settle the remaining questions about the final research tree.

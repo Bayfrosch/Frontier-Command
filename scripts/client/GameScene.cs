@@ -22,7 +22,8 @@ public partial class GameScene : Node2D
 		["spawn_barracks"] = BuildingType.BARRACKS,
 		["spawn_power_plant"] = BuildingType.POWER_PLANT,
 		["spawn_resource_gatherer"] = BuildingType.RESOURCE_GATHERER,
-		["spawn_war_factory"] = BuildingType.WAR_FACTORY
+		["spawn_war_factory"] = BuildingType.WAR_FACTORY,
+		["spawn_research_facility"] = BuildingType.RESEARCH_FACILITY
 	};
 	private static readonly Color ValidConstructionPreviewColor = new(1f, 1f, 1f, 0.45f);
 	private static readonly Color InvalidConstructionPreviewColor = new(1f, 0.15f, 0.15f, 0.65f);
