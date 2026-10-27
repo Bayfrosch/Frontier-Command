@@ -416,13 +416,17 @@ public sealed class SimulationContext
 	/*
 	Applies the armor modifier and clamps successful hits to at least 1 damage.
 	*/
-	private static int CalculateDamage(int baseDamage, WeaponClass weaponClass, EntityState target)
+	private int CalculateDamage(int baseDamage, WeaponClass weaponClass, EntityState target)
 	{
 		var armorModifier = WeaponEffectivenessCatalog.GetModifier(weaponClass, target.ArmorClass);
 		if (armorModifier <= 0f)
 			return 0;
 
-		return Math.Max(1, (int)Math.Round(baseDamage * armorModifier, MidpointRounding.AwayFromZero));
+		double damage = baseDamage * armorModifier;
+		if (target is UnitState unit && unit.Type == UnitType.LIGHT_TANK
+			&& TryGetPlayer(unit.OwnerPlayerId ?? "", out var owner) && owner is not null)
+			damage *= 1d - 0.05d * owner.GetResearchLevel("better_armor");
+		return Math.Max(1, (int)Math.Round(damage, MidpointRounding.AwayFromZero));
 	}
 	/*
 	Message handlers for reacting to every pre defined message in Messages.cs
@@ -456,6 +460,8 @@ public sealed class SimulationContext
 	private bool HandleBuildStructure(BuildStructureMessage msg, int constructionCost = 0)
 	{
 		if (!TryGetPlayer(msg.player_id, out var player) || player is null)
+			return false;
+		if (msg.building_type == BuildingType.WAR_FACTORY && !player.HasUnlockedAbility("spawn_war_factory"))
 			return false;
 
 		if (!TryGetConstructionUnit(msg.player_id, msg.construction_unit_id, out var unit))
@@ -725,7 +731,8 @@ public sealed class SimulationContext
 		if (!TryGetPlayerEntity<BuildingState>(msg.PlayerId, msg.ProducerEntityId, out var building) || building is null)
 			return false;
 		if (!TryGetPlayer(msg.PlayerId, out var player)
-			|| msg.UnitDefinitionId == UnitType.RPG_TROOPER && !player.HasUnlockedAbility("spawn_rocket_troops"))
+			|| msg.UnitDefinitionId == UnitType.RPG_TROOPER && !player.HasUnlockedAbility("spawn_rocket_troops")
+			|| msg.UnitDefinitionId == UnitType.LIGHT_TANK && !player.HasUnlockedAbility("spawn_light_tank"))
 			return false;
 
 		building.QueueProduction(msg.UnitDefinitionId, msg.quantity);

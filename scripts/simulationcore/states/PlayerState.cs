@@ -65,15 +65,6 @@ public sealed class PlayerState
 		{
 			LockAbility("spawn_resource_gatherer");
 		}
-
-		if (GetCompleteBuildingCount(BuildingType.RESOURCE_GATHERER) > 0)
-		{
-			UnlockAbility("spawn_war_factory");
-		}
-		else
-		{
-			LockAbility("spawn_war_factory");
-		}
 	}
 	/*
 	Adds a unit or building owned by this player.
@@ -147,6 +138,11 @@ public sealed class PlayerState
 		_research[research] = Math.Max(GetResearchLevel(research), level);
 		if (research == "anti_armor_infantry")
 			UnlockAbility("spawn_rocket_troops");
+		if (research == "light_tanks")
+		{
+			UnlockAbility("spawn_war_factory");
+			UnlockAbility("spawn_light_tank");
+		}
 		if (research is "better_weapons" or "support_equipment")
 		{
 			foreach (var unit in _entities.Values.OfType<UnitState>())

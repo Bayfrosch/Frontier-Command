@@ -209,7 +209,7 @@ The user requested real Material payments and refunds for this outline, followed
 - Each chapter permits one active project. Different chapters run simultaneously.
 - Projects use simulation ticks and continue while the overlay is closed.
 - Cancelling an unfinished project refunds its full paid Material cost.
-- Completion records the technology as researched, without unlocking units, buildings, abilities, or stat effects.
+- Completion records the researched level and applies the technology's implemented unlocks or stat effects.
 - Technologies require their earlier research links to be complete.
 - A doctrine requires any two complete Military core trees and any one complete Civilian core tree.
 - Completing one doctrine excludes the other. Cancelling an unfinished doctrine allows another choice.
@@ -218,5 +218,7 @@ The user requested real Material payments and refunds for this outline, followed
 - Power costs, gameplay effects, and outpost generation upgrades remain previews.
 
 A completed Research Facility hosts research projects. Construction units can build one for 1,200 Materials; the facility has 600 health and consumes 15 energy, equal to the output of 1.5 Power Plants. Active projects consume additional energy. Without an owned, living facility, the research window remains accessible and shows a warning, but new research cannot start. Losing a project's facility pauses that project. Cancellation remains available for a full refund.
+
+The Tanks tree starts with War Factory research, which unlocks War Factory construction and Light Tank production. Supply Centers do not unlock the factory. Better armor follows, with two levels that reduce incoming damage to all existing and newly produced tanks by 5% per level, up to 10%. Its levels cost 1,200 and 1,600 Materials. Each level takes 60 seconds and consumes 10 additional energy while active. Field artillery requires the first level of Better armor.
 
 The outline's nodes, costs, durations, and tier assignments are placeholders. They do not settle the remaining questions about the final research tree.

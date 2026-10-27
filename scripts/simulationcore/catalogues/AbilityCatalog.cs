@@ -102,7 +102,7 @@ public static class AbilityCatalog
 					Name = "Light Tank",
 					Cost = 500,
 					RequiresTarget = false,
-					UnlockedFromStart = true
+					UnlockedFromStart = false
 				});
 				break;
 		}

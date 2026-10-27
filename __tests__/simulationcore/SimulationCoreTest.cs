@@ -833,6 +833,8 @@ public class SimulationCoreTest
 
 		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsFalse();
 		AssertThat(context.Push(msg)).IsFalse();
+		AssertThat(context.Push(new BuildStructureMessage(BuildingType.WAR_FACTORY, "player-1", 0,
+			builder.EntityId, new Vector2(100, 50)))).IsFalse();
 		AssertThat(player.Virelium).IsEqual(startingVirelium);
 
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(
@@ -842,6 +844,8 @@ public class SimulationCoreTest
 			new Vector2(-200, 0)
 		))).IsTrue();
 
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsFalse();
+		player.AddResearch("light_tanks");
 		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
 		AssertThat(context.Push(msg)).IsTrue();
 		AssertThat(player.Virelium).IsEqual(startingVirelium - buildCost);
@@ -857,7 +861,7 @@ public class SimulationCoreTest
 	}
 
 	[TestCase]
-	public void Push_UseAbilityMessage_SellLastSupplyCenterLocksWarFactory()
+	public void Push_UseAbilityMessage_SellSupplyCenterKeepsResearchedWarFactoryUnlocked()
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1");
@@ -874,6 +878,7 @@ public class SimulationCoreTest
 			.OfType<BuildingState>()
 			.Single(building => building.Type == BuildingType.RESOURCE_GATHERER);
 
+		player.AddResearch("light_tanks");
 		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
 
 		AssertThat(context.Push(new UseAbilityMessage(
@@ -883,7 +888,7 @@ public class SimulationCoreTest
 			p_ability_id: "sell_building"
 		))).IsTrue();
 
-		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsFalse();
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
 	}
 
 	[TestCase]
@@ -1066,6 +1071,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1", 2000);
+		player.AddResearch("light_tanks");
 		context.AddPlayer(player);
 
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(
@@ -1141,6 +1147,7 @@ public class SimulationCoreTest
 	{
 		var context = new SimulationContext("match-1");
 		var player = new PlayerState("player-1", 2000);
+		player.AddResearch("light_tanks");
 		context.AddPlayer(player);
 
 		AssertThat(context.Push(new DebugSpawnBuildingMessage(

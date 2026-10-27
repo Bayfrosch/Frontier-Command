@@ -9,6 +9,55 @@ using static GdUnit4.Assertions;
 public class ResearchBranchTest
 {
 	[TestCase]
+	public async Task TankBranchUnlocksWarFactoryThenOffersTwoLevelsOfBetterArmor()
+	{
+		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);
+		await runner.SimulateFrames(2);
+		var scene = runner.Scene();
+		scene.GetNode<TimeTickSystem>("GameLoop").SetProcess(false);
+		var simulation = scene.GetNode<LocalSimulationNode>("SimulationCore");
+		AssertThat(simulation.Push(new DebugSpawnBuildingMessage("player_1", 0,
+			BuildingType.RESEARCH_FACILITY, new Vector2(1000, -1000)))).IsTrue();
+		var player = simulation.GetState().Players["player_1"];
+		for (var plant = 0; plant < 3; plant++)
+			player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		var overlay = scene.GetNode<GameUserInterface>("Camera2D/Screen/GameUserInterface").Research;
+		overlay.Show();
+		var tree = overlay.GetNode<Control>("ResearchPanel/Margin/Layout/Body/TreeScroll/TreeCenter/MilitaryTree");
+		var factory = tree.GetNode<Button>("light_tanks");
+		var armor = tree.GetNode<Button>("better_armor");
+		var detail = overlay.GetNode<Control>("ResearchPanel/Margin/Layout/Body/Details/Margin/Scroll/Content");
+		var start = detail.GetNode<Button>("StartButton");
+		AssertThat(factory.Text).IsEqual("War Factory");
+		AssertThat(armor.Text).IsEqual("Better armor\n0/2");
+		AssertThat(armor.Position.Y > factory.Position.Y).IsTrue();
+		armor.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(start.Disabled).IsTrue();
+		factory.EmitSignal(Button.SignalName.Pressed);
+		start.EmitSignal(Button.SignalName.Pressed);
+		for (var tick = 0; tick < 300; tick++)
+			simulation.Context.AdvanceTick();
+		simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
+		AssertThat(player.UnlockedAbilities.Contains("spawn_light_tank")).IsTrue();
+		armor.EmitSignal(Button.SignalName.Pressed);
+		AssertThat(detail.GetNode<Label>("Description").Text.Contains("5% per level")).IsTrue();
+		for (var level = 1; level <= 2; level++)
+		{
+			AssertThat(start.Disabled).IsFalse();
+			AssertThat(start.Text).IsEqual($"Research level {level}");
+			start.EmitSignal(Button.SignalName.Pressed);
+			for (var tick = 0; tick < 300; tick++)
+				simulation.Context.AdvanceTick();
+			simulation.EmitSignal(LocalSimulationNode.SignalName.StateChanged);
+			AssertThat(player.GetResearchLevel("better_armor")).IsEqual(level);
+			AssertThat(armor.Text.Contains($"{level}/2")).IsTrue();
+		}
+		AssertThat(start.Disabled).IsTrue();
+		AssertThat(armor.Text.Contains("COMPLETE")).IsTrue();
+	}
+
+	[TestCase]
 	public async Task BranchLayoutAndRepeatPurchaseReflectTheRealResearchState()
 	{
 		using var runner = ISceneRunner.Load("res://scenes/gameScene.tscn", true, false);

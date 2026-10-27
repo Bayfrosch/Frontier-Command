@@ -96,6 +96,106 @@ public class ResearchTest
 	}
 
 	[TestCase]
+	public void TankProductionRequiresCompletedWarFactoryResearch()
+	{
+		var (context, player, _) = CreateGame();
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		AssertThat(context.Push(new DebugSpawnBuildingMessage("player", 0, BuildingType.WAR_FACTORY, new Vector2(500, 0)))).IsTrue();
+		var factory = player.Entities.Values.OfType<BuildingState>().Single(building => building.Type == BuildingType.WAR_FACTORY);
+		var train = new TrainUnitsMessage(UnitType.LIGHT_TANK, "player", 0, factory.EntityId);
+		var ability = new UseAbilityMessage("player", 0, new[] { factory.EntityId }, "spawn_light_tank");
+		var balance = player.Virelium;
+		AssertThat(context.Push(train)).IsFalse();
+		AssertThat(context.Push(ability)).IsFalse();
+		AssertThat(player.Virelium).IsEqual(balance);
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"))).IsTrue();
+		AssertThat(context.Push(train)).IsFalse();
+		AssertThat(context.Push(new CancelResearchMessage("player", 0, "center", "light_tanks"))).IsTrue();
+		AssertThat(context.Push(train)).IsFalse();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "light_tanks"))).IsTrue();
+		for (var tick = 0; tick < 299; tick++)
+			context.AdvanceTick();
+		AssertThat(context.Push(train)).IsFalse();
+		context.AdvanceTick();
+		AssertThat(player.UnlockedAbilities.Contains("spawn_war_factory")).IsTrue();
+		AssertThat(context.Push(train)).IsTrue();
+		AssertThat(context.Push(ability)).IsTrue();
+	}
+
+	[TestCase]
+	public void BetterArmorRequiresWarFactoryResearchAndSupportsTwoPaidRefundableLevels()
+	{
+		var (context, player, _) = CreateGame();
+		AssertThat(ResearchCatalog.TryGet("better_armor", out var technology)).IsTrue();
+		AssertThat(technology.MaxLevel).IsEqual(2);
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "better_armor"))).IsFalse();
+		player.AddResearch("light_tanks");
+		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
+		for (var level = 1; level <= 2; level++)
+		{
+			var price = level == 1 ? 1200 : 1600;
+			var balance = player.Virelium;
+			var start = new StartResearchMessage("player", context.get().Tick, "center", "better_armor");
+			AssertThat(context.Push(start)).IsTrue();
+			AssertThat(context.Push(start)).IsFalse();
+			AssertThat(player.Virelium).IsEqual(balance - price);
+			context.AdvanceTick();
+			AssertThat(player.GetResearchLevel("better_armor")).IsEqual(level - 1);
+			AssertThat(context.Push(new CancelResearchMessage("player", context.get().Tick, "center", "better_armor"))).IsTrue();
+			AssertThat(player.Virelium).IsEqual(balance);
+			AssertThat(context.Push(start)).IsTrue();
+			for (var tick = 0; tick < 300; tick++)
+				context.AdvanceTick();
+			AssertThat(player.GetResearchLevel("better_armor")).IsEqual(level);
+			AssertThat(player.Virelium).IsEqual(balance - price);
+		}
+		var finalBalance = player.Virelium;
+		AssertThat(context.Push(new StartResearchMessage("player", context.get().Tick, "center", "better_armor"))).IsFalse();
+		AssertThat(player.Virelium).IsEqual(finalBalance);
+	}
+
+	[TestCase(UnitType.LIGHT_TANK, 0, 45)]
+	[TestCase(UnitType.LIGHT_TANK, 1, 43)]
+	[TestCase(UnitType.LIGHT_TANK, 2, 41)]
+	[TestCase(UnitType.BASIC_INFANTRY, 2, 45)]
+	[TestCase(UnitType.RPG_TROOPER, 2, 45)]
+	[TestCase(UnitType.CONSTRUCTION_UNIT, 2, 45)]
+	[TestCase(UnitType.RESOURCE_COLLECTOR, 2, 45)]
+	public void BetterArmorReducesCannonDamageForExistingAndNewTanksOnly(UnitType type, int level, int expectedDamage)
+	{
+		var context = new SimulationContext("armor-test");
+		var defender = new PlayerState("defender");
+		var attacker = new PlayerState("attacker");
+		context.AddPlayer(defender);
+		context.AddPlayer(attacker);
+		var existing = new UnitState("existing", "defender", new Vector2(100, 0), 0f, type);
+		defender.AddEntity(existing);
+		if (level > 0)
+			defender.AddResearch("better_armor", level);
+		var newlySpawned = new UnitState("new", "defender", new Vector2(100, 200), 0f, type);
+		defender.AddEntity(newlySpawned);
+		foreach (var target in new[] { existing, newlySpawned })
+		{
+			var cannon = new UnitState("cannon-" + target.EntityId, "attacker", target.CurrentPosition - new Vector2(100, 0), 0f, UnitType.LIGHT_TANK);
+			attacker.AddEntity(cannon);
+			AssertThat(context.Push(new AttackTargetMessage("attacker", context.get().Tick, new[] { cannon.EntityId }, target.EntityId))).IsTrue();
+			for (var tick = 0; tick < 10 && target.Health == target.MaxHealth; tick++)
+				context.AdvanceTick();
+			AssertThat(target.MaxHealth - target.Health).IsEqual(expectedDamage);
+			cannon.ClearAttackOrder();
+		}
+		var enemy = new UnitState("enemy", "attacker", new Vector2(500, 0), 0f, UnitType.LIGHT_TANK);
+		attacker.AddEntity(enemy);
+		var ownCannon = new UnitState("own-cannon", "defender", new Vector2(400, 0), 0f, UnitType.LIGHT_TANK);
+		defender.AddEntity(ownCannon);
+		AssertThat(context.Push(new AttackTargetMessage("defender", context.get().Tick, new[] { ownCannon.EntityId }, enemy.EntityId))).IsTrue();
+		for (var tick = 0; tick < 10 && enemy.Health == enemy.MaxHealth; tick++)
+			context.AdvanceTick();
+		AssertThat(enemy.MaxHealth - enemy.Health).IsEqual(45);
+	}
+
+	[TestCase]
 	public void SupportEquipment_TwoLevelsPreserveDamageAndRefundThePriceActuallyPaid()
 	{
 		var (context, player, _) = CreateGame();
@@ -396,7 +496,7 @@ public class ResearchTest
 	}
 
 	[TestCase]
-	public void Complete_UsesSimulationTime_WithoutGrantingGameplayAbilities()
+	public void Complete_UsesSimulationTime_AndUnlocksWarFactoryAndLightTanks()
 	{
 		var (context, player, _) = CreateGame();
 		player.AddCompletedBuilding(BuildingType.POWER_PLANT);
@@ -409,10 +509,10 @@ public class ResearchTest
 		AssertThat(player.Research.ContainsKey("light_tanks")).IsTrue();
 		AssertThat(player.ResearchProjects.Count).IsEqual(0);
 		AssertThat(player.Virelium).IsEqual(9000);
-		AssertThat(player.UnlockedAbilities.SetEquals(abilities)).IsTrue();
+		AssertThat(player.UnlockedAbilities.SetEquals(abilities.Append("spawn_war_factory").Append("spawn_light_tank"))).IsTrue();
 		AssertThat(context.Push(new StartResearchMessage("player", 300, "center", "light_tanks"))).IsFalse();
 		AssertThat(context.Push(new CancelResearchMessage("player", 300, "center", "light_tanks"))).IsFalse();
-		AssertThat(context.Push(new StartResearchMessage("player", 300, "center", "air_defense"))).IsTrue();
+		AssertThat(context.Push(new StartResearchMessage("player", 300, "center", "better_armor"))).IsTrue();
 	}
 
 	[TestCase]
@@ -510,7 +610,7 @@ public class ResearchTest
 	public void Research_RequiresEarlierTechnology_AndCannotBuyANewGeneration()
 	{
 		var (context, player, _) = CreateGame();
-		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "air_defense"))).IsFalse();
+		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "better_armor"))).IsFalse();
 		AssertThat(context.Push(new StartResearchMessage("player", 0, "center", "next_generation"))).IsFalse();
 		AssertThat(player.Virelium).IsEqual(10000);
 	}

@@ -137,6 +137,7 @@ public class BuildingFootprintTest
 		{
 			var context = new SimulationContext("match");
 			var player = new PlayerState("player");
+			player.AddResearch("light_tanks");
 			var position = new Vector2(400, 300);
 			var footprint = BuildingCatalog.GetFootprintRect(type, position);
 			var builder = new UnitState("builder", "player", footprint.End + new Vector2(50, 50), 100f, UnitType.CONSTRUCTION_UNIT);
